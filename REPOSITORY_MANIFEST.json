@@ -1,0 +1,374 @@
+{
+  "schema_version": 1,
+  "repository": "ORKIO_FRONTEND_V2_PREMIUM",
+  "release": "2.0.0-alpha.2.2",
+  "profile": "PWA_ANDROID_IOS_GITHUB_UPLOAD_CANDIDATE",
+  "status": "SOURCE_UPLOAD_READY_BUILD_BLOCKED",
+  "baseline_alpha2_sha256": "1566a41c97ca73b7e32c901f330619fd5c7e8e416fe74599c2f1a34c3bd644ff",
+  "alpha2_1_primary_zip_available": false,
+  "reconstructed_successor": true,
+  "package_lock_present": false,
+  "file_count": 65,
+  "inventory_exclusions": [
+    {
+      "path": "REPOSITORY_MANIFEST.json",
+      "reason": "manifest self-reference"
+    },
+    {
+      "path": "SHA256SUMS.txt",
+      "reason": "checksum self-reference"
+    }
+  ],
+  "files": [
+    {
+      "path": ".env.example",
+      "bytes": 114,
+      "sha256": "a4f944bbfa0eb76cae373fa97cc51b35a2abcaff8a55119aed2d698df4fad1f4"
+    },
+    {
+      "path": ".github/CODEOWNERS",
+      "bytes": 284,
+      "sha256": "67326b5849be1a3588ed3d9625baf9a08f7f1fb2fee4452dcf7e957ec056b7c1"
+    },
+    {
+      "path": ".github/workflows/00-materialize-lockfile.yml",
+      "bytes": 1848,
+      "sha256": "51d09b52798f0aff5e513261fa2c6ffc8f732b7cc766516468bbd2e5c559a717"
+    },
+    {
+      "path": ".github/workflows/01-verify-build.yml",
+      "bytes": 1355,
+      "sha256": "fded8fd3e027f62f7170bb1cc6e0ef829d7acaf46497acbc69fad72d356dfd08"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 105,
+      "sha256": "6169431d3a49ea06ae30e4095a928a986e79959aa72b014b562842bf1be39fa1"
+    },
+    {
+      "path": ".npmrc",
+      "bytes": 94,
+      "sha256": "e37e2982f8b00143edb052d890aaf7378d717a3560a4602174ea2b42f3eddd67"
+    },
+    {
+      "path": ".nvmrc",
+      "bytes": 8,
+      "sha256": "75053fb82fe4512318dd99556daf58b862fb81c96cf1153249b75f8116edf440"
+    },
+    {
+      "path": "Dockerfile",
+      "bytes": 641,
+      "sha256": "5c2f512f46b7c8a07374d30b054855c807df7fda56606613dc8e5fc3932d6a9d"
+    },
+    {
+      "path": "README.md",
+      "bytes": 582,
+      "sha256": "298d91fe3564057b40eb504b7d551880cb59ba79723913fc9de3d0a3e443d176"
+    },
+    {
+      "path": "TEST_RESULTS.txt",
+      "bytes": 2763,
+      "sha256": "06e5cb45344cd4be1ce1b712abfb52ceefce69fb6542e306fa2d7069a61839ae"
+    },
+    {
+      "path": "TEST_RESULTS_ALPHA2_2.txt",
+      "bytes": 6574,
+      "sha256": "20357810fae6698cd265360b1bdaca4c97c654b6155acb74e388a604d226a7d3"
+    },
+    {
+      "path": "VALIDATION_REPORT.json",
+      "bytes": 1841,
+      "sha256": "fe22eea0ac31b93507522c1bb58146d7e26ef8d32f46c7db90eb86c890a09a85"
+    },
+    {
+      "path": "VALIDATION_REPORT_ALPHA2_2.json",
+      "bytes": 758,
+      "sha256": "92f9ae93323f4efe08eba81c7f3a908e66120097af0d6adee5b786b9eded4a96"
+    },
+    {
+      "path": "docs/BUILD_GATE_STATUS.md",
+      "bytes": 443,
+      "sha256": "1ac092da429a4928bb22c50e6ec88ffe2a95ec5fe608043fcda3cdbbe37bfb0e"
+    },
+    {
+      "path": "docs/GITHUB_BRANCH_PROTECTION.md",
+      "bytes": 497,
+      "sha256": "6fd9c1cc893d03ec8fec3efa8d7ed9939c451c4808543d121a001a79b76c1aa7"
+    },
+    {
+      "path": "docs/GITHUB_UPLOAD_RUNBOOK.md",
+      "bytes": 1379,
+      "sha256": "6ca4606ec4600615aad56646f721de243128a6838f9daa9d989b037fafdc678a"
+    },
+    {
+      "path": "docs/LEGACY_REFERENCE.md",
+      "bytes": 705,
+      "sha256": "5c690b030ccc4c58e566605ceee614faea416d12c8f7bbe97e6cc9f3c917509e"
+    },
+    {
+      "path": "docs/POST_UPLOAD_AO01_GATE.md",
+      "bytes": 656,
+      "sha256": "93688be8d1b7265444ce1a5b4f02ac4518feea8a63a51dc411296ded9e28a26c"
+    },
+    {
+      "path": "docs/PWA_ACCEPTANCE_MATRIX.md",
+      "bytes": 1085,
+      "sha256": "dcfb2f02854eabe86a51a318a023f421885518625b0ddb0750eacc3ba13f01be"
+    },
+    {
+      "path": "docs/PWA_SECURITY_MODEL.md",
+      "bytes": 569,
+      "sha256": "588ebf32e291c8a9821d0bf2e96a0784f27cf054e59fa994bf85e4c4583b8d40"
+    },
+    {
+      "path": "docs/RISK_ASSESSMENT.md",
+      "bytes": 860,
+      "sha256": "0077992797ea1546408b8ab65544df9c521b601bdcd6c925ce031f3cdcde4b9b"
+    },
+    {
+      "path": "docs/ROLLBACK_PLAN.md",
+      "bytes": 639,
+      "sha256": "cdcc4ebb4fe5bf95c781b65c768c3589c0538938e70588e50a05bb8b5ca0678f"
+    },
+    {
+      "path": "docs/SMOKE_PLAN.md",
+      "bytes": 677,
+      "sha256": "4c1a866b7763269530ddf888e03630d6f2c775fadb9bfcfee1083b7af5d94e9a"
+    },
+    {
+      "path": "index.html",
+      "bytes": 1376,
+      "sha256": "898370c1d251209180def8851f3c3e9b416c660788b9bfe342dfe680eafb8fe4"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1051,
+      "sha256": "3750ad5ff712cfbda8b050dfabe928a12aa6d4c90664654a9467e1f0e14a6cde"
+    },
+    {
+      "path": "public/icons/apple-touch-icon-180.png",
+      "bytes": 20992,
+      "sha256": "80a138ab3f104cc9a65ea5898787bb278d7f389adb44c3e0cf340eccb3a6396d"
+    },
+    {
+      "path": "public/icons/orkio-192.png",
+      "bytes": 22952,
+      "sha256": "5ab1c2f11d807658d11d117bf29f3ba2ba03c972d1b1430d809adf7974befc8a"
+    },
+    {
+      "path": "public/icons/orkio-48.png",
+      "bytes": 3114,
+      "sha256": "da3682f8b3404ad3c3be6697aa718056ef4e30f1ebbde9b7f4e3f410739dfc69"
+    },
+    {
+      "path": "public/icons/orkio-512.png",
+      "bytes": 86482,
+      "sha256": "dbd033e66689928ac83f59c8233a9c35ee3bdbbdfda45b1089329ee22c5636c2"
+    },
+    {
+      "path": "public/icons/orkio-maskable-192.png",
+      "bytes": 21142,
+      "sha256": "3954820c4e1152691301db3b617f8e2531e4ff4f5b698e938327b2551b526cd1"
+    },
+    {
+      "path": "public/icons/orkio-maskable-512.png",
+      "bytes": 81965,
+      "sha256": "e8347c594724dbd557bf2989fbcfb4f0f053708e282c8e00dd16dde7184d525d"
+    },
+    {
+      "path": "public/manifest.webmanifest",
+      "bytes": 1789,
+      "sha256": "b3cb4ff224743541acde1fe8ed14665d22b02b9a9c4ee7248075e877c945278d"
+    },
+    {
+      "path": "public/offline.html",
+      "bytes": 1647,
+      "sha256": "ee9f6ac1cd4b20c8d049d2c89e1b87ba060974053b58e372fe6821ebf6dc96d9"
+    },
+    {
+      "path": "public/robots.txt",
+      "bytes": 38,
+      "sha256": "01690827109e1a4110e8d65d42a928b7ec59b45b04f1fde717cec5437b1a9518"
+    },
+    {
+      "path": "public/sw.js",
+      "bytes": 4220,
+      "sha256": "e3d0e3b64fa94d1745b7f79c60e81fb5d25afe758444ff35756063032b8ad141"
+    },
+    {
+      "path": "release-identity.json",
+      "bytes": 1025,
+      "sha256": "b569cd01a30eea932464dd7650315b10d7f080d8465e519948b08f38b76decab"
+    },
+    {
+      "path": "scripts/build-evidence.mjs",
+      "bytes": 3264,
+      "sha256": "9d66e68013df33f284b8280f19ebd2ced57ab3d0f716c207b28e1d997f3a9930"
+    },
+    {
+      "path": "scripts/materialize-lockfile.sh",
+      "bytes": 465,
+      "sha256": "52c0dd0549b293d862973816f6f8695f0835a9cbf1c471f62340c89235f37feb"
+    },
+    {
+      "path": "scripts/verify-and-build.sh",
+      "bytes": 349,
+      "sha256": "2271aa23724e101cc6d2d4d589d0892bd08ba4a8aeba1865b93394c96c1b4fc4"
+    },
+    {
+      "path": "scripts/verify-dist.mjs",
+      "bytes": 1146,
+      "sha256": "32cee937d0daffa0912b0b7f601ad4882b5f5e5b250e26138455f26abb416df5"
+    },
+    {
+      "path": "scripts/verify-lockfile.mjs",
+      "bytes": 1775,
+      "sha256": "3e1d0eb77a8928a2b1fa920917202ee397145a30d445df4ac9607380ce197a5f"
+    },
+    {
+      "path": "server.mjs",
+      "bytes": 3675,
+      "sha256": "a7c29ce72dceb8c6790ac8f01c48bca96baac598549de3a338d378676a3c7cda"
+    },
+    {
+      "path": "src/App.tsx",
+      "bytes": 690,
+      "sha256": "cd9a81d7c69020d6a7fe1092777d56410ee02f25503a08796316e03e5c6d78e9"
+    },
+    {
+      "path": "src/api.ts",
+      "bytes": 687,
+      "sha256": "3bb454d62f63debba0c360594d0844d937e7579bf5126ba6fb09c6a7143cfab2"
+    },
+    {
+      "path": "src/components/PwaInstallButton.tsx",
+      "bytes": 2964,
+      "sha256": "fb175d172cd87e5287fc57e97cb84489b2ac86f97cf028e58883fe2fc87e32c1"
+    },
+    {
+      "path": "src/components/PwaUpdateBanner.tsx",
+      "bytes": 2181,
+      "sha256": "7a800021a0f4a791ab45fd14cd549b3ae738dee61fb5fca6e8ce5e00e2cefd7b"
+    },
+    {
+      "path": "src/hooks/usePwaInstall.ts",
+      "bytes": 2047,
+      "sha256": "87d58c445533304f91da50932e496f57a3b5443756f7c1786981409c8950d09f"
+    },
+    {
+      "path": "src/main.tsx",
+      "bytes": 414,
+      "sha256": "1e2cd99933d6dfd8803516ac857799f1946a963df6f11f5df86b4f0149d54551"
+    },
+    {
+      "path": "src/pwa/platform.ts",
+      "bytes": 653,
+      "sha256": "5f88370b7dcf62181998630689171b7170b7a35a7ac852b3945573dda8768edc"
+    },
+    {
+      "path": "src/pwa/registerServiceWorker.ts",
+      "bytes": 2290,
+      "sha256": "8db48c85b8395653fe60cbc314aa99dc93fd765b624e5f3380a0b1e49ee32e8f"
+    },
+    {
+      "path": "src/pwa/updateController.ts",
+      "bytes": 1589,
+      "sha256": "4d48edd66f130dd7f1b49f9ac98e9bc67f9807931b7830f942e7d654e251aade"
+    },
+    {
+      "path": "src/routes/AppConsole.tsx",
+      "bytes": 4335,
+      "sha256": "dc23237229d20b26b3b1de7c9b23afb527fbd9d4e90f102783126355cca227c9"
+    },
+    {
+      "path": "src/routes/Landing.tsx",
+      "bytes": 5483,
+      "sha256": "a9f01ba73c0817f61efd6dd6e3a6f95cffc2ab36419510e15fcb70b22cae6d51"
+    },
+    {
+      "path": "src/styles.css",
+      "bytes": 15802,
+      "sha256": "518a0935b94382b7f1f73e557f7545f8872826edfa0cdf2e1945211d8e3563de"
+    },
+    {
+      "path": "src/types/pwa.d.ts",
+      "bytes": 220,
+      "sha256": "d10d86ed158245fca19c8f146f1d726568ae52d1ee0de9668dd950c1ab080af9"
+    },
+    {
+      "path": "tests/contracts.test.mjs",
+      "bytes": 757,
+      "sha256": "131dbbef8f5fe8653ebbc88868e668a688beb2192683d411d8f231c403834ccc"
+    },
+    {
+      "path": "tests/github-build-contract.test.mjs",
+      "bytes": 2552,
+      "sha256": "89fd504ab2e8cb7b49a14f2e580ccb72bbd2e864e839d6bcd69d5724bceee854"
+    },
+    {
+      "path": "tests/landing.test.mjs",
+      "bytes": 1311,
+      "sha256": "5388b23332e39d6dc1dac974b1e78a858bf734fdc12104753122a4c95f5711ad"
+    },
+    {
+      "path": "tests/pwa.test.mjs",
+      "bytes": 2566,
+      "sha256": "e4e2e833b06df65c46cf9650f3582c831e7a4a96d06d22689f8ce227daf50f7f"
+    },
+    {
+      "path": "tests/server-security.test.mjs",
+      "bytes": 924,
+      "sha256": "cefd27bd7d949cc35d6fddd2c3a178c4ae8fc1539bcc4bc0e79649530f747776"
+    },
+    {
+      "path": "tests/update-security.test.mjs",
+      "bytes": 3428,
+      "sha256": "d9c8379f7d18ae45e8b0dce86535a62b5e520d204f01efd8481e91ad923e6aae"
+    },
+    {
+      "path": "tsconfig.json",
+      "bytes": 171,
+      "sha256": "cf765963655a82b6287ef029e2b294e27835cdb5139b066627123d7bdaf730cb"
+    },
+    {
+      "path": "vite.config.ts",
+      "bytes": 129,
+      "sha256": "3a8c7b7acf511961c0cda555c2eb6a3d63e18f493fe2bc6d4bd44a2a56b8d53c"
+    }
+  ],
+  "validation": {
+    "schema_version": 1,
+    "release": "2.0.0-alpha.2.2",
+    "status": "PASS_LOCAL_SOURCE_AND_GITHUB_BOOTSTRAP",
+    "local_node": "v22.16.0",
+    "required_node": "v20.20.2",
+    "required_npm": "10.8.2",
+    "tests_passed": 40,
+    "tests_failed": 0,
+    "syntax_checks": {
+      "server.mjs": "PASS",
+      "public/sw.js": "PASS",
+      "scripts/verify-lockfile.mjs": "PASS",
+      "scripts/verify-dist.mjs": "PASS",
+      "scripts/build-evidence.mjs": "PASS"
+    },
+    "package_lock_present": false,
+    "npm_ci_executed": false,
+    "vite_build_executed": false,
+    "dist_generated": false,
+    "github_materialization_workflow_prepared": true,
+    "github_verify_build_workflow_prepared": true,
+    "automatic_commit": false,
+    "deploy_executed": false,
+    "human_approval_required": true
+  },
+  "governance": {
+    "local_artifact_written": true,
+    "remote_write_executed": false,
+    "commit_executed": false,
+    "merge_executed": false,
+    "deploy_executed": false,
+    "execution_allowed": false,
+    "human_approval_required": true
+  }
+}

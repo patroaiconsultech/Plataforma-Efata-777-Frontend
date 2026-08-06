@@ -1,0 +1,78 @@
+{
+  "id": "/app",
+  "name": "ORKIO — Inteligência Orquestrada",
+  "short_name": "ORKIO",
+  "description": "Plataforma premium de inteligência orquestrada, colaboração e governança.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/app?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
+  "theme_color": "#0B0F14",
+  "background_color": "#0B0F14",
+  "prefer_related_applications": false,
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/icons/orkio-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/orkio-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/orkio-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/orkio-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Abrir Command Center",
+      "short_name": "Command Center",
+      "description": "Acessar a plataforma ORKIO.",
+      "url": "/app?source=pwa_shortcut",
+      "icons": [
+        {
+          "src": "/icons/orkio-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Conhecer a ORKIO",
+      "short_name": "Início",
+      "description": "Abrir a apresentação da ORKIO.",
+      "url": "/?source=pwa_shortcut",
+      "icons": [
+        {
+          "src": "/icons/orkio-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

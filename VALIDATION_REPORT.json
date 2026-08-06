@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "artifact": "ORKIO_FRONTEND_V2_PREMIUM_PWA_ANDROID_IOS_ALPHA2",
+  "status": "PASS_LOCAL_WITH_BUILD_PENDING",
+  "node_tests": {
+    "status": "PASS",
+    "count": 16
+  },
+  "server_syntax": "PASS",
+  "service_worker_syntax": "PASS",
+  "manifest_json": "PASS",
+  "manifest_required_fields": "PASS",
+  "icon_dimensions": {
+    "public/icons/orkio-48.png": {
+      "expected": [
+        48,
+        48
+      ],
+      "actual": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    "public/icons/orkio-192.png": {
+      "expected": [
+        192,
+        192
+      ],
+      "actual": [
+        192,
+        192
+      ],
+      "mode": "RGBA"
+    },
+    "public/icons/orkio-maskable-192.png": {
+      "expected": [
+        192,
+        192
+      ],
+      "actual": [
+        192,
+        192
+      ],
+      "mode": "RGBA"
+    },
+    "public/icons/orkio-512.png": {
+      "expected": [
+        512,
+        512
+      ],
+      "actual": [
+        512,
+        512
+      ],
+      "mode": "RGBA"
+    },
+    "public/icons/orkio-maskable-512.png": {
+      "expected": [
+        512,
+        512
+      ],
+      "actual": [
+        512,
+        512
+      ],
+      "mode": "RGBA"
+    },
+    "public/icons/apple-touch-icon-180.png": {
+      "expected": [
+        180,
+        180
+      ],
+      "actual": [
+        180,
+        180
+      ],
+      "mode": "RGBA"
+    }
+  },
+  "service_worker_protected_surface_exclusions": "PASS",
+  "unsafe_objects": 0,
+  "transient_artifacts": 0,
+  "secret_pattern_findings": 0,
+  "npm_ci": "NOT_EXECUTED_DEPENDENCIES_NOT_MATERIALIZED",
+  "vite_build": "NOT_EXECUTED_DEPENDENCIES_NOT_MATERIALIZED",
+  "browser_runtime": "NOT_EXECUTED",
+  "android_device_test": "NOT_EXECUTED",
+  "ios_ipados_device_test": "NOT_EXECUTED",
+  "deploy_executed": false,
+  "human_approval_required": true
+}
