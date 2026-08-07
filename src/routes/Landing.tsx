@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import PwaInstallButton from "../components/PwaInstallButton";
+import { getToken } from "../api";
+import { beginLogin, isOidcConfigured } from "../auth/oidc";
 
 const CAPABILITIES = [
   {
@@ -19,6 +21,37 @@ const CAPABILITIES = [
     icon: "✦",
   },
 ];
+
+
+
+function PlatformEntry({
+  className,
+  label,
+}: {
+  className: string;
+  label: string;
+}) {
+  const authenticated = Boolean(getToken());
+  const oidcConfigured = isOidcConfigured();
+
+  if (authenticated || !oidcConfigured) {
+    return (
+      <Link className={className} to="/app">
+        {label}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={() => void beginLogin("/app")}
+    >
+      {label}
+    </button>
+  );
+}
 
 const TRUST_ITEMS = [
   "Identidade canônica em persistência, streaming e interface",
@@ -40,9 +73,7 @@ export default function Landing() {
           <a href="#confianca">Confiança</a>
           <a href="#pwa">Aplicativo</a>
         </nav>
-        <Link className="header-cta" to="/app">
-          Abrir plataforma
-        </Link>
+        <PlatformEntry className="header-cta" label="Abrir plataforma" />
       </header>
 
       <main id="main-content">
@@ -58,9 +89,10 @@ export default function Landing() {
               colaboração e governança em uma única experiência operacional.
             </p>
             <div className="hero__actions">
-              <Link className="primary-button primary-button--large" to="/app">
-                Entrar na ORKIO
-              </Link>
+              <PlatformEntry
+                className="primary-button primary-button--large"
+                label="Entrar na ORKIO"
+              />
               <PwaInstallButton />
             </div>
             <div className="hero__proof">
@@ -134,9 +166,10 @@ export default function Landing() {
         <section className="section final-cta">
           <span className="eyebrow">EFATÀ 777</span>
           <h2>Inteligência viva. Operação governada. Evolução contínua.</h2>
-          <Link className="primary-button primary-button--large" to="/app">
-            Conhecer a plataforma
-          </Link>
+          <PlatformEntry
+            className="primary-button primary-button--large"
+            label="Conhecer a plataforma"
+          />
         </section>
       </main>
 
