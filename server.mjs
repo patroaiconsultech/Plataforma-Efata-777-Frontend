@@ -1,9 +1,23 @@
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
+import {
+  collectPublicRuntimeConfig,
+  runtimeEnvScript,
+} from "./public-config.js";
 
 const port = Number(process.env.PORT || 8080);
 const root = path.resolve("dist");
+const collectedRuntimeConfig = collectPublicRuntimeConfig(process.env);
+const runtimeConfigScript = runtimeEnvScript(collectedRuntimeConfig.config);
+
+if (collectedRuntimeConfig.errors.length) {
+  console.error(
+    `[ORKIO frontend] invalid public runtime config keys: ${collectedRuntimeConfig.errors
+      .map((item) => `${item.key}:${item.reason || "INVALID"}`)
+      .join(",")}`,
+  );
+}
 
 const MIME_TYPES = new Map([
   [".css", "text/css; charset=utf-8"],
@@ -25,7 +39,6 @@ function securityHeaders(response) {
     .split(/\s+/)
     .filter(Boolean)
     .join(" ");
-
   response.setHeader(
     "Content-Security-Policy",
     [
@@ -90,6 +103,14 @@ http
       return;
     }
 
+    if (pathname === "/env.js") {
+      response.setHeader("Content-Type", "text/javascript; charset=utf-8");
+      cacheHeaders(response, pathname);
+      response.writeHead(200);
+      response.end(runtimeConfigScript);
+      return;
+    }
+
     let requested = pathname === "/" ? "/index.html" : pathname;
     let file = path.resolve(root, `.${requested}`);
     if (!file.startsWith(`${root}${path.sep}`) && file !== root) {
@@ -101,7 +122,6 @@ http
       file = path.join(root, "index.html");
       requested = "/index.html";
     }
-
     const extension = path.extname(file).toLowerCase();
     response.setHeader(
       "Content-Type",

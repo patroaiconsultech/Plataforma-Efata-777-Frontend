@@ -4,6 +4,7 @@ import {
   setToken,
   TOKEN_STORAGE_KEY,
 } from "../api";
+import { publicEnv } from "../config/runtime";
 
 const TRANSACTION_STORAGE_KEY = "orkio_oidc_transaction";
 const ID_TOKEN_STORAGE_KEY = "orkio_oidc_id_token";
@@ -48,7 +49,7 @@ type TokenResponse = {
 };
 
 function env(name: string): string {
-  return String((import.meta.env as Record<string, unknown>)[name] || "").trim();
+  return publicEnv(name as import("../../public-config.js").PublicConfigKey);
 }
 
 function currentOrigin(): string {
@@ -189,7 +190,6 @@ export async function beginLogin(returnTo?: string): Promise<never> {
   const nonce = randomBase64Url();
   const codeVerifier = randomBase64Url(64);
   const codeChallenge = await sha256(codeVerifier);
-
   saveTransaction({
     state,
     nonce,
@@ -201,7 +201,6 @@ export async function beginLogin(returnTo?: string): Promise<never> {
     ),
     createdAt: Date.now(),
   });
-
   const url = new URL(config.authorizationEndpoint);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("client_id", config.clientId);
@@ -212,7 +211,6 @@ export async function beginLogin(returnTo?: string): Promise<never> {
   url.searchParams.set("code_challenge", codeChallenge);
   url.searchParams.set("code_challenge_method", "S256");
   if (config.audience) url.searchParams.set("audience", config.audience);
-
   window.location.assign(url.toString());
   return new Promise<never>(() => undefined);
 }
@@ -230,7 +228,6 @@ export async function completeLogin(
       params.get("error_description") || providerError,
     );
   }
-
   const transaction = loadTransaction();
   const state = params.get("state");
   const code = params.get("code");
@@ -307,7 +304,6 @@ export function logout(): void {
     window.location.assign(config.postLogoutRedirectUri || "/");
     return;
   }
-
   const url = new URL(config.endSessionEndpoint);
   url.searchParams.set(
     "post_logout_redirect_uri",

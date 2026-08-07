@@ -4,6 +4,7 @@ import path from "node:path";
 const root = path.resolve("dist");
 const required = [
   "index.html",
+  "env.js",
   "manifest.webmanifest",
   "sw.js",
   "offline.html",

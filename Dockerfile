@@ -1,4 +1,14 @@
 FROM node:20.20.2-alpine AS build
+ARG VITE_API_BASE_URL
+ARG VITE_STREAM_TIMEOUT_MS
+ARG VITE_OIDC_AUTHORIZATION_ENDPOINT
+ARG VITE_OIDC_TOKEN_ENDPOINT
+ARG VITE_OIDC_END_SESSION_ENDPOINT
+ARG VITE_OIDC_CLIENT_ID
+ARG VITE_OIDC_REDIRECT_URI
+ARG VITE_OIDC_POST_LOGOUT_REDIRECT_URI
+ARG VITE_OIDC_SCOPE
+ARG VITE_OIDC_AUDIENCE
 WORKDIR /app
 
 COPY package.json package-lock.json .npmrc ./
@@ -19,6 +29,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server.mjs ./server.mjs
+COPY --from=build /app/public-config.js ./public-config.js
 COPY --from=build /app/build-evidence ./build-evidence
 USER node
 EXPOSE 8080

@@ -1,4 +1,6 @@
-const BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+import { publicEnv } from "./config/runtime";
+
+const BASE = publicEnv("VITE_API_BASE_URL").replace(/\/$/, "");
 
 export const TOKEN_STORAGE_KEY = "orkio_access_token";
 export const TOKEN_EXPIRY_STORAGE_KEY = "orkio_access_token_expires_at";
@@ -8,7 +10,6 @@ export const AUTH_REQUIRED_EVENT = "orkio:auth-required";
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
-
   constructor(status: number, code: string, message?: string) {
     super(message || code);
     this.name = "ApiError";
@@ -239,7 +240,6 @@ export async function streamMessage(
       `${BASE}/api/v2/threads/${encodeURIComponent(threadId)}/stream`,
       { method: "POST", headers, body: JSON.stringify({ content, agent }), signal },
     );
-
     if (!response.ok) {
       const error = await readError(response);
       handlers.onError?.(error.code);
@@ -255,7 +255,6 @@ export async function streamMessage(
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -266,7 +265,6 @@ export async function streamMessage(
         const block = buffer.slice(0, separator);
         buffer = buffer.slice(separator + 2);
         separator = buffer.indexOf("\n\n");
-
         let event = "message";
         const dataLines: string[] = [];
         for (const line of block.split("\n")) {
@@ -274,14 +272,12 @@ export async function streamMessage(
           else if (line.startsWith("data:")) dataLines.push(line.slice(5).trim());
         }
         if (!dataLines.length) continue;
-
         let payload: Record<string, unknown> = {};
         try {
           payload = JSON.parse(dataLines.join("\n"));
         } catch {
           payload = { raw: dataLines.join("\n") };
         }
-
         if (event === "status") handlers.onStatus?.(payload);
         else if (event === "chunk") handlers.onChunk?.(String(payload.text ?? ""));
         else if (event === "error")
