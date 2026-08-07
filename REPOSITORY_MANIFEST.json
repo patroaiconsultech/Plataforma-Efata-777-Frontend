@@ -1,29 +1,17 @@
 {
-  "schema_version": 1,
-  "repository": "ORKIO_FRONTEND_V2_PREMIUM",
-  "release": "2.0.0-alpha.2.2",
-  "profile": "PWA_ANDROID_IOS_GITHUB_UPLOAD_CANDIDATE",
-  "status": "SOURCE_UPLOAD_READY_BUILD_BLOCKED",
-  "baseline_alpha2_sha256": "1566a41c97ca73b7e32c901f330619fd5c7e8e416fe74599c2f1a34c3bd644ff",
-  "alpha2_1_primary_zip_available": false,
-  "reconstructed_successor": true,
-  "package_lock_present": false,
-  "file_count": 65,
-  "inventory_exclusions": [
-    {
-      "path": "REPOSITORY_MANIFEST.json",
-      "reason": "manifest self-reference"
-    },
-    {
-      "path": "SHA256SUMS.txt",
-      "reason": "checksum self-reference"
-    }
-  ],
+  "schema_version": 3,
+  "candidate": "EFATA777_FUNCTIONAL_PRE_OIDC_ALPHA3",
+  "status": "SOURCE_REVIEW_READY_EXACT_BUILD_PENDING",
+  "file_count": 73,
+  "checksum_tracked_file_count": 72,
+  "package_lock_present": true,
+  "oidc_code_implemented": true,
+  "provider_configuration_pending": true,
   "files": [
     {
       "path": ".env.example",
-      "bytes": 114,
-      "sha256": "a4f944bbfa0eb76cae373fa97cc51b35a2abcaff8a55119aed2d698df4fad1f4"
+      "bytes": 595,
+      "sha256": "30895324dd747833e26117eceabd302815034eb3d143f6fd198f122d1701bf74"
     },
     {
       "path": ".github/CODEOWNERS",
@@ -32,13 +20,13 @@
     },
     {
       "path": ".github/workflows/00-materialize-lockfile.yml",
-      "bytes": 1848,
-      "sha256": "51d09b52798f0aff5e513261fa2c6ffc8f732b7cc766516468bbd2e5c559a717"
+      "bytes": 1876,
+      "sha256": "a040e0cab33cc712267b1e56f5d09e1d9104cedf7048e9ee961c08f746c04e5c"
     },
     {
       "path": ".github/workflows/01-verify-build.yml",
-      "bytes": 1355,
-      "sha256": "fded8fd3e027f62f7170bb1cc6e0ef829d7acaf46497acbc69fad72d356dfd08"
+      "bytes": 1360,
+      "sha256": "bb5e047bf8bdbc203cdb3094991b738961cd97e5f04fc5baa94bb4942d151931"
     },
     {
       "path": ".gitignore",
@@ -61,14 +49,19 @@
       "sha256": "5c2f512f46b7c8a07374d30b054855c807df7fda56606613dc8e5fc3932d6a9d"
     },
     {
+      "path": "LOCKFILE_SHA256SUMS.txt",
+      "bytes": 163,
+      "sha256": "265fa6360d61c4dc2a3007385244a0f67d7f8ec0c231287662f595e5945e4d14"
+    },
+    {
       "path": "README.md",
-      "bytes": 582,
-      "sha256": "298d91fe3564057b40eb504b7d551880cb59ba79723913fc9de3d0a3e443d176"
+      "bytes": 1155,
+      "sha256": "59378d94c24ba1974d674e9f4e27d34702174ebb57ab9805f8a231a3a784749b"
     },
     {
       "path": "TEST_RESULTS.txt",
-      "bytes": 2763,
-      "sha256": "06e5cb45344cd4be1ce1b712abfb52ceefce69fb6542e306fa2d7069a61839ae"
+      "bytes": 12640,
+      "sha256": "1736333b23f54efcf9595a49e670beb57f6843d8cbb1de0cc0fc67fe850008fe"
     },
     {
       "path": "TEST_RESULTS_ALPHA2_2.txt",
@@ -77,8 +70,8 @@
     },
     {
       "path": "VALIDATION_REPORT.json",
-      "bytes": 1841,
-      "sha256": "fe22eea0ac31b93507522c1bb58146d7e26ef8d32f46c7db90eb86c890a09a85"
+      "bytes": 1815,
+      "sha256": "f41e54d0ad55a5b011503f4ae85af95d5edfbd376648deaf72fb42c2447620f8"
     },
     {
       "path": "VALIDATION_REPORT_ALPHA2_2.json",
@@ -87,8 +80,13 @@
     },
     {
       "path": "docs/BUILD_GATE_STATUS.md",
-      "bytes": 443,
-      "sha256": "1ac092da429a4928bb22c50e6ec88ffe2a95ec5fe608043fcda3cdbbe37bfb0e"
+      "bytes": 793,
+      "sha256": "ef92c77676c096b581a985985a5660b22328cf320199ed0ebbb78baf5d4c691c"
+    },
+    {
+      "path": "docs/FUNCTIONAL_PRE_OIDC_STATUS.md",
+      "bytes": 1246,
+      "sha256": "8c7a8de56d0e1dec6d1c769fc39898bde236cdd7faa1b3e44674a6fa55c0de08"
     },
     {
       "path": "docs/GITHUB_BRANCH_PROTECTION.md",
@@ -107,8 +105,8 @@
     },
     {
       "path": "docs/POST_UPLOAD_AO01_GATE.md",
-      "bytes": 656,
-      "sha256": "93688be8d1b7265444ce1a5b4f02ac4518feea8a63a51dc411296ded9e28a26c"
+      "bytes": 599,
+      "sha256": "102886615b357f5411cae873ce5f92fa33861725351043a04aa32831827676cf"
     },
     {
       "path": "docs/PWA_ACCEPTANCE_MATRIX.md",
@@ -122,23 +120,28 @@
     },
     {
       "path": "docs/RISK_ASSESSMENT.md",
-      "bytes": 860,
-      "sha256": "0077992797ea1546408b8ab65544df9c521b601bdcd6c925ce031f3cdcde4b9b"
+      "bytes": 837,
+      "sha256": "1cf57e642f1c61308604a5842ac438567dde1640207ed89592dd9dc852d58fb0"
     },
     {
       "path": "docs/ROLLBACK_PLAN.md",
-      "bytes": 639,
-      "sha256": "cdcc4ebb4fe5bf95c781b65c768c3589c0538938e70588e50a05bb8b5ca0678f"
+      "bytes": 757,
+      "sha256": "762173e6e4cce7567f3c05d6c9f7e9d5d6fccd52a935fa1d9cd02624f0bbabed"
     },
     {
       "path": "docs/SMOKE_PLAN.md",
-      "bytes": 677,
-      "sha256": "4c1a866b7763269530ddf888e03630d6f2c775fadb9bfcfee1083b7af5d94e9a"
+      "bytes": 1101,
+      "sha256": "9151dc9dc0b26b8e6518fb69037bc48464aefbdd4960c2495b343e5d1bdd5ced"
     },
     {
       "path": "index.html",
       "bytes": 1376,
       "sha256": "898370c1d251209180def8851f3c3e9b416c660788b9bfe342dfe680eafb8fe4"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 57806,
+      "sha256": "8a59d8b95b94382ff31ea91698c4cac38816c85c8c738152d874cc2a40aa7b10"
     },
     {
       "path": "package.json",
@@ -232,13 +235,18 @@
     },
     {
       "path": "src/App.tsx",
-      "bytes": 690,
-      "sha256": "cd9a81d7c69020d6a7fe1092777d56410ee02f25503a08796316e03e5c6d78e9"
+      "bytes": 924,
+      "sha256": "0d09d1b58ed5ac9c6f05bdccb6a28014cd6a4cffce58568c2c8ae29d936a0512"
     },
     {
       "path": "src/api.ts",
-      "bytes": 687,
-      "sha256": "3bb454d62f63debba0c360594d0844d937e7579bf5126ba6fb09c6a7143cfab2"
+      "bytes": 9029,
+      "sha256": "11802f84f5e6981553c2be201ea124764f875e2fab21a4dc198eab567c42acfa"
+    },
+    {
+      "path": "src/auth/oidc.ts",
+      "bytes": 9020,
+      "sha256": "c21ed267f99596bcc03105b38ee780496fde2a13f79fe57aed6b64137b18e0ff"
     },
     {
       "path": "src/components/PwaInstallButton.tsx",
@@ -277,18 +285,28 @@
     },
     {
       "path": "src/routes/AppConsole.tsx",
-      "bytes": 4335,
-      "sha256": "dc23237229d20b26b3b1de7c9b23afb527fbd9d4e90f102783126355cca227c9"
+      "bytes": 16260,
+      "sha256": "dd2ea385fec626a89bede0184e65d6dfb5f617b9019f135e92ec336e34607022"
+    },
+    {
+      "path": "src/routes/AuthCallback.tsx",
+      "bytes": 1232,
+      "sha256": "6072ec8fc1f839398596ad1d0cfb30584c8ccefaad9da61a058d16ffa2ef32c2"
+    },
+    {
+      "path": "src/routes/InviteAccept.tsx",
+      "bytes": 3316,
+      "sha256": "5ef615f6b2118160e6296031c8042b590bee84d14dcd6441decdb09e409652a0"
     },
     {
       "path": "src/routes/Landing.tsx",
-      "bytes": 5483,
-      "sha256": "a9f01ba73c0817f61efd6dd6e3a6f95cffc2ab36419510e15fcb70b22cae6d51"
+      "bytes": 6081,
+      "sha256": "f8905c27b8636abc72b65cf921e8265bc373af91087209d72e183458a0952662"
     },
     {
       "path": "src/styles.css",
-      "bytes": 15802,
-      "sha256": "518a0935b94382b7f1f73e557f7545f8872826edfa0cdf2e1945211d8e3563de"
+      "bytes": 17234,
+      "sha256": "3acb68ad62ab08a5b94a5a716ed1084c4a082341e026e504dabb9e7f7ce3f074"
     },
     {
       "path": "src/types/pwa.d.ts",
@@ -301,6 +319,11 @@
       "sha256": "131dbbef8f5fe8653ebbc88868e668a688beb2192683d411d8f231c403834ccc"
     },
     {
+      "path": "tests/functional-wiring.test.mjs",
+      "bytes": 5851,
+      "sha256": "192e0038520fb6cb6cb9e13c9127013aecfb1c3d6b8edfce01e024702001b83d"
+    },
+    {
       "path": "tests/github-build-contract.test.mjs",
       "bytes": 2552,
       "sha256": "89fd504ab2e8cb7b49a14f2e580ccb72bbd2e864e839d6bcd69d5724bceee854"
@@ -309,6 +332,11 @@
       "path": "tests/landing.test.mjs",
       "bytes": 1311,
       "sha256": "5388b23332e39d6dc1dac974b1e78a858bf734fdc12104753122a4c95f5711ad"
+    },
+    {
+      "path": "tests/oidc-and-terminal.test.mjs",
+      "bytes": 3499,
+      "sha256": "6b286399470bbd38f010afb4281593d364334366b1f9c51d268e4b7f35668d17"
     },
     {
       "path": "tests/pwa.test.mjs",
@@ -335,40 +363,5 @@
       "bytes": 129,
       "sha256": "3a8c7b7acf511961c0cda555c2eb6a3d63e18f493fe2bc6d4bd44a2a56b8d53c"
     }
-  ],
-  "validation": {
-    "schema_version": 1,
-    "release": "2.0.0-alpha.2.2",
-    "status": "PASS_LOCAL_SOURCE_AND_GITHUB_BOOTSTRAP",
-    "local_node": "v22.16.0",
-    "required_node": "v20.20.2",
-    "required_npm": "10.8.2",
-    "tests_passed": 40,
-    "tests_failed": 0,
-    "syntax_checks": {
-      "server.mjs": "PASS",
-      "public/sw.js": "PASS",
-      "scripts/verify-lockfile.mjs": "PASS",
-      "scripts/verify-dist.mjs": "PASS",
-      "scripts/build-evidence.mjs": "PASS"
-    },
-    "package_lock_present": false,
-    "npm_ci_executed": false,
-    "vite_build_executed": false,
-    "dist_generated": false,
-    "github_materialization_workflow_prepared": true,
-    "github_verify_build_workflow_prepared": true,
-    "automatic_commit": false,
-    "deploy_executed": false,
-    "human_approval_required": true
-  },
-  "governance": {
-    "local_artifact_written": true,
-    "remote_write_executed": false,
-    "commit_executed": false,
-    "merge_executed": false,
-    "deploy_executed": false,
-    "execution_allowed": false,
-    "human_approval_required": true
-  }
+  ]
 }

@@ -1,92 +1,63 @@
 {
-  "schema_version": 1,
-  "artifact": "ORKIO_FRONTEND_V2_PREMIUM_PWA_ANDROID_IOS_ALPHA2",
-  "status": "PASS_LOCAL_WITH_BUILD_PENDING",
-  "node_tests": {
-    "status": "PASS",
-    "count": 16
+  "schema_version": 3,
+  "candidate": "EFATA777_FUNCTIONAL_PRE_OIDC_ALPHA3",
+  "status": "SOURCE_PASS_EXACT_BUILD_PENDING",
+  "toolchain_observed": {
+    "node": "v22.16.0",
+    "npm": "10.9.2",
+    "required_node": "20.20.2",
+    "required_npm": "10.8.2",
+    "exact_required_toolchain_executed": false
   },
-  "server_syntax": "PASS",
-  "service_worker_syntax": "PASS",
-  "manifest_json": "PASS",
-  "manifest_required_fields": "PASS",
-  "icon_dimensions": {
-    "public/icons/orkio-48.png": {
-      "expected": [
-        48,
-        48
-      ],
-      "actual": [
-        48,
-        48
-      ],
-      "mode": "RGBA"
-    },
-    "public/icons/orkio-192.png": {
-      "expected": [
-        192,
-        192
-      ],
-      "actual": [
-        192,
-        192
-      ],
-      "mode": "RGBA"
-    },
-    "public/icons/orkio-maskable-192.png": {
-      "expected": [
-        192,
-        192
-      ],
-      "actual": [
-        192,
-        192
-      ],
-      "mode": "RGBA"
-    },
-    "public/icons/orkio-512.png": {
-      "expected": [
-        512,
-        512
-      ],
-      "actual": [
-        512,
-        512
-      ],
-      "mode": "RGBA"
-    },
-    "public/icons/orkio-maskable-512.png": {
-      "expected": [
-        512,
-        512
-      ],
-      "actual": [
-        512,
-        512
-      ],
-      "mode": "RGBA"
-    },
-    "public/icons/apple-touch-icon-180.png": {
-      "expected": [
-        180,
-        180
-      ],
-      "actual": [
-        180,
-        180
-      ],
-      "mode": "RGBA"
-    }
+  "lockfile": {
+    "present": true,
+    "lockfile_version": 3,
+    "package_count": 118,
+    "registry": "https://registry.npmjs.org/",
+    "verification": "PASS",
+    "sha256": "8a59d8b95b94382ff31ea91698c4cac38816c85c8c738152d874cc2a40aa7b10"
   },
-  "service_worker_protected_surface_exclusions": "PASS",
-  "unsafe_objects": 0,
-  "transient_artifacts": 0,
-  "secret_pattern_findings": 0,
-  "npm_ci": "NOT_EXECUTED_DEPENDENCIES_NOT_MATERIALIZED",
-  "vite_build": "NOT_EXECUTED_DEPENDENCIES_NOT_MATERIALIZED",
-  "browser_runtime": "NOT_EXECUTED",
-  "android_device_test": "NOT_EXECUTED",
-  "ios_ipados_device_test": "NOT_EXECUTED",
-  "deploy_executed": false,
-  "human_approval_required": true
+  "tests": {
+    "node_static_contracts": {
+      "status": "PASS",
+      "passed": 80,
+      "failed": 0
+    },
+    "typescript_transpile_syntax": {
+      "status": "PASS",
+      "files": 14
+    },
+    "server_syntax": "PASS",
+    "service_worker_syntax": "PASS",
+    "json_parse": "PASS",
+    "yaml_parse": "PASS",
+    "secret_scan": "PASS"
+  },
+  "functional_source": {
+    "thread_wiring": "IMPLEMENTED",
+    "sse_client": "IMPLEMENTED",
+    "terminal_release": "IMPLEMENTED",
+    "attachments_client": "IMPLEMENTED_GOVERNANCE_DISABLED",
+    "invitation_flow": "IMPLEMENTED",
+    "oidc_authorization_code_pkce": "IMPLEMENTED",
+    "oidc_callback": "IMPLEMENTED",
+    "oidc_logout": "IMPLEMENTED",
+    "token_expiry_and_401_cleanup": "IMPLEMENTED"
+  },
+  "not_executed": {
+    "npm_ci": "INTERNAL_REGISTRY_E404_FOR_YALLIST",
+    "vite_build": "BLOCKED_BY_NPM_CI",
+    "verify_dist": "BLOCKED_BY_VITE_BUILD",
+    "browser_oidc_smoke": "PROVIDER_NOT_CONFIGURED",
+    "device_matrix": "NOT_EXECUTED",
+    "deploy": "NOT_EXECUTED"
+  },
+  "governance": {
+    "remote_write_executed": false,
+    "commit_executed": false,
+    "merge_executed": false,
+    "deploy_executed": false,
+    "migration_executed": false,
+    "human_approval_required": true
+  }
 }
