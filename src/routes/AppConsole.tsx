@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import {
   AUTH_REQUIRED_EVENT,
   ApiError,
+  AgentDefinition,
   ChatMessage,
   Thread,
   createInvite,
   createThread,
   getToken,
   isApiBaseConfigured,
+  listAgents,
   listMessages,
   listThreads,
   streamMessage,
@@ -43,6 +45,7 @@ function describe(error: unknown): string {
     THREAD_READ_ONLY: "Seu perfil nesta conversa é somente leitura.",
     INVITE_ROLE_REQUIRED:
       "Apenas o proprietário ou um moderador pode convidar participantes.",
+    AGENT_NOT_FOUND: "O agente selecionado não está disponível.",
     ARTIFACTS_DISABLED: "O envio de anexos está desabilitado no servidor.",
     UPLOAD_PERMISSION_REQUIRED: "Você não tem permissão para enviar arquivos.",
     FILE_TOO_LARGE: "Arquivo acima do tamanho máximo permitido.",
@@ -76,6 +79,11 @@ export default function AppConsole() {
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [authenticated, setAuthenticated] = useState(() => Boolean(getToken()));
+  const [agents, setAgents] = useState<AgentDefinition[]>([]);
+  const [selectedAgent, setSelectedAgent] = useState<AgentDefinition | null>(null);
+  const [showAgents, setShowAgents] = useState(false);
+  const [agentsBusy, setAgentsBusy] = useState(false);
+  const [agentsError, setAgentsError] = useState("");
 
   const fileRef = useRef<HTMLInputElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -114,6 +122,36 @@ export default function AppConsole() {
       setLoading(false);
     }
   }, [authenticated, configured, threadId]);
+
+  const refreshAgents = useCallback(async () => {
+    if (!configured || !authenticated) return;
+    setAgentsBusy(true);
+    setAgentsError("");
+    try {
+      const catalog = await listAgents();
+      setAgents(catalog);
+      setSelectedAgent((current) => {
+        if (current) {
+          return catalog.find((agent) => agent.slug === current.slug) ?? null;
+        }
+        return (
+          catalog.find((agent) => agent.slug.toLowerCase() === "orkio") ??
+          catalog[0] ??
+          null
+        );
+      });
+    } catch (err) {
+      setAgents([]);
+      setSelectedAgent(null);
+      setAgentsError(describe(err));
+    } finally {
+      setAgentsBusy(false);
+    }
+  }, [authenticated, configured]);
+
+  useEffect(() => {
+    void refreshAgents();
+  }, [refreshAgents]);
 
   useEffect(() => {
     void refreshThreads();
@@ -189,7 +227,7 @@ export default function AppConsole() {
       await streamMessage(
         threadId,
         content,
-        AGENT,
+        selectedAgent?.slug || AGENT,
         {
           onChunk: (text) => setStreamingText((current) => current + text),
           onError: (code) => setError(describe(new ApiError(0, code))),
@@ -394,7 +432,7 @@ export default function AppConsole() {
           )}
           {streamingText ? (
             <article className="message agent" aria-live="polite">
-              <b>{AGENT}</b>
+              <b>{selectedAgent?.display_name || AGENT}</b>
               <p>{streamingText}</p>
             </article>
           ) : null}
@@ -413,12 +451,17 @@ export default function AppConsole() {
           </label>
           <button
             type="button"
-            className="icon-button"
-            onClick={() => setShowInvite(true)}
-            aria-label="Convidar participante"
+            className="agent-trigger"
+            onClick={() => setShowAgents(true)}
+            aria-label="Selecionar agente"
+            aria-haspopup="dialog"
             disabled={!authenticated}
+            title="Selecionar agente"
           >
-            👥
+            <span aria-hidden="true">👥</span>
+            <span className="agent-trigger__label">
+              {selectedAgent?.display_name || "Agentes"}
+            </span>
           </button>
           <textarea
             value={message}
@@ -455,6 +498,87 @@ export default function AppConsole() {
         </footer>
       </main>
 
+
+
+      {showAgents ? (
+        <div className="modal" role="presentation">
+          <section
+            className="modal-card agent-picker"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="agent-picker-title"
+          >
+            <div className="agent-picker__heading">
+              <div>
+                <h2 id="agent-picker-title">Inteligência colaborativa</h2>
+                <p>Escolha o especialista que será solicitado para o próximo turno.</p>
+              </div>
+              <button type="button" onClick={() => setShowAgents(false)} aria-label="Fechar">
+                ×
+              </button>
+            </div>
+
+            <div className="agent-mode" aria-label="Modo de execução">
+              <button type="button" className="agent-mode__active" aria-pressed="true">
+                Individual
+              </button>
+              <button
+                type="button"
+                disabled
+                title="Modo Team depende do contrato backend governado."
+              >
+                Team · em breve
+              </button>
+            </div>
+
+            {agentsBusy ? <p role="status">Carregando Agent Registry…</p> : null}
+            {agentsError ? (
+              <div className="console-alert" role="alert">
+                <span>{agentsError}</span>
+                <button type="button" onClick={() => void refreshAgents()}>
+                  Tentar novamente
+                </button>
+              </div>
+            ) : null}
+            {!agentsBusy && !agentsError && agents.length === 0 ? (
+              <p className="agent-picker__empty">Nenhum agente disponível no Registry.</p>
+            ) : null}
+
+            <div className="agent-grid" role="list" aria-label="Agentes disponíveis">
+              {agents.map((agent) => {
+                const active = selectedAgent?.slug === agent.slug;
+                return (
+                  <button
+                    type="button"
+                    role="listitem"
+                    key={agent.slug}
+                    className={active ? "agent-card agent-card--active" : "agent-card"}
+                    aria-pressed={active}
+                    onClick={() => {
+                      setSelectedAgent(agent);
+                      setShowAgents(false);
+                      setNotice(`Agente selecionado: ${agent.display_name}`);
+                    }}
+                  >
+                    <span className="agent-card__avatar" aria-hidden="true">
+                      {agent.display_name.slice(0, 1).toUpperCase()}
+                    </span>
+                    <span>
+                      <strong>{agent.display_name}</strong>
+                      <small>{agent.target_kind === "agent" ? "Agente especializado" : agent.target_kind}</small>
+                    </span>
+                    <span className="agent-card__status">{active ? "Ativo" : "Disponível"}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="agent-picker__governance">
+              O executor real é resolvido pelo backend. A interface não substitui a identidade de execução.
+            </p>
+          </section>
+        </div>
+      ) : null}
       {showInvite ? (
         <div className="modal" role="presentation">
           <section

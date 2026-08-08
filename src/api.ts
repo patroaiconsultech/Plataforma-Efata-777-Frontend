@@ -140,6 +140,18 @@ export async function apiForm<T = unknown>(
   return (await response.json()) as T;
 }
 
+
+
+export type AgentDefinition = {
+  slug: string;
+  display_name: string;
+  target_kind: "agent" | string;
+};
+
+export function listAgents(): Promise<AgentDefinition[]> {
+  return apiJson<AgentDefinition[]>("/api/v2/agents");
+}
+
 export type Thread = {
   id: string;
   title: string;
