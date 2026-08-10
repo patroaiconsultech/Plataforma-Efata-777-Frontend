@@ -146,6 +146,21 @@ export type AgentDefinition = {
   slug: string;
   display_name: string;
   target_kind: "agent" | string;
+  canonical_name?: string;
+  role_code?: string;
+  role_label?: string;
+  organizational_level?: string;
+  department?: string;
+  founder_direct_access?: boolean;
+  localized_names?: Record<string, string>;
+  localized_role_labels?: Record<string, string>;
+  availability?: {
+    registered?: boolean;
+    configured?: boolean;
+    ready?: boolean;
+    state?: string;
+    reason?: string | null;
+  };
 };
 
 export function listAgents(): Promise<AgentDefinition[]> {

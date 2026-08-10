@@ -19,8 +19,13 @@ import {
 } from "../api";
 import PwaInstallButton from "../components/PwaInstallButton";
 import { beginLogin, isOidcConfigured, logout } from "../auth/oidc";
+import {
+  formatConversationTimestamp,
+  formatDateTimeTitle,
+  formatMessageTimestamp,
+} from "../utils/chronology";
 
-const AGENT = "Orkio";
+const AGENT = "Josué";
 
 /** Traduz códigos do backend em mensagens compreensíveis. */
 function describe(error: unknown): string {
@@ -85,6 +90,9 @@ export default function AppConsole() {
   const [showAgents, setShowAgents] = useState(false);
   const [agentsBusy, setAgentsBusy] = useState(false);
   const [agentsError, setAgentsError] = useState("");
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [recentAttachment, setRecentAttachment] = useState("");
 
   const fileRef = useRef<HTMLInputElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -95,6 +103,8 @@ export default function AppConsole() {
     setThreadId(id);
     setMessages([]);
     setStreamingText("");
+    setRecentAttachment("");
+    setShowMobileSidebar(false);
     setError("");
     const url = new URL(window.location.href);
     if (id) url.searchParams.set("thread", id);
@@ -259,11 +269,15 @@ export default function AppConsole() {
     }
     setError("");
     setNotice("");
+    setUploading(true);
     try {
       const uploaded = await uploadAttachment(threadId, file);
+      setRecentAttachment(uploaded.filename);
       setNotice(`Anexo enviado: ${uploaded.filename}`);
     } catch (err) {
       setError(describe(err));
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -297,13 +311,35 @@ export default function AppConsole() {
     }
   }
 
+  const activeThread = threads.find((thread) => thread.id === threadId) ?? null;
+  const selectedAgentName =
+    selectedAgent?.canonical_name || selectedAgent?.display_name || AGENT;
+  const selectedAgentRole =
+    selectedAgent?.localized_role_labels?.["pt-BR"] ||
+    selectedAgent?.role_label ||
+    "Agente selecionado";
+  const selectedAgentInitial = selectedAgentName.slice(0, 1).toUpperCase();
+
   return (
     <div className="console-shell">
-      <aside className="console-sidebar" aria-label="Navegação do console">
-        <Link className="brand-lockup brand-lockup--compact" to="/">
-          <span className="brand-orb" aria-hidden="true" />
-          <span>ORKIO™</span>
-        </Link>
+      <aside
+        className={showMobileSidebar ? "console-sidebar console-sidebar--open" : "console-sidebar"}
+        aria-label="Navegação do console"
+      >
+        <div className="console-sidebar__brand">
+          <Link className="brand-lockup brand-lockup--compact" to="/">
+            <span className="brand-orb" aria-hidden="true" />
+            <span>ORKIO™</span>
+          </Link>
+          <button
+            type="button"
+            className="sidebar-close"
+            onClick={() => setShowMobileSidebar(false)}
+            aria-label="Fechar conversas"
+          >
+            ×
+          </button>
+        </div>
         <button
           type="button"
           className="primary-button"
@@ -313,7 +349,10 @@ export default function AppConsole() {
           + Nova conversa
         </button>
         <nav className="conversation-nav" aria-label="Conversas">
-          <strong>Conversas</strong>
+          <div className="conversation-nav__heading">
+            <strong>Conversas</strong>
+            <span>{threads.length}</span>
+          </div>
           {threads.length === 0 ? (
             <span>Nenhuma conversa selecionada</span>
           ) : (
@@ -330,7 +369,16 @@ export default function AppConsole() {
                     aria-current={thread.id === threadId ? "true" : undefined}
                     onClick={() => selectThread(thread.id)}
                   >
-                    {thread.title || "Nova conversa"}
+                    <span className="conversation-item__title">
+                      {thread.title || "Nova conversa"}
+                    </span>
+                    <time
+                      className="conversation-item__time"
+                      dateTime={thread.created_at}
+                      title={formatDateTimeTitle(thread.created_at)}
+                    >
+                      {formatConversationTimestamp(thread.created_at)}
+                    </time>
                   </button>
                 </li>
               ))}
@@ -339,14 +387,54 @@ export default function AppConsole() {
         </nav>
         <PwaInstallButton compact />
       </aside>
+      {showMobileSidebar ? (
+        <button
+          type="button"
+          className="sidebar-backdrop"
+          aria-label="Fechar conversas"
+          onClick={() => setShowMobileSidebar(false)}
+        />
+      ) : null}
 
       <main id="main-content" className="console-main">
         <header className="console-header">
-          <div>
-            <b>ORKIO Command Center</b>
-            <small>Collaborative Intelligence</small>
+          <div className="console-header__context">
+            <button
+              type="button"
+              className="sidebar-toggle"
+              onClick={() => setShowMobileSidebar(true)}
+              aria-label="Abrir conversas"
+              aria-expanded={showMobileSidebar}
+            >
+              ☰
+            </button>
+            <div>
+              <span className="console-header__eyebrow">Conversa ativa</span>
+              <b>{activeThread?.title || "ORKIO Command Center"}</b>
+              <small>
+                {activeThread
+                  ? formatDateTimeTitle(activeThread.created_at)
+                  : "Collaborative Intelligence"}
+              </small>
+            </div>
           </div>
           <div className="console-header__actions">
+            <button
+              type="button"
+              className="active-agent-chip"
+              onClick={() => setShowAgents(true)}
+              disabled={!authenticated}
+              aria-label={`Agente ativo: ${selectedAgentName}`}
+              title="Selecionar agente"
+            >
+              <span className="active-agent-chip__avatar" aria-hidden="true">
+                {selectedAgentInitial}
+              </span>
+              <span className="active-agent-chip__copy">
+                <strong>{selectedAgentName}</strong>
+                <small>{selectedAgentRole}</small>
+              </span>
+            </button>
             <Link className="ghost-link" to="/">
               Início
             </Link>
@@ -414,10 +502,22 @@ export default function AppConsole() {
           </p>
         ) : null}
 
-        <section className="thread" aria-label="Conversa" aria-busy={loading}>
-          {messages.length === 0 && !streamingText ? (
-            <article className="message agent">
-              <b>Orkio</b>
+        <section
+          className="thread"
+          aria-label="Conversa"
+          aria-busy={loading || sending}
+        >
+          {loading && messages.length === 0 ? (
+            <div className="thread-state" role="status">
+              <span className="thread-state__pulse" aria-hidden="true" />
+              Carregando conversa…
+            </div>
+          ) : messages.length === 0 && !streamingText ? (
+            <article className="message agent message--welcome">
+              <header className="message__meta">
+                <span className="message__author">{selectedAgentName}</span>
+                <span>Pronto para conversar</span>
+              </header>
               <p>Onde a inteligência encontra harmonia.</p>
             </article>
           ) : (
@@ -426,20 +526,53 @@ export default function AppConsole() {
                 key={item.id}
                 className={item.author_type === "agent" ? "message agent" : "message user"}
               >
-                <b>{item.author_type === "agent" ? item.agent_name || AGENT : "Você"}</b>
+                <header className="message__meta">
+                  <span className="message__author">
+                    {item.author_type === "agent" ? item.agent_name || AGENT : "Você"}
+                  </span>
+                  <time
+                    dateTime={item.created_at}
+                    title={formatDateTimeTitle(item.created_at)}
+                  >
+                    {formatMessageTimestamp(item.created_at)}
+                  </time>
+                </header>
                 <p>{item.content}</p>
               </article>
             ))
           )}
           {streamingText ? (
-            <article className="message agent" aria-live="polite">
-              <b>{selectedAgent?.display_name || AGENT}</b>
+            <article className="message agent message--streaming" aria-live="polite">
+              <header className="message__meta">
+                <span className="message__author">
+                  {selectedAgent?.display_name || AGENT}
+                </span>
+                <span className="streaming-status">
+                  <span className="streaming-status__dot" aria-hidden="true" />
+                  Gerando
+                </span>
+              </header>
               <p>{streamingText}</p>
             </article>
           ) : null}
         </section>
 
         <footer className="composer">
+          <div className="composer__status" aria-live="polite">
+            <span>
+              {sending
+                ? `Gerando resposta com ${selectedAgentName}…`
+                : uploading
+                  ? "Enviando anexo…"
+                  : recentAttachment
+                    ? `Anexo no contexto: ${recentAttachment}`
+                    : "Enter para enviar · Shift+Enter para nova linha"}
+            </span>
+            <span className="composer__agent">
+              {selectedAgentName} · {selectedAgentRole}
+            </span>
+          </div>
+          <div className="composer__row">
           <label className="icon-button" aria-label="Anexar arquivo">
             <span aria-hidden="true">📎</span>
             <input
@@ -447,7 +580,7 @@ export default function AppConsole() {
               hidden
               ref={fileRef}
               onChange={handleFile}
-              disabled={!authenticated || sending}
+              disabled={!authenticated || sending || uploading}
             />
           </label>
           <button
@@ -461,7 +594,7 @@ export default function AppConsole() {
           >
             <span aria-hidden="true">👥</span>
             <span className="agent-trigger__label">
-              {selectedAgent?.display_name || "Agentes"}
+              {selectedAgentName || "Agentes"}
             </span>
           </button>
           <textarea
@@ -494,8 +627,9 @@ export default function AppConsole() {
               sending || !message.trim() || !authenticated || !configured
             }
           >
-            {sending ? "Enviando." : "Enviar"}
+            {sending ? "Gerando…" : "Enviar"}
           </button>
+          </div>
         </footer>
       </main>
 

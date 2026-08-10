@@ -994,3 +994,466 @@ button.header-cta {
   .agent-trigger__label { display: none; }
   .agent-grid { grid-template-columns: 1fr; }
 }
+
+/* R0.3.6.1 + R0.3.6.2 — Chronology and Command Center UX Premium */
+.console-sidebar__brand,
+.conversation-nav__heading,
+.console-header__context,
+.message__meta,
+.composer__status,
+.composer__row {
+  display: flex;
+  align-items: center;
+}
+
+.console-sidebar__brand,
+.conversation-nav__heading,
+.message__meta,
+.composer__status {
+  justify-content: space-between;
+}
+
+.console-sidebar {
+  position: relative;
+  overflow: hidden;
+}
+
+.console-sidebar__brand {
+  gap: 12px;
+}
+
+.sidebar-close,
+.sidebar-toggle {
+  display: none;
+}
+
+.conversation-nav {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.conversation-nav__heading {
+  padding: 0 4px;
+}
+
+.conversation-nav__heading span {
+  display: inline-grid;
+  min-width: 28px;
+  min-height: 24px;
+  place-items: center;
+  border: 1px solid rgba(55, 197, 255, 0.2);
+  border-radius: 999px;
+  color: var(--electric);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.conversation-list {
+  max-height: min(58svh, 640px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.conversation-item {
+  display: grid;
+  gap: 5px;
+  transition:
+    border-color 220ms ease,
+    background-color 220ms ease,
+    transform 220ms ease;
+}
+
+.conversation-item:hover {
+  transform: translateX(2px);
+}
+
+.conversation-item--active {
+  border-color: rgba(246, 196, 83, 0.46);
+  background:
+    linear-gradient(90deg, rgba(246, 196, 83, 0.08), transparent 58%),
+    rgba(55, 197, 255, 0.06);
+  box-shadow: inset 2px 0 0 rgba(246, 196, 83, 0.8);
+}
+
+.conversation-item__title {
+  overflow: hidden;
+  color: #eef7ff;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversation-item__time {
+  color: #7890a5;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.console-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.console-header__context {
+  min-width: 0;
+  gap: 12px;
+}
+
+.console-header__context > div {
+  min-width: 0;
+}
+
+.console-header__context b {
+  display: block;
+  max-width: min(46vw, 620px);
+  overflow: hidden;
+  color: #eef8ff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.console-header__eyebrow {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--electric);
+  font-size: 0.69rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.active-agent-chip {
+  display: flex;
+  min-width: 0;
+  max-width: 300px;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 7px;
+  border: 1px solid rgba(55, 197, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(55, 197, 255, 0.06);
+  color: #eef8ff;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.active-agent-chip:hover,
+.active-agent-chip:focus-visible {
+  border-color: rgba(246, 196, 83, 0.55);
+  background: rgba(246, 196, 83, 0.06);
+  box-shadow: 0 0 28px rgba(246, 196, 83, 0.08);
+}
+
+.active-agent-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.active-agent-chip__avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(246, 196, 83, 0.45);
+  border-radius: 50%;
+  background: rgba(246, 196, 83, 0.1);
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.active-agent-chip__copy {
+  min-width: 0;
+}
+
+.active-agent-chip__copy strong,
+.active-agent-chip__copy small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.active-agent-chip__copy small {
+  max-width: 210px;
+  margin: 2px 0 0;
+  color: #8fa3b6;
+  font-size: 0.72rem;
+}
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.thread-state {
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  gap: 10px;
+  margin: auto;
+  padding: 12px 16px;
+  border: 1px solid rgba(55, 197, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(20, 35, 51, 0.54);
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.thread-state__pulse,
+.streaming-status__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--electric);
+  box-shadow: 0 0 14px rgba(55, 197, 255, 0.78);
+  animation: orkio-pulse 1.25s ease-in-out infinite;
+}
+
+.message {
+  width: min(720px, 86%);
+  padding: 15px 17px;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.12);
+}
+
+.message.user {
+  border-color: rgba(246, 196, 83, 0.18);
+  background: rgba(52, 43, 25, 0.52);
+}
+
+.message--welcome {
+  margin: auto 0;
+  border-style: dashed;
+}
+
+.message--streaming {
+  border-color: rgba(55, 197, 255, 0.38);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.12),
+    0 0 28px rgba(55, 197, 255, 0.06);
+}
+
+.message__meta {
+  gap: 12px;
+  margin-bottom: 8px;
+  color: #8297aa;
+  font-size: 0.74rem;
+}
+
+.message__author {
+  overflow: hidden;
+  color: var(--electric);
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message.user .message__author {
+  color: var(--gold);
+}
+
+.message__meta time {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.message p {
+  margin: 0;
+  line-height: 1.58;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.streaming-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #8fa3b6;
+}
+
+.composer {
+  display: grid;
+  gap: 8px;
+}
+
+.composer__status {
+  min-width: 0;
+  gap: 18px;
+  color: #7890a5;
+  font-size: 0.74rem;
+}
+
+.composer__status > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.composer__agent {
+  max-width: 44%;
+  overflow: hidden;
+  color: #9eb2c4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.composer__row {
+  min-width: 0;
+  gap: 10px;
+}
+
+.composer__row textarea {
+  flex: 1;
+}
+
+.composer textarea:focus {
+  border-color: rgba(55, 197, 255, 0.65);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(55, 197, 255, 0.08);
+}
+
+@keyframes orkio-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.84);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .console-shell {
+    grid-template-columns: 230px minmax(0, 1fr);
+  }
+
+  .active-agent-chip__copy small {
+    display: none;
+  }
+
+  .active-agent-chip {
+    max-width: 190px;
+  }
+}
+
+@media (max-width: 760px) {
+  .console-sidebar {
+    position: fixed;
+    inset:
+      0
+      auto
+      0
+      0;
+    z-index: 120;
+    display: flex;
+    width: min(86vw, 320px);
+    transform: translateX(-104%);
+    transition: transform 220ms ease;
+    box-shadow: 28px 0 80px rgba(0, 0, 0, 0.42);
+  }
+
+  .console-sidebar--open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close,
+  .sidebar-toggle {
+    display: inline-grid;
+    min-width: 44px;
+    min-height: 44px;
+    place-items: center;
+    border: 1px solid rgba(55, 197, 255, 0.18);
+    border-radius: 12px;
+    background: rgba(55, 197, 255, 0.06);
+    color: #e9f8ff;
+    cursor: pointer;
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 110;
+    display: block;
+    border: 0;
+    background: rgba(0, 0, 0, 0.58);
+    backdrop-filter: blur(3px);
+  }
+
+  .console-header {
+    align-items: center;
+  }
+
+  .console-header__context b {
+    max-width: 46vw;
+  }
+
+  .console-header__context small {
+    display: none;
+  }
+
+  .console-header__actions {
+    gap: 6px;
+  }
+
+  .active-agent-chip {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 4px;
+    justify-content: center;
+  }
+
+  .active-agent-chip__copy {
+    display: none;
+  }
+
+  .console-header__actions > button:not(.active-agent-chip) {
+    display: none;
+  }
+
+  .message {
+    width: min(94%, 720px);
+  }
+
+  .composer__status {
+    display: block;
+    min-height: 18px;
+  }
+
+  .composer__agent {
+    display: none;
+  }
+
+  .composer__row {
+    gap: 7px;
+  }
+
+  .composer .agent-trigger {
+    width: 46px;
+    min-width: 46px;
+    padding-inline: 0;
+    justify-content: center;
+  }
+
+  .composer textarea {
+    min-height: 50px;
+    padding: 12px;
+  }
+}
+
