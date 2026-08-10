@@ -214,6 +214,13 @@ export function uploadAttachment(threadId: string, file: File) {
   );
 }
 
+export function technicalAgentTarget(agentId: string): string {
+  const normalized = agentId.trim();
+  if (!normalized) throw new Error("AGENT_ID_REQUIRED");
+  if (normalized.startsWith("id:")) return normalized;
+  return `id:${normalized}`;
+}
+
 export type StreamHandlers = {
   onStatus?: (data: Record<string, unknown>) => void;
   onChunk?: (text: string) => void;
