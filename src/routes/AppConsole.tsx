@@ -14,6 +14,7 @@ import {
   listMessages,
   listThreads,
   streamMessage,
+  technicalAgentTarget,
   uploadAttachment,
 } from "../api";
 import PwaInstallButton from "../components/PwaInstallButton";
@@ -227,7 +228,7 @@ export default function AppConsole() {
       await streamMessage(
         threadId,
         content,
-        selectedAgent?.slug || AGENT,
+        selectedAgent ? technicalAgentTarget(selectedAgent.slug) : "Josué",
         {
           onChunk: (text) => setStreamingText((current) => current + text),
           onError: (code) => setError(describe(new ApiError(0, code))),

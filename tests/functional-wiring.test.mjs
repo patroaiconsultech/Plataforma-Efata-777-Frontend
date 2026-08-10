@@ -66,6 +66,14 @@ test("stream always reaches a terminal state", () => {
   assert.match(api, /finish\(\{ status: "closed" \}\)/);
 });
 
+
+test("stream target uses explicit technical namespace", () => {
+  assert.match(api, /export function technicalAgentTarget/);
+  assert.match(api, /normalized\.startsWith\("id:"\)/);
+  assert.match(api, /return `id:\$\{normalized\}`/);
+  assert.match(console_, /selectedAgent \? technicalAgentTarget\(selectedAgent\.slug\) : "Josué"/);
+});
+
 test("stream uses fetch with Authorization instead of EventSource", () => {
   assert.doesNotMatch(api, /new EventSource/);
   assert.match(api, /getReader\(\)/);

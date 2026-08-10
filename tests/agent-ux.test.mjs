@@ -11,9 +11,13 @@ test("agent catalog is backend-driven", () => {
   assert.doesNotMatch(consoleSource, /\["Orkio",\s*"Auditor"/);
 });
 
-test("selected agent is sent as requested execution target", () => {
-  assert.match(consoleSource, /selectedAgent\?\.slug \|\| AGENT/);
+test("selected agent is sent through the explicit technical namespace", () => {
+  assert.match(api, /export function technicalAgentTarget/);
+  assert.match(api, /return `id:\$\{normalized\}`/);
+  assert.match(consoleSource, /technicalAgentTarget\(selectedAgent\.slug\)/);
+  assert.match(consoleSource, /: "Josué"/);
   assert.match(consoleSource, /selectedAgent\?\.display_name \|\| AGENT/);
+  assert.doesNotMatch(consoleSource, /selectedAgent\?\.slug \|\| AGENT/);
 });
 
 test("team mode is visible but fail-closed until backend contract exists", () => {
