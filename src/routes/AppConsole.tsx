@@ -4,19 +4,23 @@ import {
   AUTH_REQUIRED_EVENT,
   ApiError,
   AgentDefinition,
+  ArtifactMetadata,
   ChatMessage,
   Thread,
   createInvite,
   createThread,
+  downloadArtifact,
   getToken,
   isApiBaseConfigured,
   listAgents,
   listMessages,
   listThreads,
+  parseArtifactMetadata,
   streamMessage,
   technicalAgentTarget,
   uploadAttachment,
 } from "../api";
+import ArtifactCard from "../components/ArtifactCard";
 import PwaInstallButton from "../components/PwaInstallButton";
 import { beginLogin, isOidcConfigured, logout } from "../auth/oidc";
 import {
@@ -53,6 +57,16 @@ function describe(error: unknown): string {
       "Apenas o proprietário ou um moderador pode convidar participantes.",
     AGENT_NOT_FOUND: "O agente selecionado não está disponível.",
     ARTIFACTS_DISABLED: "O envio de anexos está desabilitado no servidor.",
+    ARTIFACT_METADATA_INVALID:
+      "O servidor informou um artefato, mas a metadata terminal é inválida.",
+    ARTIFACT_DOWNLOAD_PATH_INVALID:
+      "O caminho de download do artefato é inválido.",
+    ARTIFACT_DOWNLOAD_PERMISSION_REQUIRED:
+      "Você não tem permissão para baixar este artefato.",
+    ARTIFACT_NOT_FOUND: "Este artefato não está mais disponível.",
+    ARTIFACT_FILE_NOT_FOUND: "O arquivo do artefato não foi localizado.",
+    ARTIFACT_INTEGRITY_MISMATCH:
+      "A integridade do artefato não pôde ser confirmada.",
     UPLOAD_PERMISSION_REQUIRED: "Você não tem permissão para enviar arquivos.",
     FILE_TOO_LARGE: "Arquivo acima do tamanho máximo permitido.",
     MIME_TYPE_NOT_ALLOWED: "Tipo de arquivo não permitido.",
@@ -93,6 +107,11 @@ export default function AppConsole() {
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [recentAttachment, setRecentAttachment] = useState("");
+  const [artifacts, setArtifacts] = useState<ArtifactMetadata[]>([]);
+  const [artifactDownloadBusy, setArtifactDownloadBusy] = useState("");
+  const [artifactDownloadErrors, setArtifactDownloadErrors] = useState<
+    Record<string, string>
+  >({});
 
   const fileRef = useRef<HTMLInputElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -104,6 +123,9 @@ export default function AppConsole() {
     setMessages([]);
     setStreamingText("");
     setRecentAttachment("");
+    setArtifacts([]);
+    setArtifactDownloadBusy("");
+    setArtifactDownloadErrors({});
     setShowMobileSidebar(false);
     setError("");
     const url = new URL(window.location.href);
@@ -242,7 +264,19 @@ export default function AppConsole() {
         {
           onChunk: (text) => setStreamingText((current) => current + text),
           onError: (code) => setError(describe(new ApiError(0, code))),
-          onDone: () => {
+          onDone: (data) => {
+            const artifact = parseArtifactMetadata(data);
+            if (data.artifact !== undefined && !artifact) {
+              setError(describe(new ApiError(0, "ARTIFACT_METADATA_INVALID")));
+            }
+            if (artifact) {
+              setArtifacts((current) => [
+                ...current.filter(
+                  (item) => item.artifact_id !== artifact.artifact_id,
+                ),
+                artifact,
+              ]);
+            }
             setStreamingText("");
             void refreshMessages();
           },
@@ -255,6 +289,26 @@ export default function AppConsole() {
       abortRef.current = null;
       setSending(false);
       setStreamingText("");
+    }
+  }
+
+  async function handleArtifactDownload(artifact: ArtifactMetadata) {
+    if (!requireAuthenticated()) return;
+    setArtifactDownloadBusy(artifact.artifact_id);
+    setArtifactDownloadErrors((current) => ({
+      ...current,
+      [artifact.artifact_id]: "",
+    }));
+    try {
+      await downloadArtifact(artifact);
+      setNotice(`Download iniciado: ${artifact.filename}`);
+    } catch (err) {
+      setArtifactDownloadErrors((current) => ({
+        ...current,
+        [artifact.artifact_id]: describe(err),
+      }));
+    } finally {
+      setArtifactDownloadBusy("");
     }
   }
 
@@ -556,6 +610,24 @@ export default function AppConsole() {
             </article>
           ) : null}
         </section>
+
+        {artifacts.length > 0 ? (
+          <section
+            className="artifact-delivery"
+            aria-label="Arquivos gerados nesta sessão"
+            aria-live="polite"
+          >
+            {artifacts.map((artifact) => (
+              <ArtifactCard
+                key={artifact.artifact_id}
+                artifact={artifact}
+                busy={artifactDownloadBusy === artifact.artifact_id}
+                error={artifactDownloadErrors[artifact.artifact_id] || ""}
+                onDownload={(item) => void handleArtifactDownload(item)}
+              />
+            ))}
+          </section>
+        ) : null}
 
         <footer className="composer">
           <div className="composer__status" aria-live="polite">

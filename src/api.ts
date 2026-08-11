@@ -229,6 +229,125 @@ export function uploadAttachment(threadId: string, file: File) {
   );
 }
 
+export type ArtifactMetadata = {
+  artifact_id: string;
+  filename: string;
+  mime_type: string;
+  sha256: string;
+  version: number;
+  download_path: string;
+  created_at: string | null;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function validArtifactFilename(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= 255 &&
+    !value.includes("/") &&
+    !value.includes("\\") &&
+    !value.includes("\0")
+  );
+}
+
+function canonicalArtifactDownloadPath(artifactId: string): string {
+  return `/api/v2/artifacts/${artifactId}/download`;
+}
+
+/**
+ * Converte apenas metadata de artefato entregue pelo evento terminal `done`.
+ * Texto do LLM nunca é usado como fonte de verdade para ArtifactCard.
+ *
+ * O backend atual emite `artifact.id`; `artifact_id` também é aceito como
+ * compatibilidade explícita de contrato, mas o caminho precisa corresponder ao ID.
+ */
+export function parseArtifactMetadata(
+  donePayload: Record<string, unknown>,
+): ArtifactMetadata | null {
+  if (donePayload.status !== "completed") return null;
+  const raw = donePayload.artifact;
+  if (!isRecord(raw)) return null;
+
+  const rawId = raw.artifact_id ?? raw.id;
+  if (typeof rawId !== "string" || !/^[A-Za-z0-9._:-]{1,160}$/.test(rawId))
+    return null;
+  if (!validArtifactFilename(raw.filename)) return null;
+  if (
+    typeof raw.mime_type !== "string" ||
+    !/^[A-Za-z0-9][A-Za-z0-9!#$&^_.+/-]{0,199}$/.test(raw.mime_type)
+  )
+    return null;
+  if (typeof raw.sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(raw.sha256))
+    return null;
+  if (
+    typeof raw.version !== "number" ||
+    !Number.isSafeInteger(raw.version) ||
+    raw.version < 1
+  )
+    return null;
+  if (
+    typeof raw.download_path !== "string" ||
+    raw.download_path !== canonicalArtifactDownloadPath(rawId)
+  )
+    return null;
+  if (
+    raw.created_at !== null &&
+    raw.created_at !== undefined &&
+    typeof raw.created_at !== "string"
+  )
+    return null;
+
+  return {
+    artifact_id: rawId,
+    filename: raw.filename,
+    mime_type: raw.mime_type,
+    sha256: raw.sha256.toLowerCase(),
+    version: raw.version,
+    download_path: raw.download_path,
+    created_at: typeof raw.created_at === "string" ? raw.created_at : null,
+  };
+}
+
+/**
+ * Download autenticado: token somente no cabeçalho Authorization.
+ * O caminho vem de metadata terminal validada e nunca aceita URL externa.
+ */
+export async function downloadArtifact(artifact: ArtifactMetadata): Promise<void> {
+  ensureConfigured();
+  if (
+    artifact.download_path !==
+    canonicalArtifactDownloadPath(artifact.artifact_id)
+  )
+    throw new ApiError(0, "ARTIFACT_DOWNLOAD_PATH_INVALID");
+
+  const headers = authHeaders({ Accept: artifact.mime_type });
+  const response = await fetch(`${BASE}${artifact.download_path}`, {
+    method: "GET",
+    headers,
+    cache: "no-store",
+  });
+  if (!response.ok) throw await readError(response);
+
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  try {
+    anchor.href = objectUrl;
+    anchor.download = artifact.filename;
+    anchor.rel = "noopener";
+    anchor.hidden = true;
+    document.body.appendChild(anchor);
+    anchor.click();
+  } finally {
+    anchor.remove();
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export function technicalAgentTarget(agentId: string): string {
   const normalized = agentId.trim();
   if (!normalized) throw new Error("AGENT_ID_REQUIRED");
