@@ -20,10 +20,12 @@ test("selected agent is sent through the explicit technical namespace", () => {
   assert.doesNotMatch(consoleSource, /selectedAgent\?\.slug \|\| AGENT/);
 });
 
-test("team mode is visible but fail-closed until backend contract exists", () => {
-  assert.match(consoleSource, /Team · em breve/);
-  assert.match(consoleSource, /Modo Team depende do contrato backend governado/);
-  assert.match(consoleSource, /disabled/);
+test("team mode is wired to the governed backend contract", () => {
+  assert.doesNotMatch(consoleSource, /Team · em breve/);
+  assert.match(consoleSource, /type ExecutionMode = "individual" \| "team"/);
+  assert.match(consoleSource, /await listTeams\(\)/);
+  assert.match(consoleSource, /streamTeamMessage\(/);
+  assert.match(consoleSource, /orchestrator_agent_id: teamDefinition\.orchestrator_agent_id/);
 });
 
 test("participant invite remains a separate capability", () => {

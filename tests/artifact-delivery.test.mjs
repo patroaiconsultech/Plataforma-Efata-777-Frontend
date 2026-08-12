@@ -17,7 +17,7 @@ test("artifact metadata is accepted only from terminal done payload", () => {
   assert.match(api, /parseArtifactMetadata\(\s*donePayload/);
   assert.match(api, /donePayload\.status !== "completed"/);
   assert.match(api, /const raw = donePayload\.artifact/);
-  assert.match(consoleSource, /onDone: \(data\) =>/);
+  assert.match(consoleSource, /onDone: \(data: Record<string, unknown>\) =>/);
   assert.match(consoleSource, /parseArtifactMetadata\(data\)/);
 });
 
@@ -92,9 +92,10 @@ test("chronology and attachment UX remain present", () => {
   assert.match(consoleSource, /recentAttachment/);
 });
 
-test("Team remains fail-closed while Voice Message uses governed STT review flow", () => {
-  assert.match(consoleSource, /Team · em breve/);
-  assert.match(consoleSource, /Modo Team depende do contrato backend governado/);
+test("Team uses governed orchestration while Voice Message keeps reviewed STT flow", () => {
+  assert.doesNotMatch(consoleSource, /Team · em breve/);
+  assert.match(consoleSource, /streamTeamMessage\(/);
+  assert.match(consoleSource, /participant_agent_ids: teamParticipantIds/);
   assert.match(consoleSource, /handleVoiceButton/);
   assert.match(consoleSource, /Transcrição pronta — revise e envie/);
   assert.match(consoleSource, /transcribeVoice/);

@@ -12,11 +12,16 @@ import {
   downloadArtifact,
   getToken,
   isApiBaseConfigured,
+  getRealtimeCapabilities,
   listAgents,
   listMessages,
+  listTeams,
   listThreads,
   parseArtifactMetadata,
+  RealtimeCapabilities,
   streamMessage,
+  streamTeamMessage,
+  TeamDefinition,
   technicalAgentTarget,
   transcribeVoice,
   uploadAttachment,
@@ -33,7 +38,12 @@ import {
 const AGENT = "Josué";
 
 type VoiceState = "idle" | "recording" | "transcribing" | "review";
+type ExecutionMode = "individual" | "team";
 const VOICE_MAX_RECORDING_SECONDS = 90;
+const TEAM_MIN_PARTICIPANTS = 2;
+const TEAM_MAX_PARTICIPANTS = 8;
+const ATTACHMENT_ACCEPT =
+  ".pdf,.txt,.csv,.json,.docx,.xlsx,.pptx";
 
 function formatVoiceElapsed(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
@@ -80,7 +90,19 @@ function describe(error: unknown): string {
     UPLOAD_PERMISSION_REQUIRED: "Você não tem permissão para enviar arquivos.",
     FILE_TOO_LARGE: "Arquivo acima do tamanho máximo permitido.",
     MIME_TYPE_NOT_ALLOWED: "Tipo de arquivo não permitido.",
-    REALTIME_STREAMING_DISABLED: "O tempo real está desabilitado no servidor.",
+    REALTIME_STREAMING_DISABLED: "O streaming em tempo real está desabilitado no servidor.",
+    REALTIME_VOICE_DISABLED: "A sessão Realtime de voz ainda não está habilitada.",
+    REALTIME_ORCHESTRATION_BRIDGE_REQUIRED:
+      "Realtime ainda aguarda a ponte de orquestração canônica da ORKIO.",
+    TEAM_NOT_FOUND: "O Team selecionado não está disponível.",
+    TEAM_MIN_PARTICIPANTS_REQUIRED: "Selecione pelo menos dois participantes para o Team.",
+    TEAM_MAX_PARTICIPANTS_EXCEEDED: "O Team aceita no máximo oito participantes.",
+    TEAM_ORCHESTRATOR_NOT_ALLOWED: "O coordenador do Team não corresponde ao contrato canônico.",
+    TEAM_ORCHESTRATOR_MUST_BE_PARTICIPANT: "O coordenador precisa permanecer no Team.",
+    TEAM_AGENT_NOT_ALLOWED: "Um dos agentes não pertence a este Team.",
+    TEAM_AGENT_UNAVAILABLE: "Um dos agentes selecionados não está disponível para Team.",
+    TEAM_ALL_CONTRIBUTORS_FAILED: "Os especialistas do Team não conseguiram concluir a análise.",
+    TEAM_SYNTHESIS_FAILED: "A consolidação final do Team falhou.",
     STT_DISABLED: "A transcrição de voz está desabilitada no servidor.",
     STT_AUDIO_TYPE_NOT_ALLOWED: "Este formato de áudio não é suportado.",
     STT_FILE_TOO_LARGE: "A gravação de voz excede o limite permitido.",
@@ -126,6 +148,17 @@ export default function AppConsole() {
   const [showAgents, setShowAgents] = useState(false);
   const [agentsBusy, setAgentsBusy] = useState(false);
   const [agentsError, setAgentsError] = useState("");
+  const [executionMode, setExecutionMode] = useState<ExecutionMode>("individual");
+  const [teams, setTeams] = useState<TeamDefinition[]>([]);
+  const [teamsBusy, setTeamsBusy] = useState(false);
+  const [teamsError, setTeamsError] = useState("");
+  const [selectedTeamId, setSelectedTeamId] = useState("general_team");
+  const [teamParticipants, setTeamParticipants] = useState<string[]>([]);
+  const [teamRunStatus, setTeamRunStatus] = useState("");
+  const [realtimeCapabilities, setRealtimeCapabilities] =
+    useState<RealtimeCapabilities | null>(null);
+  const [realtimeBusy, setRealtimeBusy] = useState(false);
+  const [showRealtimeInfo, setShowRealtimeInfo] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [recentAttachment, setRecentAttachment] = useState("");
@@ -219,9 +252,71 @@ export default function AppConsole() {
     }
   }, [authenticated, configured]);
 
+  const refreshTeams = useCallback(async () => {
+    if (!configured || !authenticated) return;
+    setTeamsBusy(true);
+    setTeamsError("");
+    try {
+      const catalog = (await listTeams()).filter((team) => team.enabled);
+      setTeams(catalog);
+      const preferred =
+        catalog.find((team) => team.team_id === selectedTeamId) ??
+        catalog.find((team) => team.team_id === "general_team") ??
+        catalog[0] ??
+        null;
+      if (!preferred) {
+        setTeamParticipants([]);
+        return;
+      }
+      setSelectedTeamId(preferred.team_id);
+      setTeamParticipants((current) => {
+        const allowed = new Set([
+          preferred.orchestrator_agent_id,
+          ...preferred.candidate_agent_ids,
+        ]);
+        const kept = current.filter((id) => allowed.has(id));
+        if (!kept.includes(preferred.orchestrator_agent_id)) {
+          kept.unshift(preferred.orchestrator_agent_id);
+        }
+        if (kept.length < TEAM_MIN_PARTICIPANTS) {
+          const fallback = preferred.candidate_agent_ids.find(
+            (id) => id !== preferred.orchestrator_agent_id && !kept.includes(id),
+          );
+          if (fallback) kept.push(fallback);
+        }
+        return kept.slice(0, TEAM_MAX_PARTICIPANTS);
+      });
+    } catch (err) {
+      setTeams([]);
+      setTeamsError(describe(err));
+    } finally {
+      setTeamsBusy(false);
+    }
+  }, [authenticated, configured, selectedTeamId]);
+
+  const refreshRealtimeCapabilities = useCallback(async () => {
+    if (!configured || !authenticated) return;
+    setRealtimeBusy(true);
+    try {
+      setRealtimeCapabilities(await getRealtimeCapabilities());
+    } catch {
+      setRealtimeCapabilities(null);
+    } finally {
+      setRealtimeBusy(false);
+    }
+  }, [authenticated, configured]);
+
   useEffect(() => {
     void refreshAgents();
   }, [refreshAgents]);
+
+  useEffect(() => {
+    void refreshTeams();
+  }, [refreshTeams]);
+
+  useEffect(() => {
+    void refreshRealtimeCapabilities();
+  }, [refreshRealtimeCapabilities]);
 
   useEffect(() => {
     void refreshThreads();
@@ -513,6 +608,24 @@ export default function AppConsole() {
       return;
     }
 
+    let teamDefinition: TeamDefinition | null = null;
+    let teamParticipantIds: string[] = [];
+    if (executionMode === "team") {
+      teamDefinition =
+        teams.find((team) => team.team_id === selectedTeamId) ?? null;
+      if (!teamDefinition) {
+        setError("Nenhum Team governado está disponível.");
+        return;
+      }
+      teamParticipantIds = Array.from(
+        new Set([teamDefinition.orchestrator_agent_id, ...teamParticipants]),
+      ).slice(0, TEAM_MAX_PARTICIPANTS);
+      if (teamParticipantIds.length < TEAM_MIN_PARTICIPANTS) {
+        setError(describe(new ApiError(0, "TEAM_MIN_PARTICIPANTS_REQUIRED")));
+        return;
+      }
+    }
+
     setError("");
     setNotice("");
     setSending(true);
@@ -535,37 +648,79 @@ export default function AppConsole() {
     abortRef.current = controller;
 
     try {
-      await streamMessage(
-        threadId,
-        content,
-        selectedAgent ? technicalAgentTarget(selectedAgent.slug) : "Josué",
-        {
-          onChunk: (text) => setStreamingText((current) => current + text),
-          onError: (code) => setError(describe(new ApiError(0, code))),
-          onDone: (data) => {
-            const artifact = parseArtifactMetadata(data);
-            if (data.artifact !== undefined && !artifact) {
-              setError(describe(new ApiError(0, "ARTIFACT_METADATA_INVALID")));
-            }
-            if (artifact) {
-              setArtifacts((current) => [
-                ...current.filter(
-                  (item) => item.artifact_id !== artifact.artifact_id,
-                ),
-                artifact,
-              ]);
-            }
-            setStreamingText("");
-            void refreshMessages();
-          },
+      const commonHandlers = {
+        onChunk: (text: string) =>
+          setStreamingText((current) => current + text),
+        onError: (code: string) =>
+          setError(describe(new ApiError(0, code))),
+        onDone: (data: Record<string, unknown>) => {
+          const artifact = parseArtifactMetadata(data);
+          if (data.artifact !== undefined && !artifact) {
+            setError(describe(new ApiError(0, "ARTIFACT_METADATA_INVALID")));
+          }
+          if (artifact) {
+            setArtifacts((current) => [
+              ...current.filter(
+                (item) => item.artifact_id !== artifact.artifact_id,
+              ),
+              artifact,
+            ]);
+          }
+          setTeamRunStatus("");
+          setStreamingText("");
+          void refreshMessages();
         },
-        controller.signal,
-      );
+      };
+
+      if (executionMode === "team" && teamDefinition) {
+        setTeamRunStatus("Team iniciando…");
+        await streamTeamMessage(
+          threadId,
+          content,
+          {
+            team_id: teamDefinition.team_id,
+            orchestrator_agent_id: teamDefinition.orchestrator_agent_id,
+            participant_agent_ids: teamParticipantIds,
+          },
+          {
+            ...commonHandlers,
+            onStatus: (data) => {
+              const status = String(data.status ?? "");
+              if (status === "team_synthesizing") {
+                setTeamRunStatus("ORKIO consolidando as contribuições…");
+              } else if (status === "team_started") {
+                setTeamRunStatus("Team em colaboração…");
+              }
+            },
+            onAgentStarted: (data) =>
+              setTeamRunStatus(`${String(data.agent_name ?? data.agent_id ?? "Especialista")} analisando…`),
+            onAgentDone: (data) => {
+              const name = String(data.agent_name ?? data.agent_id ?? "Especialista");
+              const status = String(data.status ?? "");
+              setTeamRunStatus(
+                status === "completed"
+                  ? `${name} concluiu.`
+                  : `${name} não concluiu; o Team seguirá com as demais contribuições.`,
+              );
+            },
+          },
+          controller.signal,
+        );
+      } else {
+        await streamMessage(
+          threadId,
+          content,
+          selectedAgent ? technicalAgentTarget(selectedAgent.slug) : "Josué",
+          commonHandlers,
+          controller.signal,
+        );
+      }
     } catch (err) {
       setError(describe(err));
     } finally {
       abortRef.current = null;
       setSending(false);
+      setTeamRunStatus("");
       setStreamingText("");
     }
   }
@@ -600,7 +755,7 @@ export default function AppConsole() {
       return;
     }
     setError("");
-    setNotice("");
+    setNotice(`Preparando anexo: ${file.name}`);
     setUploading(true);
     try {
       const uploaded = await uploadAttachment(threadId, file);
@@ -651,6 +806,56 @@ export default function AppConsole() {
     selectedAgent?.role_label ||
     "Agente selecionado";
   const selectedAgentInitial = selectedAgentName.slice(0, 1).toUpperCase();
+  const activeTeam = teams.find((team) => team.team_id === selectedTeamId) ?? null;
+  const executionTargetName =
+    executionMode === "team"
+      ? activeTeam?.display_name || "Team"
+      : selectedAgentName;
+  const executionTargetRole =
+    executionMode === "team"
+      ? `${teamParticipants.length} participantes · ORKIO coordena`
+      : selectedAgentRole;
+  const realtimeReason =
+    realtimeCapabilities?.orchestration_bridge?.reason_code ||
+    realtimeCapabilities?.realtime_session?.reason_code ||
+    realtimeCapabilities?.streaming?.reason_code ||
+    "REALTIME_CAPABILITY_NOT_PROVEN";
+  const realtimeReady = Boolean(
+    realtimeCapabilities?.realtime_session?.eligible &&
+      realtimeCapabilities?.orchestration_bridge?.eligible,
+  );
+
+  function selectTeamDefinition(teamId: string) {
+    const definition = teams.find((team) => team.team_id === teamId);
+    if (!definition) return;
+    setSelectedTeamId(teamId);
+    const next = [definition.orchestrator_agent_id];
+    const preferred =
+      selectedAgent &&
+      definition.candidate_agent_ids.includes(selectedAgent.slug)
+        ? selectedAgent.slug
+        : definition.candidate_agent_ids[0];
+    if (preferred && !next.includes(preferred)) next.push(preferred);
+    setTeamParticipants(next);
+  }
+
+  function toggleTeamParticipant(agentId: string) {
+    const definition = activeTeam;
+    if (!definition) return;
+    if (agentId === definition.orchestrator_agent_id) return;
+    if (!definition.candidate_agent_ids.includes(agentId)) return;
+    setTeamParticipants((current) => {
+      if (current.includes(agentId)) {
+        if (current.length <= TEAM_MIN_PARTICIPANTS) return current;
+        return current.filter((id) => id !== agentId);
+      }
+      if (current.length >= TEAM_MAX_PARTICIPANTS) {
+        setNotice(`O Team aceita no máximo ${TEAM_MAX_PARTICIPANTS} participantes.`);
+        return current;
+      }
+      return [...current, agentId];
+    });
+  }
 
   return (
     <div className="console-shell">
@@ -765,6 +970,32 @@ export default function AppConsole() {
               <span className="active-agent-chip__copy">
                 <strong>{selectedAgentName}</strong>
                 <small>{selectedAgentRole}</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              className={
+                realtimeReady
+                  ? "capability-chip capability-chip--ready"
+                  : "capability-chip capability-chip--pending"
+              }
+              onClick={() => {
+                setShowRealtimeInfo(true);
+                void refreshRealtimeCapabilities();
+              }}
+              aria-haspopup="dialog"
+              title="Ver status do Realtime"
+            >
+              <span className="capability-chip__dot" aria-hidden="true" />
+              <span>
+                <strong>Realtime</strong>
+                <small>
+                  {realtimeBusy
+                    ? "Verificando…"
+                    : realtimeReady
+                      ? "Elegível"
+                      : "Em preparação"}
+                </small>
               </span>
             </button>
             <Link className="ghost-link" to="/">
@@ -911,7 +1142,7 @@ export default function AppConsole() {
           <div className="composer__status" aria-live="polite">
             <span>
               {sending
-                ? `Gerando resposta com ${selectedAgentName}…`
+                ? teamRunStatus || `Gerando resposta com ${executionTargetName}…`
                 : voiceState === "recording"
                   ? `Gravando ${formatVoiceElapsed(voiceElapsed)} · máx. ${formatVoiceElapsed(VOICE_MAX_RECORDING_SECONDS)}`
                   : voiceState === "transcribing"
@@ -925,18 +1156,31 @@ export default function AppConsole() {
                           : "Enter para enviar · Shift+Enter para nova linha"}
             </span>
             <span className="composer__agent">
-              {selectedAgentName} · {selectedAgentRole}
+              {executionTargetName} · {executionTargetRole}
             </span>
           </div>
           <div className="composer__row">
-          <label className="icon-button" aria-label="Anexar arquivo">
-            <span aria-hidden="true">📎</span>
+          <label
+            className={
+              !authenticated || !threadId || sending || uploading
+                ? "attachment-button attachment-button--disabled"
+                : "attachment-button"
+            }
+            aria-label="Anexar documento"
+            aria-disabled={!authenticated || !threadId || sending || uploading}
+            title="Anexar PDF, DOCX, XLSX, PPTX, TXT, CSV ou JSON"
+          >
+            <span className="attachment-button__icon" aria-hidden="true">📎</span>
+            <span className="attachment-button__label">
+              {uploading ? "Enviando…" : "Anexar"}
+            </span>
             <input
               type="file"
               hidden
               ref={fileRef}
+              accept={ATTACHMENT_ACCEPT}
               onChange={handleFile}
-              disabled={!authenticated || sending || uploading}
+              disabled={!authenticated || !threadId || sending || uploading}
             />
           </label>
           <button
@@ -1051,17 +1295,62 @@ export default function AppConsole() {
             </div>
 
             <div className="agent-mode" aria-label="Modo de execução">
-              <button type="button" className="agent-mode__active" aria-pressed="true">
+              <button
+                type="button"
+                className={executionMode === "individual" ? "agent-mode__active" : ""}
+                aria-pressed={executionMode === "individual"}
+                onClick={() => setExecutionMode("individual")}
+              >
                 Individual
               </button>
               <button
                 type="button"
-                disabled
-                title="Modo Team depende do contrato backend governado."
+                className={executionMode === "team" ? "agent-mode__active" : ""}
+                aria-pressed={executionMode === "team"}
+                onClick={() => setExecutionMode("team")}
+                disabled={teamsBusy || teams.length === 0}
+                title={
+                  teams.length
+                    ? "Usar orquestração Team governada"
+                    : "Nenhum Team disponível no backend"
+                }
               >
-                Team · em breve
+                Team
               </button>
             </div>
+
+            {executionMode === "team" ? (
+              <div className="team-config" aria-label="Configuração do Team">
+                <div className="team-config__heading">
+                  <div>
+                    <strong>Team governado</strong>
+                    <small>
+                      ORKIO coordena · selecione de {TEAM_MIN_PARTICIPANTS} a {TEAM_MAX_PARTICIPANTS} participantes
+                    </small>
+                  </div>
+                  <span className="team-config__count">
+                    {teamParticipants.length}/{TEAM_MAX_PARTICIPANTS}
+                  </span>
+                </div>
+                {teamsBusy ? <p role="status">Carregando Teams…</p> : null}
+                {teamsError ? <p className="console-alert" role="alert">{teamsError}</p> : null}
+                {teams.length ? (
+                  <label className="team-config__select">
+                    Formação
+                    <select
+                      value={selectedTeamId}
+                      onChange={(event) => selectTeamDefinition(event.target.value)}
+                    >
+                      {teams.map((team) => (
+                        <option key={team.team_id} value={team.team_id}>
+                          {team.display_name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+              </div>
+            ) : null}
 
             {agentsBusy ? <p role="status">Carregando Agent Registry…</p> : null}
             {agentsError ? (
@@ -1077,37 +1366,146 @@ export default function AppConsole() {
             ) : null}
 
             <div className="agent-grid" role="list" aria-label="Agentes disponíveis">
-              {agents.map((agent) => {
-                const active = selectedAgent?.slug === agent.slug;
-                return (
-                  <button
-                    type="button"
-                    role="listitem"
-                    key={agent.slug}
-                    className={active ? "agent-card agent-card--active" : "agent-card"}
-                    aria-pressed={active}
-                    onClick={() => {
-                      setSelectedAgent(agent);
-                      setShowAgents(false);
-                      setNotice(`Agente selecionado: ${agent.display_name}`);
-                    }}
-                  >
-                    <span className="agent-card__avatar" aria-hidden="true">
-                      {agent.display_name.slice(0, 1).toUpperCase()}
-                    </span>
-                    <span>
-                      <strong>{agent.display_name}</strong>
-                      <small>{agent.target_kind === "agent" ? "Agente especializado" : agent.target_kind}</small>
-                    </span>
-                    <span className="agent-card__status">{active ? "Ativo" : "Disponível"}</span>
-                  </button>
-                );
-              })}
+              {agents
+                .filter((agent) => {
+                  if (executionMode !== "team" || !activeTeam) return true;
+                  return (
+                    agent.slug === activeTeam.orchestrator_agent_id ||
+                    activeTeam.candidate_agent_ids.includes(agent.slug)
+                  );
+                })
+                .map((agent) => {
+                  const individualActive = selectedAgent?.slug === agent.slug;
+                  const teamActive = teamParticipants.includes(agent.slug);
+                  const orchestrator =
+                    executionMode === "team" &&
+                    activeTeam?.orchestrator_agent_id === agent.slug;
+                  const active =
+                    executionMode === "team" ? teamActive : individualActive;
+                  return (
+                    <button
+                      type="button"
+                      role="listitem"
+                      key={agent.slug}
+                      className={active ? "agent-card agent-card--active" : "agent-card"}
+                      aria-pressed={active}
+                      onClick={() => {
+                        if (executionMode === "team") {
+                          toggleTeamParticipant(agent.slug);
+                          return;
+                        }
+                        setSelectedAgent(agent);
+                        setShowAgents(false);
+                        setNotice(`Agente selecionado: ${agent.display_name}`);
+                      }}
+                    >
+                      <span className="agent-card__avatar" aria-hidden="true">
+                        {agent.display_name.slice(0, 1).toUpperCase()}
+                      </span>
+                      <span>
+                        <strong>{agent.display_name}</strong>
+                        <small>
+                          {orchestrator
+                            ? "Orquestrador canônico"
+                            : agent.target_kind === "agent"
+                              ? "Agente especializado"
+                              : agent.target_kind}
+                        </small>
+                      </span>
+                      <span className="agent-card__status">
+                        {orchestrator
+                          ? "Fixo"
+                          : active
+                            ? executionMode === "team"
+                              ? "No Team"
+                              : "Ativo"
+                            : "Disponível"}
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
 
             <p className="agent-picker__governance">
-              O executor real é resolvido pelo backend. A interface não substitui a identidade de execução.
+              {executionMode === "team"
+                ? "O coordenador do Team vem do contrato do backend; o navegador seleciona apenas participantes permitidos."
+                : "O executor real é resolvido pelo backend. A interface não substitui a identidade de execução."}
             </p>
+          </section>
+        </div>
+      ) : null}
+      {showRealtimeInfo ? (
+        <div className="modal" role="presentation">
+          <section
+            className="modal-card realtime-status-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="realtime-status-title"
+          >
+            <div className="agent-picker__heading">
+              <div>
+                <span className="console-header__eyebrow">Capability status</span>
+                <h2 id="realtime-status-title">Realtime</h2>
+                <p>
+                  O controle é informativo até a ponte canônica de orquestração estar validada.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRealtimeInfo(false)}
+                aria-label="Fechar status do Realtime"
+              >
+                ×
+              </button>
+            </div>
+            <div className="realtime-status">
+              <div>
+                <span>Sessão WebRTC</span>
+                <strong>
+                  {realtimeCapabilities?.realtime_session?.eligible
+                    ? "Elegível"
+                    : "Não liberada"}
+                </strong>
+              </div>
+              <div>
+                <span>Ponte ORKIO</span>
+                <strong>
+                  {realtimeCapabilities?.orchestration_bridge?.eligible
+                    ? "Elegível"
+                    : "Pendente"}
+                </strong>
+              </div>
+              <div>
+                <span>Estado</span>
+                <strong>{realtimeReady ? "Pronto para integração" : "Em preparação"}</strong>
+              </div>
+            </div>
+            {!realtimeReady ? (
+              <p className="realtime-status__reason">
+                {describe(new ApiError(0, realtimeReason))}
+              </p>
+            ) : null}
+            <p className="agent-picker__governance">
+              Voice Message (gravar → transcrever → revisar → enviar) permanece separado do
+              Realtime full-duplex. Nenhum botão inicia uma sessão que o backend ainda não
+              declarou elegível.
+            </p>
+            <div className="modal-card__actions">
+              <button
+                type="button"
+                onClick={() => void refreshRealtimeCapabilities()}
+                disabled={realtimeBusy}
+              >
+                {realtimeBusy ? "Verificando…" : "Atualizar status"}
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => setShowRealtimeInfo(false)}
+              >
+                Entendi
+              </button>
+            </div>
           </section>
         </div>
       ) : null}

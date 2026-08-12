@@ -1601,3 +1601,148 @@ button.header-cta {
   cursor: not-allowed;
   opacity: 0.55;
 }
+
+
+/* Premium Console capabilities — Team / Realtime / Attach */
+.capability-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 42px;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(11, 15, 20, 0.72);
+  color: inherit;
+  cursor: pointer;
+}
+.capability-chip > span:last-child {
+  display: grid;
+  text-align: left;
+  line-height: 1.1;
+}
+.capability-chip small {
+  margin-top: 0.18rem;
+  opacity: 0.65;
+}
+.capability-chip__dot {
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 999px;
+  background: #f6c453;
+  box-shadow: 0 0 16px rgba(246, 196, 83, 0.45);
+}
+.capability-chip--ready .capability-chip__dot {
+  background: #37c5ff;
+  box-shadow: 0 0 16px rgba(55, 197, 255, 0.55);
+}
+
+.attachment-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 42px;
+  padding: 0.5rem 0.72rem;
+  border: 1px solid rgba(55, 197, 255, 0.24);
+  border-radius: 14px;
+  background: rgba(55, 197, 255, 0.07);
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+.attachment-button:hover {
+  border-color: rgba(55, 197, 255, 0.5);
+  background: rgba(55, 197, 255, 0.12);
+  transform: translateY(-1px);
+}
+.attachment-button--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.attachment-button__label {
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.team-config {
+  display: grid;
+  gap: 0.8rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(55, 197, 255, 0.18);
+  border-radius: 16px;
+  background: rgba(55, 197, 255, 0.055);
+}
+.team-config__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.team-config__heading > div {
+  display: grid;
+  gap: 0.2rem;
+}
+.team-config__heading small {
+  opacity: 0.65;
+}
+.team-config__count {
+  min-width: 48px;
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(246, 196, 83, 0.12);
+  color: #f6c453;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.team-config__select {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+}
+.team-config__select select {
+  width: 100%;
+  padding: 0.62rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: #0b0f14;
+  color: inherit;
+}
+
+.realtime-status-card {
+  max-width: 560px;
+}
+.realtime-status {
+  display: grid;
+  gap: 0.55rem;
+}
+.realtime-status > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.realtime-status__reason {
+  padding: 0.72rem 0.8rem;
+  border-left: 2px solid #f6c453;
+  background: rgba(246, 196, 83, 0.07);
+  color: rgba(245, 247, 250, 0.8);
+}
+
+@media (max-width: 760px) {
+  .attachment-button__label,
+  .capability-chip small {
+    display: none;
+  }
+  .attachment-button,
+  .capability-chip {
+    min-width: 42px;
+    padding-inline: 0.55rem;
+  }
+}

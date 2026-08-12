@@ -160,11 +160,57 @@ export type AgentDefinition = {
     ready?: boolean;
     state?: string;
     reason?: string | null;
+    chat?: CapabilityAvailability;
+    team?: CapabilityAvailability;
+    realtime?: CapabilityAvailability;
+    voice_playback?: CapabilityAvailability;
+    voice_message?: CapabilityAvailability;
+    tools?: CapabilityAvailability;
   };
+};
+
+export type CapabilityAvailability = {
+  status?: string;
+  eligible?: boolean;
+  reason_code?: string;
+  source?: string;
 };
 
 export function listAgents(): Promise<AgentDefinition[]> {
   return apiJson<AgentDefinition[]>("/api/v2/agents");
+}
+
+export type TeamDefinition = {
+  team_id: string;
+  display_name: string;
+  orchestrator_agent_id: string;
+  candidate_agent_ids: string[];
+  max_delegation_depth: number;
+  enabled: boolean;
+};
+
+export function listTeams(): Promise<TeamDefinition[]> {
+  return apiJson<TeamDefinition[]>("/api/v2/teams");
+}
+
+export type RealtimeCapabilityItem = {
+  status?: string;
+  eligible?: boolean;
+  reason_code?: string;
+};
+
+export type RealtimeCapabilities = {
+  streaming?: RealtimeCapabilityItem;
+  realtime_session?: RealtimeCapabilityItem;
+  voice_input?: RealtimeCapabilityItem;
+  agent_voice_binding?: RealtimeCapabilityItem;
+  interruption?: RealtimeCapabilityItem;
+  turn_detection?: RealtimeCapabilityItem;
+  orchestration_bridge?: RealtimeCapabilityItem;
+};
+
+export function getRealtimeCapabilities(): Promise<RealtimeCapabilities> {
+  return apiJson<RealtimeCapabilities>("/api/v2/realtime/capabilities");
 }
 
 export type Thread = {
@@ -392,6 +438,9 @@ export function technicalAgentTarget(agentId: string): string {
 export type StreamHandlers = {
   onStatus?: (data: Record<string, unknown>) => void;
   onChunk?: (text: string) => void;
+  onAgentStarted?: (data: Record<string, unknown>) => void;
+  onAgentChunk?: (data: Record<string, unknown>) => void;
+  onAgentDone?: (data: Record<string, unknown>) => void;
   onError?: (code: string) => void;
   onDone?: (data: Record<string, unknown>) => void;
 };
@@ -467,6 +516,107 @@ export async function streamMessage(
         }
         if (event === "status") handlers.onStatus?.(payload);
         else if (event === "chunk") handlers.onChunk?.(String(payload.text ?? ""));
+        else if (event === "agent_started") handlers.onAgentStarted?.(payload);
+        else if (event === "agent_chunk") handlers.onAgentChunk?.(payload);
+        else if (event === "agent_done") handlers.onAgentDone?.(payload);
+        else if (event === "error")
+          handlers.onError?.(String(payload.code ?? "STREAM_ERROR"));
+        else if (event === "done") finish(payload);
+      }
+    }
+    finish({ status: "closed" });
+  } catch (error) {
+    if ((error as Error)?.name === "AbortError") {
+      finish({ status: "aborted" });
+      return;
+    }
+    handlers.onError?.(
+      error instanceof ApiError ? error.code : "NETWORK_ERROR",
+    );
+    finish({ status: "failed" });
+  } finally {
+    finish({ status: "closed" });
+  }
+}
+
+
+export type TeamStreamRequest = {
+  team_id: string;
+  orchestrator_agent_id: string;
+  participant_agent_ids: string[];
+};
+
+export async function streamTeamMessage(
+  threadId: string,
+  content: string,
+  team: TeamStreamRequest,
+  handlers: StreamHandlers = {},
+  signal?: AbortSignal,
+): Promise<void> {
+  let terminated = false;
+  const finish = (data: Record<string, unknown>) => {
+    if (terminated) return;
+    terminated = true;
+    handlers.onDone?.(data);
+  };
+
+  try {
+    ensureConfigured();
+    const headers = authHeaders();
+    headers.set("Content-Type", "application/json");
+    headers.set("Accept", "text/event-stream");
+    const response = await fetch(
+      `${BASE}/api/v2/threads/${encodeURIComponent(threadId)}/team/stream`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ content, ...team }),
+        signal,
+      },
+    );
+    if (!response.ok) {
+      const error = await readError(response);
+      handlers.onError?.(error.code);
+      finish({ status: "failed" });
+      return;
+    }
+    if (!response.body) {
+      handlers.onError?.("STREAM_BODY_UNAVAILABLE");
+      finish({ status: "failed" });
+      return;
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let separator = buffer.indexOf("\n\n");
+      while (separator !== -1) {
+        const block = buffer.slice(0, separator);
+        buffer = buffer.slice(separator + 2);
+        separator = buffer.indexOf("\n\n");
+        let event = "message";
+        const dataLines: string[] = [];
+        for (const line of block.split("\n")) {
+          if (line.startsWith("event:")) event = line.slice(6).trim();
+          else if (line.startsWith("data:")) dataLines.push(line.slice(5).trim());
+        }
+        if (!dataLines.length) continue;
+        let payload: Record<string, unknown> = {};
+        try {
+          payload = JSON.parse(dataLines.join("\n"));
+        } catch {
+          payload = { raw: dataLines.join("\n") };
+        }
+        if (event === "status") handlers.onStatus?.(payload);
+        else if (event === "chunk") handlers.onChunk?.(String(payload.text ?? ""));
+        else if (event === "agent_started") handlers.onAgentStarted?.(payload);
+        else if (event === "agent_chunk") handlers.onAgentChunk?.(payload);
+        else if (event === "agent_done") handlers.onAgentDone?.(payload);
         else if (event === "error")
           handlers.onError?.(String(payload.code ?? "STREAM_ERROR"));
         else if (event === "done") finish(payload);
