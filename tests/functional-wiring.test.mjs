@@ -108,9 +108,13 @@ test("thread list is rendered and selectable", () => {
   assert.match(console_, /onClick=\{\(\) => selectThread\(thread\.id\)\}/);
 });
 
-test("voice button explains why it is disabled", () => {
-  assert.match(console_, /title="Voz ainda não habilitada"/);
-  assert.match(console_, /aria-label="Voz"/);
+test("voice button records, transcribes and requires review before send", () => {
+  assert.match(console_, /navigator\.mediaDevices\.getUserMedia/);
+  assert.match(console_, /new MediaRecorder/);
+  assert.match(console_, /transcribeVoice\(/);
+  assert.match(console_, /setVoiceState\("review"\)/);
+  assert.match(console_, /Transcrição pronta — revise e envie/);
+  assert.match(console_, /onClick=\{handleVoiceButton\}/);
 });
 
 test("invite has error handling", () => {

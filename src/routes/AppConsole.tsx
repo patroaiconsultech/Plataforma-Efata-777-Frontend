@@ -18,6 +18,7 @@ import {
   parseArtifactMetadata,
   streamMessage,
   technicalAgentTarget,
+  transcribeVoice,
   uploadAttachment,
 } from "../api";
 import ArtifactCard from "../components/ArtifactCard";
@@ -30,6 +31,15 @@ import {
 } from "../utils/chronology";
 
 const AGENT = "Josué";
+
+type VoiceState = "idle" | "recording" | "transcribing" | "review";
+const VOICE_MAX_RECORDING_SECONDS = 90;
+
+function formatVoiceElapsed(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+}
 
 /** Traduz códigos do backend em mensagens compreensíveis. */
 function describe(error: unknown): string {
@@ -71,6 +81,18 @@ function describe(error: unknown): string {
     FILE_TOO_LARGE: "Arquivo acima do tamanho máximo permitido.",
     MIME_TYPE_NOT_ALLOWED: "Tipo de arquivo não permitido.",
     REALTIME_STREAMING_DISABLED: "O tempo real está desabilitado no servidor.",
+    STT_DISABLED: "A transcrição de voz está desabilitada no servidor.",
+    STT_AUDIO_TYPE_NOT_ALLOWED: "Este formato de áudio não é suportado.",
+    STT_FILE_TOO_LARGE: "A gravação de voz excede o limite permitido.",
+    STT_EMPTY_AUDIO: "Nenhum áudio foi capturado.",
+    STT_EMPTY_TRANSCRIPT: "Não foi possível identificar fala nesta gravação.",
+    STT_LOCALE_NOT_ALLOWED: "O idioma da gravação não é suportado.",
+    STT_DEPENDENCY_NOT_INSTALLED: "O mecanismo de transcrição ainda não está instalado.",
+    STT_MODEL_UNAVAILABLE: "O modelo de transcrição está indisponível.",
+    STT_TRANSCRIPTION_FAILED: "A transcrição de voz falhou. Tente novamente.",
+    STT_TIMEOUT: "A transcrição excedeu o tempo permitido. Tente novamente.",
+    STT_CONCURRENCY_LIMIT_REACHED: "O serviço de transcrição está ocupado. Tente novamente.",
+    STT_AUDIO_SIGNATURE_MISMATCH: "O conteúdo do áudio não corresponde ao formato informado.",
     PERSISTENCE_FAILED: "A resposta não pôde ser gravada.",
     NETWORK_ERROR: "Falha de rede. Verifique sua conexão.",
   };
@@ -112,13 +134,28 @@ export default function AppConsole() {
   const [artifactDownloadErrors, setArtifactDownloadErrors] = useState<
     Record<string, string>
   >({});
+  const [voiceState, setVoiceState] = useState<VoiceState>("idle");
+  const [voiceElapsed, setVoiceElapsed] = useState(0);
 
   const fileRef = useRef<HTMLInputElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const voiceRecorderRef = useRef<MediaRecorder | null>(null);
+  const voiceStreamRef = useRef<MediaStream | null>(null);
+  const voiceChunksRef = useRef<Blob[]>([]);
+  const voiceSessionRef = useRef(0);
+  const voiceTimerRef = useRef<number | null>(null);
+  const voiceDeadlineRef = useRef<number | null>(null);
+  const voiceAbortRef = useRef<AbortController | null>(null);
+  const activeThreadRef = useRef(threadId);
+  const voiceTranscriptOwnedRef = useRef(false);
   const configured = isApiBaseConfigured();
   const authConfigured = isOidcConfigured();
 
   const selectThread = useCallback((id: string) => {
+    if (id !== activeThreadRef.current) {
+      cancelVoiceCapture(true);
+    }
+    activeThreadRef.current = id;
     setThreadId(id);
     setMessages([]);
     setStreamingText("");
@@ -194,7 +231,32 @@ export default function AppConsole() {
     void refreshMessages();
   }, [refreshMessages]);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      voiceSessionRef.current += 1;
+      voiceAbortRef.current?.abort();
+      if (voiceTimerRef.current !== null) {
+        window.clearInterval(voiceTimerRef.current);
+        voiceTimerRef.current = null;
+      }
+      if (voiceDeadlineRef.current !== null) {
+        window.clearTimeout(voiceDeadlineRef.current);
+        voiceDeadlineRef.current = null;
+      }
+      const recorder = voiceRecorderRef.current;
+      if (recorder && recorder.state !== "inactive") {
+        recorder.ondataavailable = null;
+        recorder.onstop = null;
+        recorder.onerror = null;
+        recorder.stop();
+      }
+      voiceRecorderRef.current = null;
+      voiceStreamRef.current?.getTracks().forEach((track) => track.stop());
+      voiceStreamRef.current = null;
+      voiceChunksRef.current = [];
+    };
+  }, []);
 
   useEffect(() => {
     const handleAuthRequired = () => setAuthenticated(Boolean(getToken()));
@@ -211,6 +273,212 @@ export default function AppConsole() {
         : "A autenticação OIDC ainda não está configurada nesta implantação.",
     );
     return false;
+  }
+
+  function stopVoiceTracks() {
+    voiceStreamRef.current?.getTracks().forEach((track) => track.stop());
+    voiceStreamRef.current = null;
+  }
+
+  function clearVoiceTimer() {
+    if (voiceTimerRef.current !== null) {
+      window.clearInterval(voiceTimerRef.current);
+      voiceTimerRef.current = null;
+    }
+    if (voiceDeadlineRef.current !== null) {
+      window.clearTimeout(voiceDeadlineRef.current);
+      voiceDeadlineRef.current = null;
+    }
+  }
+
+  function cancelVoiceCapture(clearTranscript = false) {
+    const ownsComposerTranscript = voiceTranscriptOwnedRef.current;
+    voiceSessionRef.current += 1;
+    voiceAbortRef.current?.abort();
+    voiceAbortRef.current = null;
+    clearVoiceTimer();
+
+    const recorder = voiceRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      recorder.ondataavailable = null;
+      recorder.onstop = null;
+      recorder.onerror = null;
+      recorder.stop();
+    }
+    voiceRecorderRef.current = null;
+    stopVoiceTracks();
+    voiceChunksRef.current = [];
+    setVoiceState("idle");
+    setVoiceElapsed(0);
+    voiceTranscriptOwnedRef.current = false;
+    if (clearTranscript && ownsComposerTranscript) setMessage("");
+  }
+
+  async function transcribeRecordedVoice(
+    sessionId: number,
+    recordThreadId: string,
+    mimeType: string,
+  ) {
+    clearVoiceTimer();
+    stopVoiceTracks();
+    voiceRecorderRef.current = null;
+
+    if (sessionId !== voiceSessionRef.current) return;
+
+    const chunks = voiceChunksRef.current;
+    voiceChunksRef.current = [];
+    const blob = new Blob(chunks, { type: mimeType || "audio/webm" });
+    if (!blob.size) {
+      setVoiceState("idle");
+      setError(describe(new ApiError(0, "STT_EMPTY_AUDIO")));
+      return;
+    }
+
+    setVoiceState("transcribing");
+    setNotice("");
+    const controller = new AbortController();
+    voiceAbortRef.current = controller;
+    try {
+      const result = await transcribeVoice(
+        recordThreadId,
+        blob,
+        "auto",
+        controller.signal,
+      );
+      if (
+        sessionId !== voiceSessionRef.current ||
+        recordThreadId !== activeThreadRef.current
+      ) {
+        return;
+      }
+      voiceTranscriptOwnedRef.current = true;
+      setMessage(result.transcript);
+      setVoiceState("review");
+      setNotice("Transcrição pronta. Revise o texto antes de enviar.");
+    } catch (err) {
+      if (sessionId !== voiceSessionRef.current) return;
+      if (!(err instanceof DOMException && err.name === "AbortError")) {
+        setError(describe(err));
+      }
+      setVoiceState("idle");
+    } finally {
+      if (sessionId === voiceSessionRef.current) {
+        voiceAbortRef.current = null;
+      }
+    }
+  }
+
+  async function startVoiceRecording() {
+    if (!requireAuthenticated()) return;
+    if (!threadId) {
+      setError("Crie ou selecione uma conversa antes de gravar.");
+      return;
+    }
+    if (
+      typeof MediaRecorder === "undefined" ||
+      !navigator.mediaDevices?.getUserMedia
+    ) {
+      setError("Este navegador não oferece gravação de voz compatível.");
+      return;
+    }
+
+    setError("");
+    setNotice("");
+    const sessionId = voiceSessionRef.current + 1;
+    voiceSessionRef.current = sessionId;
+    const recordThreadId = threadId;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (sessionId !== voiceSessionRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+
+      const candidates = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/ogg;codecs=opus",
+        "audio/mp4",
+      ];
+      const mimeType =
+        typeof MediaRecorder.isTypeSupported === "function"
+          ? candidates.find((candidate) => MediaRecorder.isTypeSupported(candidate))
+          : undefined;
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+
+      voiceStreamRef.current = stream;
+      voiceRecorderRef.current = recorder;
+      voiceChunksRef.current = [];
+      setVoiceElapsed(0);
+
+      recorder.ondataavailable = (event) => {
+        if (sessionId === voiceSessionRef.current && event.data.size > 0) {
+          voiceChunksRef.current.push(event.data);
+        }
+      };
+      recorder.onerror = () => {
+        if (sessionId !== voiceSessionRef.current) return;
+        setError("A gravação de voz foi interrompida.");
+        cancelVoiceCapture();
+      };
+      recorder.onstop = () => {
+        void transcribeRecordedVoice(
+          sessionId,
+          recordThreadId,
+          recorder.mimeType || mimeType || "audio/webm",
+        );
+      };
+
+      recorder.start(250);
+      setVoiceState("recording");
+      voiceTimerRef.current = window.setInterval(
+        () =>
+          setVoiceElapsed((current) =>
+            Math.min(current + 1, VOICE_MAX_RECORDING_SECONDS),
+          ),
+        1000,
+      );
+      voiceDeadlineRef.current = window.setTimeout(() => {
+        if (sessionId !== voiceSessionRef.current) return;
+        const activeRecorder = voiceRecorderRef.current;
+        if (!activeRecorder || activeRecorder.state === "inactive") return;
+        setNotice(
+          `Limite de ${VOICE_MAX_RECORDING_SECONDS}s atingido. Transcrevendo…`,
+        );
+        clearVoiceTimer();
+        activeRecorder.stop();
+      }, VOICE_MAX_RECORDING_SECONDS * 1000);
+    } catch (err) {
+      cancelVoiceCapture();
+      const name =
+        err && typeof err === "object" && "name" in err
+          ? String((err as { name?: unknown }).name || "")
+          : "";
+      setError(
+        name === "NotAllowedError"
+          ? "Permissão do microfone negada."
+          : "Não foi possível iniciar o microfone.",
+      );
+    }
+  }
+
+  function stopVoiceRecording() {
+    const recorder = voiceRecorderRef.current;
+    if (!recorder || recorder.state === "inactive") return;
+    clearVoiceTimer();
+    recorder.stop();
+  }
+
+  function handleVoiceButton() {
+    if (voiceState === "recording") {
+      stopVoiceRecording();
+      return;
+    }
+    if (voiceState === "transcribing") return;
+    void startVoiceRecording();
   }
 
   async function handleNewThread() {
@@ -232,7 +500,13 @@ export default function AppConsole() {
 
   async function handleSend() {
     const content = message.trim();
-    if (!content || sending) return;
+    if (
+      !content ||
+      sending ||
+      voiceState === "recording" ||
+      voiceState === "transcribing"
+    )
+      return;
     if (!requireAuthenticated()) return;
     if (!threadId) {
       setError("Crie ou selecione uma conversa antes de enviar.");
@@ -252,6 +526,10 @@ export default function AppConsole() {
     };
     setMessages((current) => [...current, optimistic]);
     setMessage("");
+    if (voiceState === "review") {
+      voiceTranscriptOwnedRef.current = false;
+      setVoiceState("idle");
+    }
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -634,11 +912,17 @@ export default function AppConsole() {
             <span>
               {sending
                 ? `Gerando resposta com ${selectedAgentName}…`
-                : uploading
-                  ? "Enviando anexo…"
-                  : recentAttachment
-                    ? `Anexo no contexto: ${recentAttachment}`
-                    : "Enter para enviar · Shift+Enter para nova linha"}
+                : voiceState === "recording"
+                  ? `Gravando ${formatVoiceElapsed(voiceElapsed)} · máx. ${formatVoiceElapsed(VOICE_MAX_RECORDING_SECONDS)}`
+                  : voiceState === "transcribing"
+                    ? "Transcrevendo voz…"
+                    : voiceState === "review"
+                      ? "Transcrição pronta — revise e envie."
+                      : uploading
+                        ? "Enviando anexo…"
+                        : recentAttachment
+                          ? `Anexo no contexto: ${recentAttachment}`
+                          : "Enter para enviar · Shift+Enter para nova linha"}
             </span>
             <span className="composer__agent">
               {selectedAgentName} · {selectedAgentRole}
@@ -680,23 +964,64 @@ export default function AppConsole() {
             }}
             placeholder="Digite sua mensagem."
             aria-label="Mensagem"
-            disabled={sending || !authenticated}
+            disabled={
+              sending ||
+              !authenticated ||
+              voiceState === "recording" ||
+              voiceState === "transcribing"
+            }
           />
           <button
             type="button"
-            className="icon-button"
-            aria-label="Voz"
-            title="Voz ainda não habilitada"
-            disabled
+            className={
+              voiceState === "recording"
+                ? "icon-button voice-button voice-button--recording"
+                : "icon-button voice-button"
+            }
+            aria-label={
+              voiceState === "recording" ? "Parar gravação" : "Gravar voz"
+            }
+            title={
+              voiceState === "recording"
+                ? "Parar e transcrever"
+                : voiceState === "review"
+                  ? "Gravar novamente"
+                  : `Gravar mensagem de voz (máx. ${VOICE_MAX_RECORDING_SECONDS}s)`
+            }
+            onClick={handleVoiceButton}
+            disabled={
+              !authenticated ||
+              !configured ||
+              !threadId ||
+              sending ||
+              uploading ||
+              voiceState === "transcribing"
+            }
+            aria-pressed={voiceState === "recording"}
           >
-            🎙
+            {voiceState === "recording" ? "■" : "🎙"}
           </button>
+          {voiceState === "review" ? (
+            <button
+              type="button"
+              className="voice-review__discard"
+              onClick={() => cancelVoiceCapture(true)}
+              disabled={sending}
+            >
+              Descartar
+            </button>
+          ) : null}
           <button
             type="button"
             className="primary-button composer__send"
             onClick={handleSend}
             disabled={
-              sending || !message.trim() || !authenticated || !configured
+              sending ||
+              !message.trim() ||
+              !authenticated ||
+              !configured ||
+              voiceState === "recording" ||
+              voiceState === "transcribing"
             }
           >
             {sending ? "Gerando…" : "Enviar"}

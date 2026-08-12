@@ -92,11 +92,12 @@ test("chronology and attachment UX remain present", () => {
   assert.match(consoleSource, /recentAttachment/);
 });
 
-test("Team and Realtime remain fail-closed exactly as current main", () => {
+test("Team remains fail-closed while Voice Message uses governed STT review flow", () => {
   assert.match(consoleSource, /Team · em breve/);
   assert.match(consoleSource, /Modo Team depende do contrato backend governado/);
-  assert.match(consoleSource, /title="Voz ainda não habilitada"/);
-  assert.match(consoleSource, /aria-label="Voz"[\s\S]*?disabled/);
+  assert.match(consoleSource, /handleVoiceButton/);
+  assert.match(consoleSource, /Transcrição pronta — revise e envie/);
+  assert.match(consoleSource, /transcribeVoice/);
 });
 
 test("ArtifactCard has accessible busy error and download states", () => {

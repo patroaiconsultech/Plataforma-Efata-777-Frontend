@@ -6,7 +6,7 @@ test("invite and composer controls remain in the console", () => {
   const source = fs.readFileSync("src/routes/AppConsole.tsx", "utf8");
   assert.match(source, /Convidar participante/);
   assert.match(source, /type="file"/);
-  assert.match(source, /aria-label="Voz"/);
+  assert.match(source, /"Parar gravação" : "Gravar voz"/);
 });
 
 test("frontend source contains no server-side secrets", () => {

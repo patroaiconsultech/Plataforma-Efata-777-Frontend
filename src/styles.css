@@ -1582,3 +1582,22 @@ button.header-cta {
   }
 }
 
+.voice-button--recording {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08), 0 0 0 4px var(--electric);
+  animation: orkio-pulse 1.1s ease-in-out infinite;
+}
+
+.voice-review__discard {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.voice-review__discard:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

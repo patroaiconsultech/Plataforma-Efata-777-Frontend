@@ -229,6 +229,40 @@ export function uploadAttachment(threadId: string, file: File) {
   );
 }
 
+export type VoiceTranscript = {
+  transcript: string;
+  locale_requested: string;
+  language_detected: string | null;
+  language_probability: number | null;
+  engine: string;
+  model: string;
+  persisted: false;
+};
+
+export type VoiceLocale = "auto" | "pt-BR" | "en-US" | "es-419";
+
+export function transcribeVoice(
+  threadId: string,
+  audio: Blob,
+  locale: VoiceLocale = "auto",
+  signal?: AbortSignal,
+): Promise<VoiceTranscript> {
+  const form = new FormData();
+  const extension =
+    audio.type.includes("ogg") ? "ogg" :
+    audio.type.includes("wav") ? "wav" :
+    audio.type.includes("mp4") ? "m4a" :
+    audio.type.includes("mpeg") ? "mp3" :
+    "webm";
+  form.append("audio", audio, `voice-message.${extension}`);
+  form.append("locale", locale);
+  return apiForm<VoiceTranscript>(
+    `/api/v2/threads/${encodeURIComponent(threadId)}/voice/transcribe`,
+    form,
+    { signal },
+  );
+}
+
 export type ArtifactMetadata = {
   artifact_id: string;
   filename: string;
