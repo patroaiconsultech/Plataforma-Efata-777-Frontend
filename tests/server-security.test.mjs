@@ -28,3 +28,9 @@ test("server keeps SPA fallback and blocks path traversal", () => {
   assert.match(server, /file\.startsWith/);
   assert.match(server, /decodeURIComponent/);
 });
+
+
+test("server CSP allows blob audio playback without relaxing default-src", () => {
+  assert.match(server, /"media-src 'self' blob:"/);
+  assert.match(server, /"default-src 'self'"/);
+});

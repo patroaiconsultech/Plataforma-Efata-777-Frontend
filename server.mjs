@@ -50,6 +50,7 @@ function securityHeaders(response) {
       "frame-ancestors 'none'",
       "img-src 'self' data: blob:",
       "manifest-src 'self'",
+      "media-src 'self' blob:",
       "object-src 'none'",
       "script-src 'self'",
       "style-src 'self' 'unsafe-inline'",
