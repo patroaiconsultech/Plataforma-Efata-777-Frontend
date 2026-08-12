@@ -13,14 +13,19 @@ test("Team mode is no longer hardcoded as disabled/em breve", () => {
   assert.match(console_, /listTeams/);
 });
 
-test("Team request uses the governed backend team contract", () => {
+test("Team request uses the governed backend v1.1 contract", () => {
   assert.match(api, /export function listTeams/);
   assert.match(api, /export async function streamTeamMessage/);
   assert.match(api, /\/team\/stream/);
-  assert.match(console_, /orchestrator_agent_id: teamDefinition\.orchestrator_agent_id/);
-  assert.match(console_, /participant_agent_ids: teamParticipantIds/);
-  assert.match(console_, /TEAM_MIN_PARTICIPANTS/);
-  assert.match(console_, /TEAM_MAX_PARTICIPANTS/);
+  assert.match(api, /candidate_contributor_agent_ids/);
+  assert.match(api, /participant_policy/);
+  assert.match(console_, /contributor_agent_ids:/);
+  assert.match(console_, /selection_mode: teamSelectionMode/);
+  assert.match(console_, /activeTeam\?\.participant_policy\.max_contributors/);
+  assert.match(console_, /Selecionar todos/);
+  assert.doesNotMatch(console_, /TEAM_MIN_PARTICIPANTS/);
+  assert.doesNotMatch(console_, /TEAM_MAX_PARTICIPANTS/);
+  assert.doesNotMatch(console_, /orchestrator_agent_id: teamDefinition\.orchestrator_agent_id/);
 });
 
 test("Team SSE surfaces agent lifecycle and final synthesis", () => {
@@ -32,13 +37,17 @@ test("Team SSE surfaces agent lifecycle and final synthesis", () => {
   assert.match(console_, /ORKIO consolidando as contribuições/);
 });
 
-test("Realtime control is capability-aware and never fakes a session", () => {
+test("Realtime control starts only through backend-governed canonical bridge", () => {
   assert.match(api, /export function getRealtimeCapabilities/);
-  assert.match(console_, /showRealtimeInfo/);
+  assert.match(api, /createRealtimeCall/);
+  assert.match(api, /commitRealtimeTurn/);
   assert.match(console_, /orchestration_bridge/);
-  assert.match(console_, /Realtime/);
-  assert.match(console_, /Nenhum botão inicia uma sessão que o backend ainda não/);
-  assert.doesNotMatch(console_, /new RTCPeerConnection/);
+  assert.match(console_, /voice_input/);
+  assert.match(console_, /voice_output/);
+  assert.match(console_, /new RTCPeerConnection/);
+  assert.match(console_, /conversation\.item\.input_audio_transcription\.completed/);
+  assert.match(console_, /commitRealtimeTurn/);
+  assert.match(console_, /stopRealtimeSession/);
 });
 
 test("attachment UX is explicit and mirrors backend-supported document types", () => {
@@ -53,7 +62,10 @@ test("attachment UX is explicit and mirrors backend-supported document types", (
 });
 
 test("premium capability controls have dedicated responsive styles", () => {
-  assert.match(styles, /\.capability-chip/);
+  assert.match(styles, /\.realtime-button/);
+  assert.match(styles, /\.attachment-button/);
+  assert.match(styles, /\.voice-button/);
+  assert.match(styles, /\.speaker-button/);
   assert.match(styles, /\.team-config/);
   assert.match(styles, /\.realtime-status/);
 });

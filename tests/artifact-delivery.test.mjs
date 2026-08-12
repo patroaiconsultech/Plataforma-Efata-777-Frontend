@@ -95,7 +95,8 @@ test("chronology and attachment UX remain present", () => {
 test("Team uses governed orchestration while Voice Message keeps reviewed STT flow", () => {
   assert.doesNotMatch(consoleSource, /Team · em breve/);
   assert.match(consoleSource, /streamTeamMessage\(/);
-  assert.match(consoleSource, /participant_agent_ids: teamParticipantIds/);
+  assert.match(consoleSource, /contributor_agent_ids:/);
+  assert.match(consoleSource, /selection_mode: teamSelectionMode/);
   assert.match(consoleSource, /handleVoiceButton/);
   assert.match(consoleSource, /Transcrição pronta — revise e envie/);
   assert.match(consoleSource, /transcribeVoice/);

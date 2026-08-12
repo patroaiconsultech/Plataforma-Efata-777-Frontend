@@ -8,15 +8,19 @@ import {
   ChatMessage,
   Thread,
   createInvite,
+  createRealtimeCall,
   createThread,
+  commitRealtimeTurn,
   downloadArtifact,
   getToken,
   isApiBaseConfigured,
+  getDocumentContextProvenance,
   getRealtimeCapabilities,
   listAgents,
   listMessages,
   listTeams,
   listThreads,
+  messageVoice,
   parseArtifactMetadata,
   RealtimeCapabilities,
   streamMessage,
@@ -39,9 +43,15 @@ const AGENT = "Josué";
 
 type VoiceState = "idle" | "recording" | "transcribing" | "review";
 type ExecutionMode = "individual" | "team";
+type RealtimeState =
+  | "idle"
+  | "connecting"
+  | "listening"
+  | "transcribing"
+  | "orkio_processing"
+  | "speaking"
+  | "error";
 const VOICE_MAX_RECORDING_SECONDS = 90;
-const TEAM_MIN_PARTICIPANTS = 2;
-const TEAM_MAX_PARTICIPANTS = 8;
 const ATTACHMENT_ACCEPT =
   ".pdf,.txt,.csv,.json,.docx,.xlsx,.pptx";
 
@@ -94,9 +104,27 @@ function describe(error: unknown): string {
     REALTIME_VOICE_DISABLED: "A sessão Realtime de voz ainda não está habilitada.",
     REALTIME_ORCHESTRATION_BRIDGE_REQUIRED:
       "Realtime ainda aguarda a ponte de orquestração canônica da ORKIO.",
+    REALTIME_VOICE_OUTPUT_REQUIRED:
+      "Realtime precisa de uma voz canônica validada para o agente selecionado.",
+    REALTIME_IDEMPOTENCY_KEY_INCOMPLETE:
+      "O evento final de voz não possui identidade estável suficiente para criar um turno.",
+    REALTIME_TURN_IN_PROGRESS:
+      "Este turno Realtime já está sendo processado.",
+    REALTIME_PREVIOUS_ATTEMPT_FAILED:
+      "Este evento Realtime já falhou e não será duplicado.",
+    VIEWER_TTS_NOT_ALLOWED:
+      "Seu perfil pode ler a conversa, mas não solicitar síntese de voz.",
+    TTS_DISABLED: "A reprodução por voz está desabilitada no servidor.",
+    TTS_RATE_LIMITED: "O limite de reprodução por voz foi atingido. Tente novamente em instantes.",
+    TTS_COST_GUARD_REJECTED: "Esta resposta excede a política atual de síntese por voz.",
+    TTS_TIMEOUT: "A geração de voz excedeu o tempo permitido.",
+    VOICE_BINDING_NOT_FOUND: "Este agente ainda não possui uma voz canônica configurada.",
+    VOICE_PROFILE_NOT_VALIDATED: "A voz deste agente ainda aguarda validação.",
     TEAM_NOT_FOUND: "O Team selecionado não está disponível.",
-    TEAM_MIN_PARTICIPANTS_REQUIRED: "Selecione pelo menos dois participantes para o Team.",
-    TEAM_MAX_PARTICIPANTS_EXCEEDED: "O Team aceita no máximo oito participantes.",
+    TEAM_MIN_CONTRIBUTORS_REQUIRED: "Selecione o mínimo de especialistas exigido pelo Team.",
+    TEAM_MAX_CONTRIBUTORS_EXCEEDED: "O limite de especialistas deste Team foi atingido.",
+    TEAM_SELECT_ALL_NOT_SUPPORTED: "Selecionar todos ainda não está liberado para esta formação.",
+    TEAM_CHAIR_AS_CONTRIBUTOR_FORBIDDEN: "O coordenador canônico não pode ser executado como especialista.",
     TEAM_ORCHESTRATOR_NOT_ALLOWED: "O coordenador do Team não corresponde ao contrato canônico.",
     TEAM_ORCHESTRATOR_MUST_BE_PARTICIPANT: "O coordenador precisa permanecer no Team.",
     TEAM_AGENT_NOT_ALLOWED: "Um dos agentes não pertence a este Team.",
@@ -159,6 +187,11 @@ export default function AppConsole() {
     useState<RealtimeCapabilities | null>(null);
   const [realtimeBusy, setRealtimeBusy] = useState(false);
   const [showRealtimeInfo, setShowRealtimeInfo] = useState(false);
+  const [realtimeState, setRealtimeState] = useState<RealtimeState>("idle");
+  const [teamSelectionMode, setTeamSelectionMode] =
+    useState<"explicit" | "all_eligible">("explicit");
+  const [documentProvenanceLabel, setDocumentProvenanceLabel] = useState("");
+  const [speakingMessageId, setSpeakingMessageId] = useState("");
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [recentAttachment, setRecentAttachment] = useState("");
@@ -181,18 +214,31 @@ export default function AppConsole() {
   const voiceAbortRef = useRef<AbortController | null>(null);
   const activeThreadRef = useRef(threadId);
   const voiceTranscriptOwnedRef = useRef(false);
+  const realtimePeerRef = useRef<RTCPeerConnection | null>(null);
+  const realtimeStreamRef = useRef<MediaStream | null>(null);
+  const realtimeChannelRef = useRef<RTCDataChannel | null>(null);
+  const realtimeSessionIdRef = useRef("");
+  const realtimeSessionThreadRef = useRef("");
+  const realtimeSeenFinalIdsRef = useRef<Set<string>>(new Set());
+  const realtimeTurnChainRef = useRef<Promise<void>>(Promise.resolve());
+  const messageAudioRef = useRef<HTMLAudioElement | null>(null);
+  const messageAudioUrlRef = useRef("");
+  const messageVoiceAbortRef = useRef<AbortController | null>(null);
   const configured = isApiBaseConfigured();
   const authConfigured = isOidcConfigured();
 
   const selectThread = useCallback((id: string) => {
     if (id !== activeThreadRef.current) {
       cancelVoiceCapture(true);
+      stopRealtimeSession();
+      stopMessageAudio();
     }
     activeThreadRef.current = id;
     setThreadId(id);
     setMessages([]);
     setStreamingText("");
     setRecentAttachment("");
+    setDocumentProvenanceLabel("");
     setArtifacts([]);
     setArtifactDownloadBusy("");
     setArtifactDownloadErrors({});
@@ -269,22 +315,17 @@ export default function AppConsole() {
         return;
       }
       setSelectedTeamId(preferred.team_id);
+      setTeamSelectionMode("explicit");
       setTeamParticipants((current) => {
-        const allowed = new Set([
-          preferred.orchestrator_agent_id,
-          ...preferred.candidate_agent_ids,
-        ]);
+        const allowed = new Set(preferred.candidate_contributor_agent_ids);
         const kept = current.filter((id) => allowed.has(id));
-        if (!kept.includes(preferred.orchestrator_agent_id)) {
-          kept.unshift(preferred.orchestrator_agent_id);
+        const min = preferred.participant_policy.min_contributors;
+        const max = preferred.participant_policy.max_contributors;
+        for (const candidate of preferred.candidate_contributor_agent_ids) {
+          if (kept.length >= min) break;
+          if (!kept.includes(candidate)) kept.push(candidate);
         }
-        if (kept.length < TEAM_MIN_PARTICIPANTS) {
-          const fallback = preferred.candidate_agent_ids.find(
-            (id) => id !== preferred.orchestrator_agent_id && !kept.includes(id),
-          );
-          if (fallback) kept.push(fallback);
-        }
-        return kept.slice(0, TEAM_MAX_PARTICIPANTS);
+        return kept.slice(0, max);
       });
     } catch (err) {
       setTeams([]);
@@ -350,6 +391,22 @@ export default function AppConsole() {
       voiceStreamRef.current?.getTracks().forEach((track) => track.stop());
       voiceStreamRef.current = null;
       voiceChunksRef.current = [];
+      realtimeChannelRef.current?.close();
+      realtimeChannelRef.current = null;
+      realtimePeerRef.current?.close();
+      realtimePeerRef.current = null;
+      realtimeStreamRef.current?.getTracks().forEach((track) => track.stop());
+      realtimeStreamRef.current = null;
+      messageVoiceAbortRef.current?.abort();
+      messageVoiceAbortRef.current = null;
+      const activeAudio = messageAudioRef.current;
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.src = "";
+      }
+      messageAudioRef.current = null;
+      if (messageAudioUrlRef.current) URL.revokeObjectURL(messageAudioUrlRef.current);
+      messageAudioUrlRef.current = "";
     };
   }, []);
 
@@ -576,6 +633,335 @@ export default function AppConsole() {
     void startVoiceRecording();
   }
 
+  function stopMessageAudio() {
+    messageVoiceAbortRef.current?.abort();
+    messageVoiceAbortRef.current = null;
+    const audio = messageAudioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.src = "";
+    }
+    messageAudioRef.current = null;
+    if (messageAudioUrlRef.current) {
+      URL.revokeObjectURL(messageAudioUrlRef.current);
+      messageAudioUrlRef.current = "";
+    }
+    setSpeakingMessageId("");
+  }
+
+  async function playCanonicalMessageVoice(
+    messageId: string,
+    fromRealtime = false,
+  ) {
+    if (!threadId || threadId !== activeThreadRef.current) return;
+    stopMessageAudio();
+    const controller = new AbortController();
+    messageVoiceAbortRef.current = controller;
+    try {
+      if (fromRealtime) setRealtimeState("speaking");
+      setSpeakingMessageId(messageId);
+      const voice = await messageVoice(
+        threadId,
+        messageId,
+        "pt-BR",
+        controller.signal,
+      );
+      if (
+        controller.signal.aborted ||
+        threadId !== activeThreadRef.current
+      ) {
+        return;
+      }
+      const objectUrl = URL.createObjectURL(voice.blob);
+      messageAudioUrlRef.current = objectUrl;
+      const audio = new Audio(objectUrl);
+      messageAudioRef.current = audio;
+      audio.onended = () => {
+        if (messageAudioRef.current === audio) {
+          stopMessageAudio();
+          if (fromRealtime && realtimeSessionIdRef.current) {
+            setRealtimeState("listening");
+          }
+        }
+      };
+      audio.onerror = () => {
+        if (messageAudioRef.current === audio) {
+          stopMessageAudio();
+          setError("O áudio foi gerado, mas o navegador não conseguiu reproduzi-lo.");
+          if (fromRealtime && realtimeSessionIdRef.current) {
+            setRealtimeState("listening");
+          }
+        }
+      };
+      await audio.play();
+    } catch (err) {
+      if (!controller.signal.aborted) setError(describe(err));
+      stopMessageAudio();
+      if (fromRealtime && realtimeSessionIdRef.current) {
+        setRealtimeState("listening");
+      }
+    } finally {
+      if (messageVoiceAbortRef.current === controller) {
+        messageVoiceAbortRef.current = null;
+      }
+    }
+  }
+
+  async function handleMessageVoice(messageId: string) {
+    if (!requireAuthenticated() || !threadId) return;
+    if (speakingMessageId === messageId) {
+      stopMessageAudio();
+      return;
+    }
+    await playCanonicalMessageVoice(messageId);
+  }
+
+  function stopRealtimeSession() {
+    realtimeChannelRef.current?.close();
+    realtimeChannelRef.current = null;
+    realtimePeerRef.current?.close();
+    realtimePeerRef.current = null;
+    realtimeStreamRef.current?.getTracks().forEach((track) => track.stop());
+    realtimeStreamRef.current = null;
+    realtimeSessionIdRef.current = "";
+    realtimeSessionThreadRef.current = "";
+    realtimeSeenFinalIdsRef.current.clear();
+    realtimeTurnChainRef.current = Promise.resolve();
+    setRealtimeState("idle");
+  }
+
+  function waitForIceGatheringComplete(
+    peer: RTCPeerConnection,
+    timeoutMs = 3000,
+  ): Promise<void> {
+    if (peer.iceGatheringState === "complete") return Promise.resolve();
+    return new Promise((resolve) => {
+      const timeout = window.setTimeout(done, timeoutMs);
+      function done() {
+        window.clearTimeout(timeout);
+        peer.removeEventListener("icegatheringstatechange", onChange);
+        resolve();
+      }
+      function onChange() {
+        if (peer.iceGatheringState === "complete") done();
+      }
+      peer.addEventListener("icegatheringstatechange", onChange);
+    });
+  }
+
+  async function processRealtimeFinal(
+    eventId: string,
+    itemId: string,
+    transcript: string,
+    sessionId: string,
+    sessionThreadId: string,
+  ) {
+    if (
+      !sessionId ||
+      !eventId ||
+      !itemId ||
+      !transcript.trim() ||
+      sessionId !== realtimeSessionIdRef.current ||
+      sessionThreadId !== activeThreadRef.current
+    ) {
+      return;
+    }
+    setRealtimeState("orkio_processing");
+    try {
+      const result = await commitRealtimeTurn(sessionThreadId, {
+        session_id: sessionId,
+        provider_item_id: itemId,
+        transcript_final_id: eventId,
+        transcript,
+      });
+      if (
+        sessionId !== realtimeSessionIdRef.current ||
+        sessionThreadId !== activeThreadRef.current
+      ) {
+        return;
+      }
+      await refreshMessages();
+      await playCanonicalMessageVoice(result.message_id, true);
+    } catch (err) {
+      if (
+        sessionId === realtimeSessionIdRef.current &&
+        sessionThreadId === activeThreadRef.current
+      ) {
+        setRealtimeState("error");
+        setError(describe(err));
+      }
+    }
+  }
+
+  function handleRealtimeProviderEvent(raw: unknown) {
+    if (!raw || typeof raw !== "object") return;
+    const event = raw as Record<string, unknown>;
+    if (
+      String(event.type || "") !==
+      "conversation.item.input_audio_transcription.completed"
+    ) {
+      return;
+    }
+    const eventId = String(event.event_id || "");
+    const itemId = String(event.item_id || "");
+    const transcript = String(event.transcript || "").trim();
+    if (!eventId || !itemId || !transcript) return;
+
+    const dedupeId = `${itemId}:${eventId}`;
+    if (realtimeSeenFinalIdsRef.current.has(dedupeId)) return;
+    realtimeSeenFinalIdsRef.current.add(dedupeId);
+
+    const sessionId = realtimeSessionIdRef.current;
+    const sessionThreadId = realtimeSessionThreadRef.current;
+    setRealtimeState("transcribing");
+    realtimeTurnChainRef.current = realtimeTurnChainRef.current
+      .then(() =>
+        processRealtimeFinal(
+          eventId,
+          itemId,
+          transcript,
+          sessionId,
+          sessionThreadId,
+        ),
+      )
+      .catch(() => undefined);
+  }
+
+  async function startRealtimeSession() {
+    if (!requireAuthenticated()) return;
+    if (!threadId) {
+      setError("Crie ou selecione uma conversa antes de iniciar o Realtime.");
+      return;
+    }
+    if (!realtimeReady) {
+      setShowRealtimeInfo(true);
+      void refreshRealtimeCapabilities();
+      return;
+    }
+    if (
+      typeof RTCPeerConnection === "undefined" ||
+      !navigator.mediaDevices?.getUserMedia
+    ) {
+      setError("Este navegador não oferece WebRTC/microfone compatível.");
+      return;
+    }
+
+    cancelVoiceCapture(true);
+    stopMessageAudio();
+    stopRealtimeSession();
+    setError("");
+    setNotice("");
+    setRealtimeState("connecting");
+
+    const sessionThreadId = threadId;
+    const peer = new RTCPeerConnection();
+    realtimePeerRef.current = peer;
+    const channel = peer.createDataChannel("oai-events");
+    realtimeChannelRef.current = channel;
+
+    channel.onmessage = (event) => {
+      try {
+        handleRealtimeProviderEvent(JSON.parse(String(event.data || "{}")));
+      } catch {
+        // Eventos não JSON ou desconhecidos não ganham autoridade no runtime.
+      }
+    };
+    channel.onopen = () => {
+      if (sessionThreadId === activeThreadRef.current) {
+        setRealtimeState("listening");
+      }
+    };
+    channel.onclose = () => {
+      if (
+        sessionThreadId === activeThreadRef.current &&
+        realtimeSessionIdRef.current
+      ) {
+        stopRealtimeSession();
+      }
+    };
+
+    peer.onconnectionstatechange = () => {
+      if (["failed", "closed"].includes(peer.connectionState)) {
+        if (sessionThreadId === activeThreadRef.current) {
+          stopRealtimeSession();
+        }
+      }
+    };
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (sessionThreadId !== activeThreadRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        peer.close();
+        return;
+      }
+      realtimeStreamRef.current = stream;
+      stream.getTracks().forEach((track) => peer.addTrack(track, stream));
+
+      const offer = await peer.createOffer();
+      await peer.setLocalDescription(offer);
+      await waitForIceGatheringComplete(peer);
+      const sdp = peer.localDescription?.sdp || offer.sdp || "";
+      if (!sdp) throw new ApiError(0, "REALTIME_SDP_EMPTY");
+
+      const call =
+        executionMode === "team" && activeTeam
+          ? await createRealtimeCall(sessionThreadId, {
+              sdp,
+              target_mode: "team",
+              team_id: activeTeam.team_id,
+              selection_mode: teamSelectionMode,
+              contributor_agent_ids:
+                teamSelectionMode === "explicit" ? teamParticipants : undefined,
+              locale: "pt-BR",
+            })
+          : await createRealtimeCall(sessionThreadId, {
+              sdp,
+              target_mode: "direct",
+              agent: selectedAgent
+                ? technicalAgentTarget(selectedAgent.slug)
+                : "Josué",
+              locale: "pt-BR",
+            });
+
+      if (sessionThreadId !== activeThreadRef.current) {
+        stopRealtimeSession();
+        return;
+      }
+      realtimeSessionIdRef.current = call.session_id;
+      realtimeSessionThreadRef.current = sessionThreadId;
+      await peer.setRemoteDescription({ type: "answer", sdp: call.sdp });
+      setRealtimeState("listening");
+      setNotice(`Realtime ativo com ${call.agent_name}.`);
+    } catch (err) {
+      stopRealtimeSession();
+      const name =
+        err && typeof err === "object" && "name" in err
+          ? String((err as { name?: unknown }).name || "")
+          : "";
+      setRealtimeState("error");
+      setError(
+        name === "NotAllowedError"
+          ? "Permissão do microfone negada para o Realtime."
+          : describe(err),
+      );
+    }
+  }
+
+  function handleRealtimeButton() {
+    if (realtimeState !== "idle" && realtimeState !== "error") {
+      stopRealtimeSession();
+      setNotice("Realtime encerrado.");
+      return;
+    }
+    if (!realtimeReady) {
+      setShowRealtimeInfo(true);
+      void refreshRealtimeCapabilities();
+      return;
+    }
+    void startRealtimeSession();
+  }
+
   async function handleNewThread() {
     if (!requireAuthenticated()) return;
     if (!configured) {
@@ -609,7 +995,7 @@ export default function AppConsole() {
     }
 
     let teamDefinition: TeamDefinition | null = null;
-    let teamParticipantIds: string[] = [];
+    let teamContributorIds: string[] = [];
     if (executionMode === "team") {
       teamDefinition =
         teams.find((team) => team.team_id === selectedTeamId) ?? null;
@@ -617,11 +1003,32 @@ export default function AppConsole() {
         setError("Nenhum Team governado está disponível.");
         return;
       }
-      teamParticipantIds = Array.from(
-        new Set([teamDefinition.orchestrator_agent_id, ...teamParticipants]),
-      ).slice(0, TEAM_MAX_PARTICIPANTS);
-      if (teamParticipantIds.length < TEAM_MIN_PARTICIPANTS) {
-        setError(describe(new ApiError(0, "TEAM_MIN_PARTICIPANTS_REQUIRED")));
+      teamContributorIds = Array.from(new Set(teamParticipants)).filter(
+        (id) =>
+          id !== teamDefinition?.orchestrator_agent_id &&
+          teamDefinition?.candidate_contributor_agent_ids.includes(id),
+      );
+      if (
+        teamSelectionMode === "explicit" &&
+        teamContributorIds.length <
+          teamDefinition.participant_policy.min_contributors
+      ) {
+        setError(describe(new ApiError(0, "TEAM_MIN_CONTRIBUTORS_REQUIRED")));
+        return;
+      }
+      if (
+        teamSelectionMode === "explicit" &&
+        teamContributorIds.length >
+          teamDefinition.participant_policy.max_contributors
+      ) {
+        setError(describe(new ApiError(0, "TEAM_MAX_CONTRIBUTORS_EXCEEDED")));
+        return;
+      }
+      if (
+        teamSelectionMode === "all_eligible" &&
+        !teamDefinition.participant_policy.select_all_supported
+      ) {
+        setError(describe(new ApiError(0, "TEAM_SELECT_ALL_NOT_SUPPORTED")));
         return;
       }
     }
@@ -679,8 +1086,9 @@ export default function AppConsole() {
           content,
           {
             team_id: teamDefinition.team_id,
-            orchestrator_agent_id: teamDefinition.orchestrator_agent_id,
-            participant_agent_ids: teamParticipantIds,
+            selection_mode: teamSelectionMode,
+            contributor_agent_ids:
+              teamSelectionMode === "explicit" ? teamContributorIds : undefined,
           },
           {
             ...commonHandlers,
@@ -760,7 +1168,27 @@ export default function AppConsole() {
     try {
       const uploaded = await uploadAttachment(threadId, file);
       setRecentAttachment(uploaded.filename);
-      setNotice(`Anexo enviado: ${uploaded.filename}`);
+      setNotice(`Anexo enviado: ${uploaded.filename} · processando contexto…`);
+      const provenance = await getDocumentContextProvenance(threadId);
+      const uploadedSource = provenance.source_provenance.find(
+        (source) => source.attachment_id === uploaded.id,
+      );
+      if (uploadedSource?.extraction_status === "ready") {
+        const detail = uploadedSource.truncated
+          ? `${uploadedSource.provided_chars.toLocaleString("pt-BR")} de ${uploadedSource.source_chars.toLocaleString("pt-BR")} caracteres fornecidos`
+          : `${uploadedSource.provided_chars.toLocaleString("pt-BR")} caracteres processados`;
+        setDocumentProvenanceLabel(`✓ Documento lido · ${detail}`);
+        setNotice(`Documento lido: ${uploaded.filename}`);
+      } else if (provenance.source_ids.includes(uploaded.id)) {
+        setDocumentProvenanceLabel("Documento processado · provenance individual indisponível.");
+        setNotice(`Anexo processado: ${uploaded.filename}`);
+      } else if (provenance.extraction_status === "failed" && provenance.sources === 0) {
+        setDocumentProvenanceLabel("Falha de extração do documento.");
+        setNotice(`Anexo armazenado, mas o conteúdo não pôde ser extraído.`);
+      } else {
+        setDocumentProvenanceLabel("Documento armazenado · este arquivo ainda não está disponível no contexto.");
+        setNotice(`Anexo armazenado: ${uploaded.filename} · contexto deste arquivo não confirmado.`);
+      }
     } catch (err) {
       setError(describe(err));
     } finally {
@@ -807,54 +1235,97 @@ export default function AppConsole() {
     "Agente selecionado";
   const selectedAgentInitial = selectedAgentName.slice(0, 1).toUpperCase();
   const activeTeam = teams.find((team) => team.team_id === selectedTeamId) ?? null;
+  const teamMin = activeTeam?.participant_policy.min_contributors ?? 2;
+  const teamMax = activeTeam?.participant_policy.max_contributors ?? 0;
+  const teamEligibleCount = activeTeam?.participant_policy.eligible_count ?? 0;
   const executionTargetName =
     executionMode === "team"
       ? activeTeam?.display_name || "Team"
       : selectedAgentName;
   const executionTargetRole =
     executionMode === "team"
-      ? `${teamParticipants.length} participantes · ORKIO coordena`
+      ? `${teamParticipants.length}/${teamMax || "?"} especialistas · ORKIO coordena`
       : selectedAgentRole;
   const realtimeReason =
     realtimeCapabilities?.orchestration_bridge?.reason_code ||
     realtimeCapabilities?.realtime_session?.reason_code ||
+    realtimeCapabilities?.voice_input?.reason_code ||
+    realtimeCapabilities?.voice_output?.reason_code ||
     realtimeCapabilities?.streaming?.reason_code ||
     "REALTIME_CAPABILITY_NOT_PROVEN";
   const realtimeReady = Boolean(
     realtimeCapabilities?.realtime_session?.eligible &&
-      realtimeCapabilities?.orchestration_bridge?.eligible,
+      realtimeCapabilities?.orchestration_bridge?.eligible &&
+      realtimeCapabilities?.voice_input?.eligible &&
+      realtimeCapabilities?.voice_output?.eligible,
   );
+  const realtimeActive =
+    realtimeState !== "idle" && realtimeState !== "error";
+  const realtimeStateLabel: Record<RealtimeState, string> = {
+    idle: realtimeReady ? "Pronto" : "Em preparação",
+    connecting: "Conectando",
+    listening: "Ouvindo",
+    transcribing: "Transcrevendo",
+    orkio_processing: "ORKIO processando",
+    speaking: "Falando",
+    error: "Erro",
+  };
 
   function selectTeamDefinition(teamId: string) {
     const definition = teams.find((team) => team.team_id === teamId);
     if (!definition) return;
     setSelectedTeamId(teamId);
-    const next = [definition.orchestrator_agent_id];
+    setTeamSelectionMode("explicit");
+    const candidates = definition.candidate_contributor_agent_ids;
     const preferred =
-      selectedAgent &&
-      definition.candidate_agent_ids.includes(selectedAgent.slug)
+      selectedAgent && candidates.includes(selectedAgent.slug)
         ? selectedAgent.slug
-        : definition.candidate_agent_ids[0];
-    if (preferred && !next.includes(preferred)) next.push(preferred);
-    setTeamParticipants(next);
+        : candidates[0];
+    const next = preferred ? [preferred] : [];
+    for (const candidate of candidates) {
+      if (next.length >= definition.participant_policy.min_contributors) break;
+      if (!next.includes(candidate)) next.push(candidate);
+    }
+    setTeamParticipants(
+      next.slice(0, definition.participant_policy.max_contributors),
+    );
   }
 
   function toggleTeamParticipant(agentId: string) {
     const definition = activeTeam;
     if (!definition) return;
     if (agentId === definition.orchestrator_agent_id) return;
-    if (!definition.candidate_agent_ids.includes(agentId)) return;
+    if (!definition.candidate_contributor_agent_ids.includes(agentId)) return;
+    setTeamSelectionMode("explicit");
     setTeamParticipants((current) => {
       if (current.includes(agentId)) {
-        if (current.length <= TEAM_MIN_PARTICIPANTS) return current;
         return current.filter((id) => id !== agentId);
       }
-      if (current.length >= TEAM_MAX_PARTICIPANTS) {
-        setNotice(`O Team aceita no máximo ${TEAM_MAX_PARTICIPANTS} participantes.`);
+      const max = definition.participant_policy.max_contributors;
+      if (current.length >= max) {
+        setNotice(`O Team aceita no máximo ${max} especialistas nesta versão.`);
         return current;
       }
       return [...current, agentId];
     });
+  }
+
+  function selectAllTeamContributors() {
+    if (!activeTeam) return;
+    if (!activeTeam.participant_policy.select_all_supported) {
+      setNotice(
+        `${activeTeam.participant_policy.eligible_count} especialistas elegíveis · limite operacional ${activeTeam.participant_policy.max_contributors}. "Selecionar todos" será liberado pelo backend após prova de carga.`,
+      );
+      return;
+    }
+    setTeamSelectionMode("all_eligible");
+    setTeamParticipants([...activeTeam.candidate_contributor_agent_ids]);
+    setNotice("Todos os especialistas elegíveis foram selecionados pelo contrato do backend.");
+  }
+
+  function clearTeamContributors() {
+    setTeamSelectionMode("explicit");
+    setTeamParticipants([]);
   }
 
   return (
@@ -974,27 +1445,25 @@ export default function AppConsole() {
             </button>
             <button
               type="button"
-              className={
+              className={`realtime-button realtime-button--${realtimeState} ${
+                realtimeReady ? "realtime-button--ready" : "realtime-button--pending"
+              }`}
+              onClick={handleRealtimeButton}
+              aria-pressed={realtimeActive}
+              title={
                 realtimeReady
-                  ? "capability-chip capability-chip--ready"
-                  : "capability-chip capability-chip--pending"
+                  ? realtimeActive
+                    ? "Encerrar Realtime"
+                    : "Iniciar Realtime canônico"
+                  : "Ver requisitos para liberar o Realtime"
               }
-              onClick={() => {
-                setShowRealtimeInfo(true);
-                void refreshRealtimeCapabilities();
-              }}
-              aria-haspopup="dialog"
-              title="Ver status do Realtime"
             >
-              <span className="capability-chip__dot" aria-hidden="true" />
-              <span>
+              <span className="realtime-button__pulse" aria-hidden="true" />
+              <span className="realtime-button__icon" aria-hidden="true">◉</span>
+              <span className="realtime-button__copy">
                 <strong>Realtime</strong>
                 <small>
-                  {realtimeBusy
-                    ? "Verificando…"
-                    : realtimeReady
-                      ? "Elegível"
-                      : "Em preparação"}
+                  {realtimeBusy ? "Verificando…" : realtimeStateLabel[realtimeState]}
                 </small>
               </span>
             </button>
@@ -1101,6 +1570,30 @@ export default function AppConsole() {
                   </time>
                 </header>
                 <p>{item.content}</p>
+                {item.author_type === "agent" ? (
+                  <footer className="message__actions">
+                    <button
+                      type="button"
+                      className={
+                        speakingMessageId === item.id
+                          ? "speaker-button speaker-button--playing"
+                          : "speaker-button"
+                      }
+                      onClick={() => void handleMessageVoice(item.id)}
+                      aria-pressed={speakingMessageId === item.id}
+                      title={
+                        speakingMessageId === item.id
+                          ? "Parar reprodução"
+                          : "Ouvir resposta com a voz canônica deste agente"
+                      }
+                    >
+                      <span aria-hidden="true">🔊</span>
+                      <span>
+                        {speakingMessageId === item.id ? "Parar" : "Ouvir"}
+                      </span>
+                    </button>
+                  </footer>
+                ) : null}
               </article>
             ))
           )}
@@ -1151,9 +1644,13 @@ export default function AppConsole() {
                       ? "Transcrição pronta — revise e envie."
                       : uploading
                         ? "Enviando anexo…"
-                        : recentAttachment
-                          ? `Anexo no contexto: ${recentAttachment}`
-                          : "Enter para enviar · Shift+Enter para nova linha"}
+                        : documentProvenanceLabel
+                          ? documentProvenanceLabel
+                          : recentAttachment
+                            ? `Anexo enviado: ${recentAttachment}`
+                            : realtimeActive
+                              ? `Realtime · ${realtimeStateLabel[realtimeState]}`
+                              : "Enter para enviar · Shift+Enter para nova linha"}
             </span>
             <span className="composer__agent">
               {executionTargetName} · {executionTargetRole}
@@ -1220,7 +1717,9 @@ export default function AppConsole() {
             className={
               voiceState === "recording"
                 ? "icon-button voice-button voice-button--recording"
-                : "icon-button voice-button"
+                : voiceState === "review"
+                  ? "icon-button voice-button voice-button--review"
+                  : "icon-button voice-button voice-button--ready"
             }
             aria-label={
               voiceState === "recording" ? "Parar gravação" : "Gravar voz"
@@ -1325,12 +1824,41 @@ export default function AppConsole() {
                   <div>
                     <strong>Team governado</strong>
                     <small>
-                      ORKIO coordena · selecione de {TEAM_MIN_PARTICIPANTS} a {TEAM_MAX_PARTICIPANTS} participantes
+                      ORKIO é o chair canônico · selecione de {teamMin} a {activeTeam?.participant_policy.max_contributors ?? 0} especialistas
                     </small>
                   </div>
                   <span className="team-config__count">
-                    {teamParticipants.length}/{TEAM_MAX_PARTICIPANTS}
+                    {teamSelectionMode === "all_eligible"
+                      ? `${teamEligibleCount} todos`
+                      : `${teamParticipants.length}/${activeTeam?.participant_policy.max_contributors ?? 0}`}
                   </span>
+                </div>
+                <div className="team-config__toolbar">
+                  <button
+                    type="button"
+                    className="team-config__select-all"
+                    onClick={selectAllTeamContributors}
+                    disabled={!activeTeam?.participant_policy.select_all_supported}
+                    title={
+                      activeTeam?.participant_policy.select_all_supported
+                        ? "Selecionar todos os especialistas elegíveis"
+                        : `${teamEligibleCount} elegíveis · limite atual ${teamMax}. O backend liberará esta opção quando a carga estiver comprovada.`
+                    }
+                  >
+                    Selecionar todos
+                  </button>
+                  <button
+                    type="button"
+                    className="team-config__clear"
+                    onClick={clearTeamContributors}
+                  >
+                    Limpar
+                  </button>
+                  {!activeTeam?.participant_policy.select_all_supported ? (
+                    <small className="team-config__limit-note">
+                      {teamEligibleCount} elegíveis · limite operacional {teamMax}
+                    </small>
+                  ) : null}
                 </div>
                 {teamsBusy ? <p role="status">Carregando Teams…</p> : null}
                 {teamsError ? <p className="console-alert" role="alert">{teamsError}</p> : null}
@@ -1371,7 +1899,7 @@ export default function AppConsole() {
                   if (executionMode !== "team" || !activeTeam) return true;
                   return (
                     agent.slug === activeTeam.orchestrator_agent_id ||
-                    activeTeam.candidate_agent_ids.includes(agent.slug)
+                    activeTeam.candidate_contributor_agent_ids.includes(agent.slug)
                   );
                 })
                 .map((agent) => {
@@ -1381,7 +1909,9 @@ export default function AppConsole() {
                     executionMode === "team" &&
                     activeTeam?.orchestrator_agent_id === agent.slug;
                   const active =
-                    executionMode === "team" ? teamActive : individualActive;
+                    executionMode === "team"
+                      ? orchestrator || teamActive
+                      : individualActive;
                   return (
                     <button
                       type="button"
@@ -1389,6 +1919,7 @@ export default function AppConsole() {
                       key={agent.slug}
                       className={active ? "agent-card agent-card--active" : "agent-card"}
                       aria-pressed={active}
+                      disabled={Boolean(orchestrator)}
                       onClick={() => {
                         if (executionMode === "team") {
                           toggleTeamParticipant(agent.slug);
@@ -1428,7 +1959,7 @@ export default function AppConsole() {
 
             <p className="agent-picker__governance">
               {executionMode === "team"
-                ? "O coordenador do Team vem do contrato do backend; o navegador seleciona apenas participantes permitidos."
+                ? "O chair do Team vem do contrato do backend e nunca executa como especialista; o navegador seleciona apenas contributors permitidos."
                 : "O executor real é resolvido pelo backend. A interface não substitui a identidade de execução."}
             </p>
           </section>
@@ -1447,7 +1978,7 @@ export default function AppConsole() {
                 <span className="console-header__eyebrow">Capability status</span>
                 <h2 id="realtime-status-title">Realtime</h2>
                 <p>
-                  O controle é informativo até a ponte canônica de orquestração estar validada.
+                  Sessão de voz canônica: microfone → transcrição → ORKIO → persistência → mesma voz do botão 🔊.
                 </p>
               </div>
               <button
@@ -1476,8 +2007,24 @@ export default function AppConsole() {
                 </strong>
               </div>
               <div>
+                <span>Entrada de voz</span>
+                <strong>
+                  {realtimeCapabilities?.voice_input?.eligible ? "Elegível" : "Pendente"}
+                </strong>
+              </div>
+              <div>
+                <span>Saída de voz</span>
+                <strong>
+                  {realtimeCapabilities?.voice_output?.eligible ? "Elegível" : "Pendente"}
+                </strong>
+              </div>
+              <div>
+                <span>Runtime comprovado</span>
+                <strong>{realtimeCapabilities?.runtime_proven ? "Sim" : "Ainda não"}</strong>
+              </div>
+              <div>
                 <span>Estado</span>
-                <strong>{realtimeReady ? "Pronto para integração" : "Em preparação"}</strong>
+                <strong>{realtimeStateLabel[realtimeState]}</strong>
               </div>
             </div>
             {!realtimeReady ? (
@@ -1487,8 +2034,8 @@ export default function AppConsole() {
             ) : null}
             <p className="agent-picker__governance">
               Voice Message (gravar → transcrever → revisar → enviar) permanece separado do
-              Realtime full-duplex. Nenhum botão inicia uma sessão que o backend ainda não
-              declarou elegível.
+              Realtime. O Realtime só inicia quando sessão, bridge, input e output estão elegíveis;
+              a resposta canônica é persistida pela ORKIO antes da reprodução por voz.
             </p>
             <div className="modal-card__actions">
               <button

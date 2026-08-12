@@ -180,11 +180,21 @@ export function listAgents(): Promise<AgentDefinition[]> {
   return apiJson<AgentDefinition[]>("/api/v2/agents");
 }
 
+export type TeamParticipantPolicy = {
+  min_contributors: number;
+  max_contributors: number;
+  eligible_count: number;
+  select_all_supported: boolean;
+};
+
 export type TeamDefinition = {
   team_id: string;
   display_name: string;
   orchestrator_agent_id: string;
-  candidate_agent_ids: string[];
+  candidate_contributor_agent_ids: string[];
+  participant_policy: TeamParticipantPolicy;
+  /** rolling-deploy compatibility; new UI uses contributor field */
+  candidate_agent_ids?: string[];
   max_delegation_depth: number;
   enabled: boolean;
 };
@@ -200,13 +210,16 @@ export type RealtimeCapabilityItem = {
 };
 
 export type RealtimeCapabilities = {
+  text_streaming?: RealtimeCapabilityItem;
   streaming?: RealtimeCapabilityItem;
   realtime_session?: RealtimeCapabilityItem;
   voice_input?: RealtimeCapabilityItem;
+  voice_output?: RealtimeCapabilityItem;
   agent_voice_binding?: RealtimeCapabilityItem;
   interruption?: RealtimeCapabilityItem;
   turn_detection?: RealtimeCapabilityItem;
   orchestration_bridge?: RealtimeCapabilityItem;
+  runtime_proven?: boolean;
 };
 
 export function getRealtimeCapabilities(): Promise<RealtimeCapabilities> {
@@ -230,6 +243,7 @@ export type ThreadList = {
 export type ChatMessage = {
   id: string;
   author_type: "user" | "agent";
+  agent_id?: string | null;
   agent_name: string | null;
   content: string;
   created_at: string;
@@ -272,6 +286,141 @@ export function uploadAttachment(threadId: string, file: File) {
   return apiForm<{ id: string; filename: string; sha256: string }>(
     `/api/v2/threads/${encodeURIComponent(threadId)}/attachments`,
     form,
+  );
+}
+
+
+export type DocumentSourceProvenance = {
+  attachment_id: string;
+  filename: string;
+  extraction_status: string;
+  source_chars: number;
+  provided_chars: number;
+  truncated: boolean;
+};
+
+export type DocumentContextProvenance = {
+  available: boolean;
+  sources: number;
+  source_ids: string[];
+  extraction_status: "ready" | "partial" | "failed" | "none" | string;
+  source_chars: number;
+  provided_chars: number;
+  per_source_truncated: boolean;
+  aggregate_truncated: boolean;
+  truncated: boolean;
+  context_version: string;
+  source_provenance: DocumentSourceProvenance[];
+};
+
+export function getDocumentContextProvenance(
+  threadId: string,
+): Promise<DocumentContextProvenance> {
+  return apiJson<DocumentContextProvenance>(
+    `/api/v2/threads/${encodeURIComponent(threadId)}/document-context`,
+  );
+}
+
+export type MessageVoiceResult = {
+  blob: Blob;
+  agentId: string;
+  bindingId: string;
+  locale: string;
+  cache: string;
+};
+
+export async function messageVoice(
+  threadId: string,
+  messageId: string,
+  locale: "pt-BR" | "en-US" | "es-419" = "pt-BR",
+  signal?: AbortSignal,
+): Promise<MessageVoiceResult> {
+  ensureConfigured();
+  const headers = authHeaders();
+  headers.set("Content-Type", "application/json");
+  headers.set(
+    "X-Request-Id",
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `tts-${Date.now()}`,
+  );
+  const response = await fetch(
+    `${BASE}/api/v2/threads/${encodeURIComponent(threadId)}/messages/${encodeURIComponent(messageId)}/voice`,
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ locale }),
+      signal,
+      cache: "no-store",
+    },
+  );
+  if (!response.ok) throw await readError(response);
+  return {
+    blob: await response.blob(),
+    agentId: response.headers.get("X-Orkio-Voice-Agent-Id") || "",
+    bindingId: response.headers.get("X-Orkio-Voice-Binding-Id") || "",
+    locale: response.headers.get("X-Orkio-Voice-Locale") || locale,
+    cache: response.headers.get("X-Orkio-TTS-Cache") || "",
+  };
+}
+
+export type RealtimeCallRequest = {
+  sdp: string;
+  target_mode: "direct" | "team";
+  agent?: string;
+  team_id?: string;
+  selection_mode?: "explicit" | "all_eligible";
+  contributor_agent_ids?: string[];
+  locale: "pt-BR" | "en-US" | "es-419";
+};
+
+export type RealtimeCall = {
+  sdp: string;
+  call_id: string | null;
+  session_id: string;
+  execution_id: string;
+  agent_id: string;
+  agent_name: string;
+  ownership_locked: boolean;
+  target_mode: "direct" | "team";
+  orchestration_bridge: true;
+};
+
+export function createRealtimeCall(
+  threadId: string,
+  payload: RealtimeCallRequest,
+): Promise<RealtimeCall> {
+  return apiJson<RealtimeCall>(
+    `/api/v2/threads/${encodeURIComponent(threadId)}/realtime/calls`,
+    { method: "POST", body: JSON.stringify(payload) },
+  );
+}
+
+export type RealtimeTurnResult = {
+  status: "completed";
+  reconciled: boolean;
+  terminal_event: "done";
+  message_id: string;
+  execution_id: string;
+  agent_id: string;
+  agent_name?: string;
+  target_mode?: "direct" | "team";
+  content: string;
+  tts_path?: string;
+};
+
+export function commitRealtimeTurn(
+  threadId: string,
+  payload: {
+    session_id: string;
+    provider_item_id: string;
+    transcript_final_id: string;
+    transcript: string;
+  },
+): Promise<RealtimeTurnResult> {
+  return apiJson<RealtimeTurnResult>(
+    `/api/v2/threads/${encodeURIComponent(threadId)}/realtime/turns`,
+    { method: "POST", body: JSON.stringify(payload) },
   );
 }
 
@@ -542,8 +691,8 @@ export async function streamMessage(
 
 export type TeamStreamRequest = {
   team_id: string;
-  orchestrator_agent_id: string;
-  participant_agent_ids: string[];
+  selection_mode: "explicit" | "all_eligible";
+  contributor_agent_ids?: string[];
 };
 
 export async function streamTeamMessage(

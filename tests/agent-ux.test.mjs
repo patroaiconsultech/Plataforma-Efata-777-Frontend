@@ -25,7 +25,9 @@ test("team mode is wired to the governed backend contract", () => {
   assert.match(consoleSource, /type ExecutionMode = "individual" \| "team"/);
   assert.match(consoleSource, /await listTeams\(\)/);
   assert.match(consoleSource, /streamTeamMessage\(/);
-  assert.match(consoleSource, /orchestrator_agent_id: teamDefinition\.orchestrator_agent_id/);
+  assert.match(consoleSource, /contributor_agent_ids:/);
+  assert.match(consoleSource, /team_id: teamDefinition\.team_id/);
+  assert.doesNotMatch(consoleSource, /orchestrator_agent_id: teamDefinition\.orchestrator_agent_id/);
 });
 
 test("participant invite remains a separate capability", () => {

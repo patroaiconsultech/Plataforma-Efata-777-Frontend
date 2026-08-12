@@ -52,7 +52,8 @@ test("attachment upload has an explicit local UI state", () => {
   assert.match(consoleSource, /setUploading\(true\)/);
   assert.match(consoleSource, /setRecentAttachment\(uploaded\.filename\)/);
   assert.match(consoleSource, /setUploading\(false\)/);
-  assert.match(consoleSource, /Anexo no contexto/);
+  assert.match(consoleSource, /getDocumentContextProvenance/);
+  assert.match(consoleSource, /Documento lido/);
 });
 
 test("premium console preserves ORKIO brand interaction vocabulary", () => {
