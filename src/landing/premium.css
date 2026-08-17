@@ -1,0 +1,1157 @@
+.patroai-premium {
+        color-scheme: dark;
+        --bg: #020605;
+        --panel: rgba(9, 22, 19, 0.78);
+        --text: #f5f8f4;
+        --muted: #b7c7bf;
+        --dim: #7f928a;
+        --green: #28f0b5;
+        --gold: #d9b45f;
+        --cyan: #30d8ff;
+        --shadow: 0 24px 90px rgba(0, 0, 0, 0.48);
+        --radius: 8px;
+        --max: 1180px;
+        --serif: Georgia, "Times New Roman", serif;
+        --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .patroai-premium, .patroai-premium * { box-sizing: border-box; }
+      .patroai-premium { scroll-behavior: smooth; }
+      .patroai-premium {
+        margin: 0;
+        min-width: 320px;
+        overflow-x: hidden;
+        background:
+          radial-gradient(circle at 16% 10%, rgba(40, 240, 181, 0.14), transparent 30%),
+          radial-gradient(circle at 86% 12%, rgba(217, 180, 95, 0.15), transparent 28%),
+          linear-gradient(180deg, #010302 0%, #06110e 48%, #020605 100%);
+        color: var(--text);
+        font-family: var(--sans);
+      }
+
+      .patroai-premium::before {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        pointer-events: none;
+        content: "";
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        background-size: 68px 68px;
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.82), transparent 72%);
+      }
+
+      .patroai-premium::after {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        content: "";
+        background:
+          linear-gradient(115deg, transparent 0 42%, rgba(217, 180, 95, 0.08) 48%, transparent 54%),
+          radial-gradient(circle at var(--mx, 50%) var(--my, 30%), rgba(40, 240, 181, 0.12), transparent 28%);
+      }
+
+      .patroai-premium a { color: inherit; text-decoration: none; }
+      .patroai-premium button, .patroai-premium input, .patroai-premium select, .patroai-premium textarea { font: inherit; }
+      .patroai-premium h1, .patroai-premium h2, .patroai-premium h3, .patroai-premium p { margin-top: 0; }
+
+      .patroai-premium .progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 50;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--green), var(--gold));
+        box-shadow: 0 0 24px rgba(40, 240, 181, 0.5);
+      }
+
+      .patroai-premium .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(2, 6, 5, 0.78);
+        backdrop-filter: blur(18px);
+      }
+
+      .patroai-premium .nav, .patroai-premium .hero-inner, .patroai-premium .section-inner, .patroai-premium .footer-inner {
+        width: min(100% - 32px, var(--max));
+        margin: 0 auto;
+      }
+
+      .patroai-premium .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 134px;
+        gap: 20px;
+      }
+
+      .patroai-premium .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        min-width: max-content;
+      }
+
+      .patroai-premium .brand-logo {
+        position: relative;
+        display: grid;
+        width: 132px;
+        height: 132px;
+        place-items: center;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        isolation: isolate;
+        perspective: 560px;
+        transform-style: preserve-3d;
+        animation: logoStageHover 4.8s ease-in-out infinite;
+      }
+
+      .patroai-premium .brand-logo::before, .patroai-premium .brand-logo::after {
+        position: absolute;
+        content: "";
+        border-radius: inherit;
+      }
+
+      .patroai-premium .brand-logo::before {
+        inset: -10px;
+        z-index: -2;
+        background: conic-gradient(from 0deg, transparent, rgba(255, 235, 170, 0.95), rgba(217, 180, 95, 0.98), rgba(40, 240, 181, 0.45), transparent 48%);
+        filter: blur(10px);
+        opacity: 0.96;
+        animation: logoOrbit 8s linear infinite, logoHaloBreath 2.8s ease-in-out infinite;
+      }
+
+      .patroai-premium .brand-logo::after {
+        inset: -3px;
+        z-index: -1;
+        background: radial-gradient(circle, rgba(255, 246, 190, 0.65), rgba(217, 180, 95, 0.14) 48%, transparent 68%);
+        filter: blur(14px);
+        animation: logoPulse 2.8s ease-in-out infinite;
+      }
+
+      .patroai-premium .logo-3d {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        transform-style: preserve-3d;
+        animation: logo3dTurn 5.8s ease-in-out infinite;
+      }
+
+      .patroai-premium .logo-3d::before {
+        position: absolute;
+        inset: 5px;
+        content: "";
+        border-radius: inherit;
+        background: url("/assets/logo-patroai-oficial.png") center / cover no-repeat;
+        filter: brightness(0.48) saturate(1.25) blur(0.4px);
+        opacity: 0.58;
+        transform: translate3d(10px, 10px, -32px) scale(0.98);
+        box-shadow:
+          0 16px 28px rgba(0, 0, 0, 0.48),
+          0 0 26px rgba(217, 180, 95, 0.28);
+      }
+
+      .patroai-premium .logo-3d::after {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        content: "";
+        border-radius: inherit;
+        background: linear-gradient(112deg, transparent 0 34%, rgba(255, 255, 240, 0.78) 45%, rgba(217, 180, 95, 0.28) 53%, transparent 66%);
+        mix-blend-mode: screen;
+        opacity: 0;
+        transform: translateX(-74%) rotate(12deg);
+        animation: logoGlint 3.4s ease-in-out infinite;
+      }
+
+      .patroai-premium .logo-orbit-visible {
+        position: absolute;
+        inset: -13px;
+        z-index: 4;
+        border: 2px solid rgba(255, 224, 137, 0.72);
+        border-right-color: rgba(255, 224, 137, 0.1);
+        border-bottom-color: rgba(40, 240, 181, 0.18);
+        border-radius: 50%;
+        pointer-events: none;
+        box-shadow:
+          0 0 14px rgba(217, 180, 95, 0.42),
+          inset 0 0 12px rgba(217, 180, 95, 0.18);
+        animation: visibleOrbitSpin 1.9s linear infinite;
+      }
+
+      .patroai-premium .logo-orbit-visible::before, .patroai-premium .logo-orbit-visible::after {
+        position: absolute;
+        content: "";
+        border-radius: 50%;
+        background: #fff2ad;
+        box-shadow: 0 0 14px rgba(255, 224, 137, 0.98), 0 0 26px rgba(217, 180, 95, 0.72);
+      }
+
+      .patroai-premium .logo-orbit-visible::before {
+        top: -5px;
+        left: 50%;
+        width: 10px;
+        height: 10px;
+        transform: translateX(-50%);
+      }
+
+      .patroai-premium .logo-orbit-visible::after {
+        right: 6px;
+        bottom: 15px;
+        width: 7px;
+        height: 7px;
+      }
+
+      .patroai-premium .brand-logo img {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        object-fit: cover;
+        filter:
+          saturate(1.18)
+          contrast(1.08)
+          drop-shadow(0 0 10px rgba(255, 238, 174, 0.62))
+          drop-shadow(0 0 24px rgba(217, 180, 95, 0.42))
+          drop-shadow(0 0 30px rgba(40, 240, 181, 0.18));
+        transform: translateZ(28px);
+        backface-visibility: hidden;
+      }
+
+      .patroai-premium .brand-logo svg, .patroai-premium .showcase-logo svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+
+      .patroai-premium .logo-ring {
+        transform-origin: 50% 50%;
+        animation: planetSpin 22s linear infinite;
+      }
+
+      .patroai-premium .logo-orbit {
+        transform-origin: 50% 50%;
+        animation: logoOrbit 14s linear infinite;
+      }
+
+      .patroai-premium .logo-core {
+        filter: drop-shadow(0 0 10px rgba(255, 231, 158, 0.72)) drop-shadow(0 0 18px rgba(217, 180, 95, 0.42));
+      }
+
+      .patroai-premium .logo-word {
+        font-family: var(--sans);
+        font-size: 17px;
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        fill: #fff8dc;
+        paint-order: stroke;
+        stroke: rgba(0, 0, 0, 0.42);
+        stroke-width: 2.6px;
+        text-anchor: middle;
+      }
+
+      .patroai-premium .brand strong {
+        display: block;
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .patroai-premium .brand span span {
+        display: block;
+        color: var(--dim);
+        font-size: 0.76rem;
+      }
+
+      .patroai-premium .nav-links, .patroai-premium .nav-actions, .patroai-premium .language-switch {
+        display: flex;
+        align-items: center;
+      }
+
+      .patroai-premium .nav-links { gap: 4px; }
+      .patroai-premium .nav-links a {
+        padding: 10px 12px;
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        transition: color 180ms ease, background 180ms ease;
+      }
+      .patroai-premium .nav-links a:hover, .patroai-premium .nav-links a:focus-visible {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.06);
+        outline: none;
+      }
+
+      .patroai-premium .nav-actions { gap: 10px; }
+      .patroai-premium .language-switch {
+        padding: 3px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .patroai-premium .language-switch button {
+        min-width: 34px;
+        min-height: 30px;
+        border: 0;
+        border-radius: 999px;
+        color: var(--dim);
+        background: transparent;
+        cursor: pointer;
+        font-size: 0.73rem;
+        font-weight: 800;
+      }
+      .patroai-premium .language-switch button.active {
+        color: #120f06;
+        background: linear-gradient(135deg, #f5d681, var(--gold));
+      }
+
+      .patroai-premium .icon-button {
+        display: none;
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(153, 255, 218, 0.18);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        cursor: pointer;
+      }
+      .patroai-premium .icon-button span {
+        display: block;
+        width: 18px;
+        height: 2px;
+        margin: 5px auto;
+        background: currentColor;
+      }
+
+      .patroai-premium .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 18px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 800;
+        transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+      }
+      .patroai-premium .button:hover { transform: translateY(-1px); }
+      .patroai-premium .button.primary {
+        color: #101009;
+        background: linear-gradient(135deg, #f5d681, var(--gold) 46%, #b9913e);
+        box-shadow: 0 14px 34px rgba(217, 180, 95, 0.22), 0 0 34px rgba(217, 180, 95, 0.16);
+      }
+      .patroai-premium .button.secondary {
+        color: var(--text);
+        border-color: rgba(40, 240, 181, 0.42);
+        background: rgba(40, 240, 181, 0.06);
+      }
+      .patroai-premium .button.ghost {
+        color: var(--muted);
+        border-color: rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .patroai-premium .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 78px 0 46px;
+      }
+      .patroai-premium .hero-grid {
+        display: grid;
+        align-items: center;
+        grid-template-columns: minmax(0, 0.86fr) minmax(420px, 1.14fr);
+        gap: 46px;
+      }
+      .patroai-premium .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 18px;
+        color: var(--gold);
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .patroai-premium .eyebrow::before {
+        width: 28px;
+        height: 1px;
+        content: "";
+        background: currentColor;
+      }
+      .patroai-premium h1 {
+        max-width: 760px;
+        margin-bottom: 24px;
+        font-family: var(--serif);
+        font-size: clamp(3.2rem, 7vw, 6.8rem);
+        font-weight: 500;
+        line-height: 0.94;
+      }
+      .patroai-premium h1 span, .patroai-premium .accent { color: var(--gold); }
+      .patroai-premium .hero-copy {
+        max-width: 640px;
+        color: var(--muted);
+        font-size: clamp(1.04rem, 1.3vw, 1.22rem);
+        line-height: 1.72;
+      }
+      .patroai-premium .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+      }
+      .patroai-premium .assurance {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 34px;
+      }
+      .patroai-premium .assurance-item {
+        min-height: 86px;
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.035);
+      }
+      .patroai-premium .assurance-item strong {
+        display: block;
+        color: var(--green);
+        font-size: 1.3rem;
+      }
+      .patroai-premium .assurance-item span {
+        color: var(--dim);
+        font-size: 0.78rem;
+        line-height: 1.4;
+      }
+
+      .patroai-premium .device-stage {
+        position: relative;
+        min-height: 640px;
+        perspective: 1100px;
+      }
+      .patroai-premium .screen-card {
+        position: absolute;
+        inset: 18px 0 auto auto;
+        width: min(100%, 860px);
+        border: 1px solid rgba(153, 255, 218, 0.22);
+        border-radius: 18px;
+        overflow: hidden;
+        background: linear-gradient(145deg, rgba(8, 21, 19, 0.96), rgba(2, 8, 7, 0.98));
+        box-shadow: var(--shadow), 0 0 48px rgba(40, 240, 181, 0.11);
+        transform: rotateY(calc(-9deg + var(--tilt-x, 0deg))) rotateX(calc(4deg + var(--tilt-y, 0deg)));
+        transition: transform 180ms ease;
+      }
+      .patroai-premium .screen-card::before, .patroai-premium .visual-image::after {
+        position: absolute;
+        inset: -60% -40%;
+        pointer-events: none;
+        content: "";
+        background: linear-gradient(115deg, transparent 0 42%, rgba(255, 238, 174, 0.14) 48%, transparent 55%);
+        animation: glassSweep 7.6s ease-in-out infinite;
+      }
+      .patroai-premium .screen-top {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 17px 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--dim);
+        font-size: 0.76rem;
+      }
+      .patroai-premium .screen-body {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(210px, 0.68fr) minmax(350px, 1.32fr);
+        gap: 16px;
+        padding: 18px;
+      }
+      .patroai-premium .interface-panel {
+        min-height: 330px;
+        padding: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(40, 240, 181, 0.07), transparent 48%), rgba(255, 255, 255, 0.03);
+      }
+      .patroai-premium .interface-panel h3 {
+        font-family: var(--serif);
+        font-size: clamp(1.54rem, 2.05vw, 2.02rem);
+        font-weight: 500;
+        line-height: 1.02;
+        margin-bottom: 14px;
+      }
+      .patroai-premium .interface-panel p:not(.eyebrow) {
+        font-size: 0.88rem;
+        line-height: 1.52;
+      }
+      .patroai-premium .signal-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .patroai-premium .signal {
+        min-height: 82px;
+        padding: 11px;
+        border: 1px solid rgba(153, 255, 218, 0.14);
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.2);
+        transition: transform 220ms ease, border-color 220ms ease, background 220ms ease;
+      }
+      .patroai-premium .signal:hover {
+        transform: translateY(-3px);
+        border-color: rgba(40, 240, 181, 0.42);
+        background: rgba(40, 240, 181, 0.07);
+      }
+      .patroai-premium .signal i {
+        display: block;
+        width: 22px;
+        height: 22px;
+        margin-bottom: 9px;
+        border: 1px solid var(--green);
+        border-radius: 6px;
+        transform: rotate(45deg);
+        box-shadow: 0 0 16px rgba(40, 240, 181, 0.2);
+      }
+      .patroai-premium .signal strong { display: block; margin-bottom: 5px; }
+      .patroai-premium .signal span { color: var(--dim); font-size: 0.78rem; }
+
+      .patroai-premium .neural-stage {
+        position: relative;
+        display: grid;
+        min-height: 390px;
+        place-items: center;
+        border: 1px solid rgba(217, 180, 95, 0.14);
+        border-radius: 12px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 50% 48%, rgba(40, 240, 181, 0.16), transparent 24%),
+          repeating-radial-gradient(circle at 50% 50%, rgba(48, 216, 255, 0.14) 0 1px, transparent 1px 44px),
+          linear-gradient(145deg, rgba(217, 180, 95, 0.08), rgba(40, 240, 181, 0.05));
+      }
+      .patroai-premium .neural-stage::before {
+        position: absolute;
+        width: 1px;
+        height: 154%;
+        content: "";
+        background: linear-gradient(transparent, rgba(40, 240, 181, 0.9), transparent);
+        animation: sweep 4s linear infinite;
+        transform-origin: bottom;
+      }
+      .patroai-premium #brainCanvas {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+      }
+      .patroai-premium .brain-shell {
+        position: relative;
+        z-index: 2;
+        width: min(72%, 312px);
+        aspect-ratio: 1;
+        animation: brainDrift 10.5s ease-in-out infinite;
+        filter: drop-shadow(0 0 26px rgba(40, 240, 181, 0.28));
+      }
+      .patroai-premium .brain-shell::before, .patroai-premium .brain-shell::after {
+        position: absolute;
+        content: "";
+        border-radius: 50%;
+      }
+      .patroai-premium .brain-shell::before {
+        inset: 5%;
+        background:
+          radial-gradient(circle at 36% 38%, transparent 0 18%, rgba(40, 240, 181, 0.36) 19% 20%, transparent 21%),
+          radial-gradient(circle at 62% 34%, transparent 0 15%, rgba(217, 180, 95, 0.36) 16% 17%, transparent 18%),
+          radial-gradient(circle at 42% 65%, transparent 0 13%, rgba(40, 240, 181, 0.28) 14% 15%, transparent 16%),
+          radial-gradient(circle at 58% 62%, transparent 0 17%, rgba(48, 216, 255, 0.23) 18% 19%, transparent 20%);
+        border: 1px solid rgba(40, 240, 181, 0.52);
+        box-shadow: inset 0 0 30px rgba(40, 240, 181, 0.18), 0 0 34px rgba(40, 240, 181, 0.24), 0 0 64px rgba(217, 180, 95, 0.1);
+        clip-path: polygon(48% 5%, 63% 8%, 78% 17%, 88% 32%, 91% 50%, 83% 68%, 70% 80%, 55% 88%, 50% 78%, 45% 88%, 29% 81%, 16% 68%, 9% 51%, 12% 32%, 22% 17%, 37% 8%);
+      }
+      .patroai-premium .brain-shell::after {
+        inset: 23% 25%;
+        background: radial-gradient(circle, rgba(255, 245, 190, 0.95), rgba(217, 180, 95, 0.22) 28%, transparent 55%);
+        filter: blur(1px);
+        animation: corePulse 2.6s ease-in-out infinite;
+      }
+      .patroai-premium .brain-lines {
+        position: absolute;
+        inset: 15%;
+        border-radius: 46%;
+        background:
+          linear-gradient(18deg, transparent 0 48%, rgba(40, 240, 181, 0.64) 49% 50%, transparent 51%),
+          linear-gradient(152deg, transparent 0 46%, rgba(217, 180, 95, 0.66) 47% 48%, transparent 49%),
+          linear-gradient(90deg, transparent 0 49%, rgba(40, 240, 181, 0.48) 50% 51%, transparent 52%),
+          linear-gradient(122deg, transparent 0 43%, rgba(48, 216, 255, 0.36) 44% 45%, transparent 46%);
+        animation: linePulse 3.1s ease-in-out infinite;
+      }
+
+      .patroai-premium .section { padding: 82px 0; }
+      .patroai-premium .section.alt { background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0)); }
+      .patroai-premium .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 0.88fr) minmax(260px, 0.52fr);
+        gap: 42px;
+        margin-bottom: 34px;
+      }
+      .patroai-premium .section h2 {
+        margin-bottom: 0;
+        font-family: var(--serif);
+        font-size: clamp(2.2rem, 4vw, 4.4rem);
+        font-weight: 500;
+        line-height: 1;
+      }
+      .patroai-premium .section-head p { color: var(--muted); line-height: 1.7; }
+      .patroai-premium .unit-grid, .patroai-premium .metric-grid, .patroai-premium .timeline {
+        display: grid;
+        gap: 16px;
+      }
+      .patroai-premium .unit-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .patroai-premium .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 24px; }
+      .patroai-premium .timeline { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+      .patroai-premium .unit-card, .patroai-premium .metric-card, .patroai-premium .form-wrap, .patroai-premium .timeline-card {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+      }
+      .patroai-premium .reveal {
+        transform: translateY(18px);
+        opacity: 0;
+        transition: transform 700ms ease, opacity 700ms ease, border-color 220ms ease, background 220ms ease;
+      }
+      .patroai-premium .reveal.visible {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .patroai-premium .unit-card:hover, .patroai-premium .metric-card:hover, .patroai-premium .timeline-card:hover {
+        border-color: rgba(40, 240, 181, 0.34);
+        background: rgba(11, 30, 26, 0.86);
+      }
+      .patroai-premium .unit-card { min-height: 410px; padding: 24px; }
+      .patroai-premium .unit-icon {
+        display: grid;
+        width: 52px;
+        height: 52px;
+        margin-bottom: 26px;
+        place-items: center;
+        border: 1px solid rgba(40, 240, 181, 0.38);
+        border-radius: 8px;
+        color: var(--green);
+        background: rgba(40, 240, 181, 0.06);
+        box-shadow: 0 0 22px rgba(40, 240, 181, 0.12);
+      }
+      .patroai-premium .unit-icon svg {
+        width: 28px;
+        height: 28px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8;
+      }
+      .patroai-premium .unit-card h3 {
+        font-family: var(--serif);
+        font-size: 2rem;
+        font-weight: 500;
+      }
+      .patroai-premium .unit-card p, .patroai-premium .timeline-card p, .patroai-premium .metric-card span { color: var(--muted); line-height: 1.65; }
+      .patroai-premium .unit-card ul, .patroai-premium .check-list {
+        display: grid;
+        gap: 10px;
+        padding: 0;
+        margin: 22px 0 0;
+        list-style: none;
+      }
+      .patroai-premium .unit-card li, .patroai-premium .check-list li {
+        position: relative;
+        padding-left: 24px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      .patroai-premium .unit-card li::before, .patroai-premium .check-list li::before {
+        position: absolute;
+        left: 0;
+        top: 0.64em;
+        width: 10px;
+        height: 1px;
+        content: "";
+        background: var(--gold);
+      }
+      .patroai-premium .metric-band {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 28px;
+        align-items: stretch;
+        max-width: 980px;
+      }
+      .patroai-premium .visual-image {
+        position: relative;
+        overflow: hidden;
+        min-height: 460px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius);
+        background:
+          radial-gradient(circle at 50% 42%, rgba(40, 240, 181, 0.16), transparent 24%),
+          radial-gradient(circle at 54% 50%, rgba(217, 180, 95, 0.12), transparent 34%),
+          linear-gradient(145deg, rgba(3, 13, 11, 0.92), rgba(1, 5, 4, 0.98));
+      }
+      .patroai-premium .visual-image::after { inset: 0; }
+      .patroai-premium .visual-image img {
+        width: 100%;
+        height: 100%;
+        min-height: 460px;
+        object-fit: cover;
+        filter: saturate(1.08) contrast(1.04);
+        transform: scale(1.02);
+      }
+
+      .patroai-premium .live-showcase {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      .patroai-premium .live-showcase::before {
+        position: absolute;
+        inset: 8%;
+        content: "";
+        border: 1px solid rgba(40, 240, 181, 0.16);
+        border-radius: 50%;
+        box-shadow:
+          0 0 0 52px rgba(40, 240, 181, 0.035),
+          0 0 0 104px rgba(217, 180, 95, 0.025),
+          0 0 90px rgba(40, 240, 181, 0.18);
+        animation: breatheRing 7s ease-in-out infinite;
+      }
+
+      .patroai-premium .showcase-logo {
+        position: absolute;
+        top: 28px;
+        left: 28px;
+        width: 112px;
+        height: 112px;
+        z-index: 3;
+        filter: drop-shadow(0 0 24px rgba(217, 180, 95, 0.35));
+        animation: planetDrift 10s ease-in-out infinite;
+      }
+
+      .patroai-premium .showcase-brain {
+        position: relative;
+        z-index: 2;
+        width: min(58%, 310px);
+        aspect-ratio: 1;
+        animation: brainTravel 12s ease-in-out infinite;
+        filter: drop-shadow(0 0 28px rgba(40, 240, 181, 0.36));
+      }
+
+      .patroai-premium .showcase-brain::before, .patroai-premium .showcase-brain::after {
+        position: absolute;
+        content: "";
+        border-radius: 50%;
+      }
+
+      .patroai-premium .showcase-brain::before {
+        inset: 4%;
+        background:
+          radial-gradient(circle at 36% 38%, transparent 0 18%, rgba(40, 240, 181, 0.52) 19% 20%, transparent 21%),
+          radial-gradient(circle at 62% 34%, transparent 0 15%, rgba(217, 180, 95, 0.52) 16% 17%, transparent 18%),
+          radial-gradient(circle at 42% 65%, transparent 0 13%, rgba(40, 240, 181, 0.4) 14% 15%, transparent 16%),
+          radial-gradient(circle at 58% 62%, transparent 0 17%, rgba(48, 216, 255, 0.34) 18% 19%, transparent 20%);
+        border: 1px solid rgba(40, 240, 181, 0.64);
+        box-shadow:
+          inset 0 0 32px rgba(40, 240, 181, 0.22),
+          0 0 44px rgba(40, 240, 181, 0.28),
+          0 0 74px rgba(217, 180, 95, 0.16);
+        clip-path: polygon(48% 5%, 63% 8%, 78% 17%, 88% 32%, 91% 50%, 83% 68%, 70% 80%, 55% 88%, 50% 78%, 45% 88%, 29% 81%, 16% 68%, 9% 51%, 12% 32%, 22% 17%, 37% 8%);
+      }
+
+      .patroai-premium .showcase-brain::after {
+        inset: 23% 25%;
+        background: radial-gradient(circle, rgba(255, 245, 190, 0.96), rgba(217, 180, 95, 0.24) 28%, transparent 58%);
+        filter: blur(1px);
+        animation: corePulse 2.6s ease-in-out infinite;
+      }
+
+      .patroai-premium .showcase-lines {
+        position: absolute;
+        inset: 15%;
+        border-radius: 46%;
+        background:
+          linear-gradient(18deg, transparent 0 48%, rgba(40, 240, 181, 0.68) 49% 50%, transparent 51%),
+          linear-gradient(152deg, transparent 0 46%, rgba(217, 180, 95, 0.7) 47% 48%, transparent 49%),
+          linear-gradient(90deg, transparent 0 49%, rgba(40, 240, 181, 0.52) 50% 51%, transparent 52%),
+          linear-gradient(122deg, transparent 0 43%, rgba(48, 216, 255, 0.4) 44% 45%, transparent 46%);
+        animation: linePulse 3.1s ease-in-out infinite;
+      }
+
+      .patroai-premium .showcase-particle {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 14px rgba(40, 240, 181, 0.76);
+        animation: particleOrbit 9s linear infinite;
+      }
+
+      .patroai-premium .showcase-particle:nth-child(4) { animation-duration: 11s; animation-delay: -3s; }
+      .patroai-premium .showcase-particle:nth-child(5) { animation-duration: 13s; animation-delay: -6s; background: var(--gold); }
+      .patroai-premium .showcase-particle:nth-child(6) { animation-duration: 15s; animation-delay: -8s; }
+      .patroai-premium .metric-card { min-height: 170px; padding: 24px; }
+      .patroai-premium .metric-card strong {
+        display: block;
+        margin-bottom: 14px;
+        color: var(--green);
+        font-family: var(--serif);
+        font-size: 3rem;
+        font-weight: 500;
+      }
+      .patroai-premium .timeline-card { min-height: 240px; padding: 22px; }
+      .patroai-premium .timeline-card small {
+        display: inline-flex;
+        margin-bottom: 24px;
+        color: var(--gold);
+        font-weight: 900;
+        letter-spacing: 0.1em;
+      }
+      .patroai-premium .timeline-card h3 { font-size: 1.2rem; }
+      .patroai-premium .contact-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(360px, 0.72fr);
+        gap: 28px;
+        align-items: start;
+      }
+      .patroai-premium .legal-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 0.58fr) minmax(0, 1fr);
+        gap: 28px;
+        align-items: start;
+      }
+      .patroai-premium .legal-summary {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+      .patroai-premium .legal-grid {
+        display: grid;
+        gap: 12px;
+      }
+      .patroai-premium .legal-card {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.035);
+      }
+      .patroai-premium .legal-card summary {
+        cursor: pointer;
+        padding: 18px 20px;
+        color: var(--gold);
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .patroai-premium .legal-card p, .patroai-premium .legal-card li {
+        color: var(--muted);
+        line-height: 1.65;
+      }
+      .patroai-premium .legal-card p {
+        margin: 0;
+        padding: 0 20px 18px;
+      }
+      .patroai-premium .legal-card ul {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0 20px 20px 38px;
+      }
+      .patroai-premium .form-wrap { padding: 24px; }
+      .patroai-premium .field-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .patroai-premium label {
+        display: grid;
+        gap: 7px;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+      .patroai-premium label.full { grid-column: 1 / -1; }
+      .patroai-premium input, .patroai-premium select, .patroai-premium textarea {
+        width: 100%;
+        min-height: 46px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        color: var(--text);
+        background: rgba(0, 0, 0, 0.24);
+      }
+      .patroai-premium input, .patroai-premium select { padding: 0 12px; }
+      .patroai-premium textarea { min-height: 112px; padding: 12px; resize: vertical; }
+      .patroai-premium input:focus, .patroai-premium select:focus, .patroai-premium textarea:focus {
+        border-color: rgba(40, 240, 181, 0.54);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(40, 240, 181, 0.08);
+      }
+      .patroai-premium .form-status {
+        min-height: 22px;
+        margin-top: 14px;
+        color: var(--green);
+        font-size: 0.9rem;
+      }
+      .patroai-premium .footer {
+        padding: 32px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--dim);
+      }
+      .patroai-premium .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .patroai-premium .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+      .patroai-premium .footer-links a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .patroai-premium .footer-links a:hover { color: var(--gold); }
+
+      @keyframes logoOrbit { to { transform: rotate(360deg); } }
+      @keyframes logoPulse {
+        0%, 100% { opacity: 0.24; transform: scale(0.94); }
+        50% { opacity: 0.92; transform: scale(1.2); }
+      }
+      @keyframes logoHaloBreath {
+        0%, 100% { filter: blur(10px); transform: scale(0.96); }
+        50% { filter: blur(15px); transform: scale(1.08); }
+      }
+      @keyframes logoStageHover {
+        0%, 100% { transform: translate3d(-8px, 0, 0) rotateZ(-1.5deg); }
+        35% { transform: translate3d(12px, -7px, 0) rotateZ(1.4deg); }
+        70% { transform: translate3d(4px, 5px, 0) rotateZ(-0.6deg); }
+      }
+      @keyframes planetDrift {
+        0%, 100% { transform: rotateZ(-2deg) rotateY(0deg) translateY(0); }
+        50% { transform: rotateZ(2deg) rotateY(12deg) translateY(-2px); }
+      }
+      @keyframes planetSpin {
+        to { transform: rotateZ(360deg); }
+      }
+      @keyframes officialLogoFloat {
+        0%, 100% { transform: perspective(420px) rotateY(-8deg) rotateX(2deg) rotateZ(-1.2deg) translateY(0) scale(1); }
+        50% { transform: perspective(420px) rotateY(8deg) rotateX(-2deg) rotateZ(1.2deg) translateY(-3px) scale(1.025); }
+      }
+      @keyframes logo3dTurn {
+        0%, 100% { transform: rotateY(-34deg) rotateX(10deg) rotateZ(-1.4deg); }
+        28% { transform: rotateY(24deg) rotateX(-7deg) rotateZ(1.4deg); }
+        58% { transform: rotateY(34deg) rotateX(8deg) rotateZ(0.8deg); }
+        78% { transform: rotateY(-20deg) rotateX(-6deg) rotateZ(-1deg); }
+      }
+      @keyframes logoGlint {
+        0%, 44%, 100% { opacity: 0; transform: translateX(-84%) rotate(12deg); }
+        57% { opacity: 0.9; }
+        76% { opacity: 0; transform: translateX(84%) rotate(12deg); }
+      }
+      @keyframes visibleOrbitSpin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes sweep { to { transform: rotate(360deg); } }
+      @keyframes glassSweep {
+        0%, 100% { transform: translateX(-36%); opacity: 0; }
+        42%, 58% { opacity: 1; }
+        72% { transform: translateX(36%); opacity: 0; }
+      }
+      @keyframes brainDrift {
+        0%, 100% { transform: translate3d(-34px, 4px, 0) rotateZ(-2deg) scale(0.96); }
+        25% { transform: translate3d(24px, -22px, 0) rotateZ(1.5deg) scale(1.03); }
+        50% { transform: translate3d(38px, 16px, 0) rotateZ(2.5deg) scale(1); }
+        75% { transform: translate3d(-16px, 28px, 0) rotateZ(-1.5deg) scale(1.04); }
+      }
+      @keyframes corePulse {
+        0%, 100% { opacity: 0.6; transform: scale(0.92); }
+        50% { opacity: 1; transform: scale(1.12); }
+      }
+      @keyframes linePulse {
+        0%, 100% { opacity: 0.58; filter: drop-shadow(0 0 4px rgba(40, 240, 181, 0.2)); }
+        50% { opacity: 1; filter: drop-shadow(0 0 14px rgba(217, 180, 95, 0.36)); }
+      }
+      @keyframes breatheRing {
+        0%, 100% { transform: scale(0.9); opacity: 0.58; }
+        50% { transform: scale(1.06); opacity: 0.92; }
+      }
+      @keyframes brainTravel {
+        0%, 100% { transform: translate3d(-34px, 4px, 0) rotateZ(-2deg) scale(0.95); }
+        25% { transform: translate3d(24px, -22px, 0) rotateZ(2deg) scale(1.03); }
+        50% { transform: translate3d(38px, 18px, 0) rotateZ(3deg) scale(0.99); }
+        75% { transform: translate3d(-18px, 28px, 0) rotateZ(-1deg) scale(1.04); }
+      }
+      @keyframes particleOrbit {
+        from { transform: rotate(0deg) translateX(176px) rotate(0deg); }
+        to { transform: rotate(360deg) translateX(176px) rotate(-360deg); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .patroai-premium, .patroai-premium *, .patroai-premium *::before, .patroai-premium *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+        .patroai-premium .brand-logo, .patroai-premium .brand-logo::before, .patroai-premium .brand-logo::after, .patroai-premium .logo-3d, .patroai-premium .logo-3d::after, .patroai-premium .logo-orbit-visible, .patroai-premium .logo-orbit-visible::before, .patroai-premium .logo-orbit-visible::after {
+          animation-duration: revert !important;
+          animation-iteration-count: infinite !important;
+        }
+        .patroai-premium .brand-logo { animation-name: logoStageHover !important; animation-duration: 4.8s !important; }
+        .patroai-premium .brand-logo::before { animation-name: logoOrbit, logoHaloBreath !important; animation-duration: 8s, 2.8s !important; }
+        .patroai-premium .brand-logo::after { animation-name: logoPulse !important; animation-duration: 2.8s !important; }
+        .patroai-premium .logo-3d { animation-name: logo3dTurn !important; animation-duration: 5.8s !important; }
+        .patroai-premium .logo-3d::after { animation-name: logoGlint !important; animation-duration: 3.4s !important; }
+        .patroai-premium .logo-orbit-visible { animation-name: visibleOrbitSpin !important; animation-duration: 1.9s !important; }
+      }
+
+      @media (max-width: 1020px) {
+        .patroai-premium .hero-grid, .patroai-premium .metric-band, .patroai-premium .contact-grid, .patroai-premium .legal-layout, .patroai-premium .section-head { grid-template-columns: 1fr; }
+        .patroai-premium .device-stage { min-height: 680px; }
+        .patroai-premium .screen-card { left: 0; right: 0; width: 100%; }
+        .patroai-premium .unit-grid, .patroai-premium .timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+
+      @media (max-width: 860px) {
+        .patroai-premium .icon-button { display: inline-grid; place-items: center; }
+        .patroai-premium .nav-links {
+          position: fixed;
+          top: 134px;
+          left: 16px;
+          right: 16px;
+          display: none;
+          padding: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          background: rgba(2, 6, 5, 0.96);
+          box-shadow: var(--shadow);
+        }
+        .patroai-premium .nav-links.open { display: grid; }
+        .patroai-premium .nav-actions .ghost { display: none; }
+        .patroai-premium .hero { padding-top: 56px; }
+        .patroai-premium .hero-grid { gap: 26px; }
+        .patroai-premium .assurance, .patroai-premium .unit-grid, .patroai-premium .metric-grid, .patroai-premium .timeline, .patroai-premium .field-grid { grid-template-columns: 1fr; }
+        .patroai-premium .screen-body { grid-template-columns: 1fr; }
+        .patroai-premium .device-stage { min-height: 760px; }
+        .patroai-premium .screen-card { position: relative; inset: auto; transform: none; }
+        .patroai-premium h1 { font-size: clamp(2.72rem, 12vw, 3.9rem); line-height: 0.96; }
+        .patroai-premium .footer-inner { align-items: flex-start; flex-direction: column; }
+      }
+
+      @media (max-width: 620px) {
+        .patroai-premium .nav, .patroai-premium .hero-inner, .patroai-premium .section-inner, .patroai-premium .footer-inner { width: min(100% - 22px, var(--max)); }
+        .patroai-premium .brand span span, .patroai-premium .language-switch { display: none; }
+        .patroai-premium .brand-logo { width: 86px; height: 86px; }
+        .patroai-premium .hero { padding-top: 44px; }
+        .patroai-premium .hero-copy { font-size: 1rem; line-height: 1.58; }
+        .patroai-premium .hero-actions .button { width: 100%; }
+        .patroai-premium .device-stage { min-height: 705px; }
+        .patroai-premium .screen-top { padding: 13px 14px; font-size: 0.68rem; }
+        .patroai-premium .screen-body { padding: 14px; gap: 12px; }
+        .patroai-premium .interface-panel { min-height: auto; padding: 15px; }
+        .patroai-premium .neural-stage { min-height: 320px; }
+        .patroai-premium .brain-shell { width: min(70%, 245px); }
+      }
+/* Wave 1 containment and regression hardening */
+.patroai-premium {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+.patroai-premium::before,
+.patroai-premium::after {
+  z-index: 0 !important;
+}
+.patroai-premium > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Prevent the tablet card labels (notably “Consultech”) from escaping. */
+.patroai-premium .interface-panel,
+.patroai-premium .signal-grid,
+.patroai-premium .signal {
+  min-width: 0;
+}
+.patroai-premium .signal {
+  overflow: hidden;
+}
+.patroai-premium .signal strong,
+.patroai-premium .signal span {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.patroai-premium .signal strong {
+  font-size: clamp(0.76rem, 1.15vw, 0.94rem);
+  line-height: 1.15;
+}
+
+/* React PWA install control placed in the premium header. */
+.patroai-premium .pwa-install-slot {
+  display: inline-flex;
+  align-items: center;
+}
+.patroai-premium .pwa-install-slot .install-button {
+  min-height: 40px;
+  border: 1px solid rgba(217, 180, 95, 0.42);
+  border-radius: 999px;
+  background: rgba(217, 180, 95, 0.07);
+  color: var(--gold);
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+.patroai-premium .pwa-install-slot .install-button--compact {
+  width: auto;
+  margin: 0;
+}
+.patroai-premium .pwa-install-slot .installed-badge {
+  margin: 0;
+}
+
+/* Reduced motion is honored consistently; Wave 1 no longer re-enables logo motion. */
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium .brand-logo,
+  .patroai-premium .brand-logo::before,
+  .patroai-premium .brand-logo::after,
+  .patroai-premium .logo-3d,
+  .patroai-premium .logo-3d::after,
+  .patroai-premium .logo-orbit-visible,
+  .patroai-premium .logo-orbit-visible::before,
+  .patroai-premium .logo-orbit-visible::after,
+  .patroai-premium .brain-shell,
+  .patroai-premium .brain-shell::after,
+  .patroai-premium .brain-lines,
+  .patroai-premium .neural-stage::before {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .patroai-premium .pwa-install-slot,
+  .patroai-premium .pwa-install-slot .install-button {
+    width: 100%;
+  }
+}
