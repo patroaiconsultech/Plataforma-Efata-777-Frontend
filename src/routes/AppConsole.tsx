@@ -15,6 +15,9 @@ import {
   getToken,
   isApiBaseConfigured,
   getDocumentContextProvenance,
+  getMe,
+  completeHyperCocreatorOnboarding,
+  HyperCocreatorMe,
   getRealtimeCapabilities,
   listAgents,
   listMessages,
@@ -33,6 +36,7 @@ import {
 import ArtifactCard from "../components/ArtifactCard";
 import PwaInstallButton from "../components/PwaInstallButton";
 import { beginLogin, isOidcConfigured, logout } from "../auth/oidc";
+import { ONBOARDING_DRAFT_KEY } from "./AccessPortal";
 import {
   formatConversationTimestamp,
   formatDateTimeTitle,
@@ -171,6 +175,7 @@ export default function AppConsole() {
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [authenticated, setAuthenticated] = useState(() => Boolean(getToken()));
+  const [me, setMe] = useState<HyperCocreatorMe | null>(null);
   const [agents, setAgents] = useState<AgentDefinition[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<AgentDefinition | null>(null);
   const [showAgents, setShowAgents] = useState(false);
@@ -278,17 +283,11 @@ export default function AppConsole() {
     setAgentsError("");
     try {
       const catalog = await listAgents();
-      setAgents(catalog);
-      setSelectedAgent((current) => {
-        if (current) {
-          return catalog.find((agent) => agent.slug === current.slug) ?? null;
-        }
-        return (
-          catalog.find((agent) => agent.slug.toLowerCase() === "orkio") ??
-          catalog[0] ??
-          null
-        );
-      });
+      const hyper = catalog.find(
+        (agent) => agent.slug.toLowerCase() === "orkio",
+      ) ?? null;
+      setAgents(hyper ? [hyper] : []);
+      setSelectedAgent(hyper);
     } catch (err) {
       setAgents([]);
       setSelectedAgent(null);
@@ -352,8 +351,48 @@ export default function AppConsole() {
   }, [refreshAgents]);
 
   useEffect(() => {
-    void refreshTeams();
-  }, [refreshTeams]);
+    if (!authenticated || !configured) {
+      setMe(null);
+      return;
+    }
+    let active = true;
+    const bootstrap = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("onboarding") === "1") {
+          const raw = sessionStorage.getItem(ONBOARDING_DRAFT_KEY);
+          if (raw) {
+            const draft = JSON.parse(raw) as {
+              grant: string;
+              co_creator_name: string;
+              onboarding_goal?: string | null;
+            };
+            await completeHyperCocreatorOnboarding(draft);
+            sessionStorage.removeItem(ONBOARDING_DRAFT_KEY);
+            params.delete("onboarding");
+            const query = params.toString();
+            window.history.replaceState(
+              null,
+              "",
+              `${window.location.pathname}${query ? `?${query}` : ""}`,
+            );
+          }
+        }
+        const profile = await getMe();
+        if (active) setMe(profile);
+      } catch (err) {
+        if (active) setError(describe(err));
+      }
+    };
+    void bootstrap();
+    return () => { active = false; };
+  }, [authenticated, configured]);
+
+
+  useEffect(() => {
+    setExecutionMode("individual");
+    setTeams([]);
+  }, []);
 
   useEffect(() => {
     void refreshRealtimeCapabilities();
@@ -905,7 +944,7 @@ export default function AppConsole() {
       if (!sdp) throw new ApiError(0, "REALTIME_SDP_EMPTY");
 
       const call =
-        executionMode === "team" && activeTeam
+        false && executionMode === "team" && activeTeam
           ? await createRealtimeCall(sessionThreadId, {
               sdp,
               target_mode: "team",
@@ -918,9 +957,7 @@ export default function AppConsole() {
           : await createRealtimeCall(sessionThreadId, {
               sdp,
               target_mode: "direct",
-              agent: selectedAgent
-                ? technicalAgentTarget(selectedAgent.slug)
-                : "Josué",
+              agent: technicalAgentTarget("orkio"),
               locale: "pt-BR",
             });
 
@@ -996,7 +1033,7 @@ export default function AppConsole() {
 
     let teamDefinition: TeamDefinition | null = null;
     let teamContributorIds: string[] = [];
-    if (executionMode === "team") {
+    if (false && executionMode === "team") {
       teamDefinition =
         teams.find((team) => team.team_id === selectedTeamId) ?? null;
       if (!teamDefinition) {
@@ -1079,7 +1116,7 @@ export default function AppConsole() {
         },
       };
 
-      if (executionMode === "team" && teamDefinition) {
+      if (false && executionMode === "team" && teamDefinition) {
         setTeamRunStatus("Team iniciando…");
         await streamTeamMessage(
           threadId,
@@ -1095,7 +1132,7 @@ export default function AppConsole() {
             onStatus: (data) => {
               const status = String(data.status ?? "");
               if (status === "team_synthesizing") {
-                setTeamRunStatus("ORKIO consolidando as contribuições…");
+                setTeamRunStatus("Plataforma consolidando as contribuições…");
               } else if (status === "team_started") {
                 setTeamRunStatus("Team em colaboração…");
               }
@@ -1118,7 +1155,7 @@ export default function AppConsole() {
         await streamMessage(
           threadId,
           content,
-          selectedAgent ? technicalAgentTarget(selectedAgent.slug) : "Josué",
+          technicalAgentTarget("orkio"),
           commonHandlers,
           controller.signal,
         );
@@ -1228,24 +1265,16 @@ export default function AppConsole() {
 
   const activeThread = threads.find((thread) => thread.id === threadId) ?? null;
   const selectedAgentName =
-    selectedAgent?.canonical_name || selectedAgent?.display_name || AGENT;
+    me?.co_creator_name || "Co-Criador";
   const selectedAgentRole =
-    selectedAgent?.localized_role_labels?.["pt-BR"] ||
-    selectedAgent?.role_label ||
-    "Agente selecionado";
+    "Hyper Co-Criador · Estratégia, criatividade e execução de negócios";
   const selectedAgentInitial = selectedAgentName.slice(0, 1).toUpperCase();
   const activeTeam = teams.find((team) => team.team_id === selectedTeamId) ?? null;
   const teamMin = activeTeam?.participant_policy.min_contributors ?? 2;
   const teamMax = activeTeam?.participant_policy.max_contributors ?? 0;
   const teamEligibleCount = activeTeam?.participant_policy.eligible_count ?? 0;
-  const executionTargetName =
-    executionMode === "team"
-      ? activeTeam?.display_name || "Team"
-      : selectedAgentName;
-  const executionTargetRole =
-    executionMode === "team"
-      ? `${teamParticipants.length}/${teamMax || "?"} especialistas · ORKIO coordena`
-      : selectedAgentRole;
+  const executionTargetName = selectedAgentName;
+  const executionTargetRole = selectedAgentRole;
   const realtimeReason =
     realtimeCapabilities?.orchestration_bridge?.reason_code ||
     realtimeCapabilities?.realtime_session?.reason_code ||
@@ -1266,7 +1295,7 @@ export default function AppConsole() {
     connecting: "Conectando",
     listening: "Ouvindo",
     transcribing: "Transcrevendo",
-    orkio_processing: "ORKIO processando",
+    orkio_processing: "Co-Criador processando",
     speaking: "Falando",
     error: "Erro",
   };
@@ -1337,7 +1366,7 @@ export default function AppConsole() {
         <div className="console-sidebar__brand">
           <Link className="brand-lockup brand-lockup--compact" to="/">
             <span className="brand-orb" aria-hidden="true" />
-            <span>ORKIO™</span>
+            <span>Plataforma</span>
           </Link>
           <button
             type="button"
@@ -1472,7 +1501,10 @@ export default function AppConsole() {
             </Link>
             {authConfigured ? (
               authenticated ? (
-                <button
+                {me?.admin_access ? (
+                <Link className="ghost-link" to="/admin">Painel admin</Link>
+              ) : null}
+              <button
                   type="button"
                   onClick={() => {
                     logout();
@@ -1680,20 +1712,10 @@ export default function AppConsole() {
               disabled={!authenticated || !threadId || sending || uploading}
             />
           </label>
-          <button
-            type="button"
-            className="agent-trigger"
-            onClick={() => setShowAgents(true)}
-            aria-label="Selecionar agente"
-            aria-haspopup="dialog"
-            disabled={!authenticated}
-            title="Selecionar agente"
-          >
-            <span aria-hidden="true">👥</span>
-            <span className="agent-trigger__label">
-              {selectedAgentName || "Agentes"}
-            </span>
-          </button>
+          <div className="agent-trigger hyper-cocreator-badge" aria-label={`Co-Criador ativo: ${selectedAgentName}`}>
+            <span aria-hidden="true">✦</span>
+            <span className="agent-trigger__label">{selectedAgentName}</span>
+          </div>
           <textarea
             value={message}
             onChange={(event) => setMessage(event.target.value)}
@@ -1775,7 +1797,7 @@ export default function AppConsole() {
 
 
 
-      {showAgents ? (
+      {false && showAgents ? (
         <div className="modal" role="presentation">
           <section
             className="modal-card agent-picker"

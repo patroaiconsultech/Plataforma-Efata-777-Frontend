@@ -28,7 +28,7 @@ test("landing contains PatroAI premium institutional sections", () => {
   assert.match(premiumMarkup, /Ecossistema PatroAI/);
   assert.match(premiumMarkup, /Governança, ESG e perpetuação/);
   assert.match(premiumMarkup, /Do briefing ao sistema governado/);
-  assert.match(premiumMarkup, /Solicite uma conversa estratégica/);
+  assert.match(premiumMarkup, /Converse com a PatroAI/);
 });
 
 test("premium landing remains under the canonical React route", () => {
@@ -51,6 +51,30 @@ test("responsive layout includes safe areas and touch targets", () => {
   assert.match(styles, /min-height: 44px/);
   assert.match(styles, /@media \(max-width: 760px\)/);
   assert.match(styles, /@media \(display-mode: standalone\)/);
-  assert.match(premiumCss, /overflow-wrap: anywhere/);
+  assert.match(premiumCss, /white-space: nowrap/);
+  assert.match(premiumCss, /word-break: normal/);
   assert.match(premiumCss, /\.signal strong/);
+});
+
+
+test("header premium brand motion hooks exist", () => {
+  assert.match(premiumMarkup, /header-brand-image/);
+  assert.match(premiumMarkup, /header-brand-orbit--outer/);
+  assert.match(premiumMarkup, /header-brand-aura/);
+  assert.match(premiumMarkup, /logo-patroai-oficial\.png/);
+});
+
+test("public landing presents the single Hyper Co-Creator without legacy 67/77 branding", () => {
+  assert.match(premiumMarkup, /Hyper Co-Criador/);
+  assert.match(premiumMarkup, /Acessar Plataforma/);
+  assert.match(premiumMarkup, /data-private-entry="true"/);
+  assert.doesNotMatch(premiumMarkup, /ORKIO 77|Plataforma 67|v0\.77/);
+});
+
+
+test("landing opens with an optional immersive music gateway", () => {
+  assert.match(premiumMarkup, /Este é um ambiente imersivo/);
+  assert.match(premiumMarkup, /Entrar com experiência sonora/);
+  assert.match(premiumMarkup, /Entrar em silêncio/);
+  assert.match(premiumMarkup, /Recomendamos o uso de fones de ouvido/);
 });

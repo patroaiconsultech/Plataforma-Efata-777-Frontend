@@ -71,7 +71,7 @@ test("stream target uses explicit technical namespace", () => {
   assert.match(api, /export function technicalAgentTarget/);
   assert.match(api, /normalized\.startsWith\("id:"\)/);
   assert.match(api, /return `id:\$\{normalized\}`/);
-  assert.match(console_, /selectedAgent \? technicalAgentTarget\(selectedAgent\.slug\) : "Josué"/);
+  assert.match(console_, /technicalAgentTarget\("orkio"\)/);
 });
 
 test("stream uses fetch with Authorization instead of EventSource", () => {

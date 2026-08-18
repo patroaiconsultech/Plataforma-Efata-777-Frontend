@@ -28,7 +28,7 @@ export default function AuthCallback() {
 
   return (
     <main id="main-content" className="invite-shell">
-      <h1>Autenticação ORKIO</h1>
+      <h1>Autenticação da Plataforma</h1>
       {state === "working" ? (
         <p role="status">Validando sua identidade.</p>
       ) : (

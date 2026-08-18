@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import PwaInstallButton from "../components/PwaInstallButton";
 import { getToken } from "../api";
-import { beginLogin, isOidcConfigured } from "../auth/oidc";
 import { premiumMarkup } from "../landing/premiumMarkup";
 import { mountPremiumLanding } from "../landing/premiumInteractions";
 import "../landing/premium.css";
@@ -21,15 +20,11 @@ export default function Landing() {
       root,
       onPwaSlot: setPwaSlot,
       onPrivateAccess: async () => {
-        const authenticated = Boolean(getToken());
-        const oidcConfigured = isOidcConfigured();
-
-        if (authenticated || !oidcConfigured) {
+        if (getToken()) {
           navigate("/app");
           return;
         }
-
-        await beginLogin("/app");
+        navigate("/access");
       },
     });
   }, [navigate]);

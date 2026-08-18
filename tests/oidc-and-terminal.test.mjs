@@ -9,6 +9,7 @@ const console_ = fs.readFileSync("src/routes/AppConsole.tsx", "utf8");
 const invite = fs.readFileSync("src/routes/InviteAccept.tsx", "utf8");
 const app = fs.readFileSync("src/App.tsx", "utf8");
 const landing = fs.readFileSync("src/routes/Landing.tsx", "utf8");
+const accessPortal = fs.readFileSync("src/routes/AccessPortal.tsx", "utf8");
 
 test("OIDC uses Authorization Code with PKCE S256", () => {
   assert.match(oidc, /response_type", "code"/);
@@ -75,9 +76,11 @@ test("console blocks product actions before authentication", () => {
   assert.match(console_, /Autentique-se para usar conversas/);
 });
 
-test("landing starts login when OIDC is configured", () => {
-  assert.match(landing, /isOidcConfigured/);
-  assert.match(landing, /beginLogin\("\/app"\)/);
+test("landing routes unauthenticated private access through the governed access portal", () => {
+  assert.match(landing, /navigate\("\/access"\)/);
+  assert.match(accessPortal, /isOidcConfigured/);
+  assert.match(accessPortal, /beginLogin/);
+  assert.match(accessPortal, /validateAccessCode/);
 });
 
 test("invite preserves target through authentication", () => {

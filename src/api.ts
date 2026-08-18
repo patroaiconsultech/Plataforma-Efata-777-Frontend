@@ -788,3 +788,64 @@ export async function streamTeamMessage(
 
 /** Compatibilidade com o consumo anterior. */
 export const api = apiJson;
+
+
+export type HyperCocreatorMe = {
+  user_id: string;
+  tenant_id: string;
+  email?: string | null;
+  roles: string[];
+  admin_access: boolean;
+  co_creator_name: string;
+  onboarding_goal?: string | null;
+};
+
+export type AccessGrantResponse = {
+  grant: string;
+  expires_at: number;
+  onboarding_required: boolean;
+};
+
+export type AdminOverview = {
+  tenant_id: string;
+  users: number;
+  threads: number;
+  messages: number;
+  co_creator_profiles: number;
+  environment: string;
+  release_sha: string;
+};
+
+export async function validateAccessCode(
+  code: string,
+): Promise<AccessGrantResponse> {
+  return apiJson<AccessGrantResponse>("/api/v2/access/validate", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+}
+
+export async function completeHyperCocreatorOnboarding(input: {
+  grant: string;
+  co_creator_name: string;
+  onboarding_goal?: string | null;
+}): Promise<{
+  status: string;
+  user_id: string;
+  tenant_id: string;
+  co_creator_name: string;
+  onboarding_goal?: string | null;
+}> {
+  return apiJson("/api/v2/onboarding/complete", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getMe(): Promise<HyperCocreatorMe> {
+  return apiJson<HyperCocreatorMe>("/api/v2/me");
+}
+
+export async function getAdminOverview(): Promise<AdminOverview> {
+  return apiJson<AdminOverview>("/api/v2/admin/overview");
+}

@@ -34,7 +34,7 @@ test("Team SSE surfaces agent lifecycle and final synthesis", () => {
   }
   assert.match(console_, /onAgentStarted/);
   assert.match(console_, /onAgentDone/);
-  assert.match(console_, /ORKIO consolidando as contribuições/);
+  assert.match(console_, /Plataforma consolidando as contribuições/);
 });
 
 test("Realtime control starts only through backend-governed canonical bridge", () => {

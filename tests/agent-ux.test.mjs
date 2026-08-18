@@ -11,27 +11,21 @@ test("agent catalog is backend-driven", () => {
   assert.doesNotMatch(consoleSource, /\["Orkio",\s*"Auditor"/);
 });
 
-test("selected agent is sent through the explicit technical namespace", () => {
+test("single Hyper Co-Creator uses the explicit canonical technical namespace", () => {
   assert.match(api, /export function technicalAgentTarget/);
   assert.match(api, /return `id:\$\{normalized\}`/);
-  assert.match(consoleSource, /technicalAgentTarget\(selectedAgent\.slug\)/);
-  assert.match(consoleSource, /: "Josué"/);
-  assert.match(consoleSource, /selectedAgent\?\.display_name \|\| AGENT/);
-  assert.doesNotMatch(consoleSource, /selectedAgent\?\.slug \|\| AGENT/);
+  assert.match(consoleSource, /technicalAgentTarget\("orkio"\)/);
+  assert.match(consoleSource, /me\?\.co_creator_name \|\| "Co-Criador"/);
 });
 
-test("team mode is wired to the governed backend contract", () => {
-  assert.doesNotMatch(consoleSource, /Team · em breve/);
+test("multi-agent implementation remains internal but is not exposed in the initial Hyper Co-Creator UX", () => {
   assert.match(consoleSource, /type ExecutionMode = "individual" \| "team"/);
-  assert.match(consoleSource, /await listTeams\(\)/);
   assert.match(consoleSource, /streamTeamMessage\(/);
-  assert.match(consoleSource, /contributor_agent_ids:/);
-  assert.match(consoleSource, /team_id: teamDefinition\.team_id/);
-  assert.doesNotMatch(consoleSource, /orchestrator_agent_id: teamDefinition\.orchestrator_agent_id/);
+  assert.match(consoleSource, /setExecutionMode\("individual"\)/);
+  assert.match(consoleSource, /\{false && showAgents/);
 });
 
 test("participant invite remains a separate capability", () => {
   assert.match(consoleSource, /\+ Convidar/);
   assert.match(consoleSource, /setShowInvite\(true\)/);
-  assert.match(consoleSource, /setShowAgents\(true\)/);
 });

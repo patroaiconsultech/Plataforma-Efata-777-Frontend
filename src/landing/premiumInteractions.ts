@@ -63,6 +63,8 @@ export function mountPremiumLanding({
   const timers = new Set<number>();
   const previousLang = document.documentElement.lang || "pt-BR";
   let currentLang = "pt";
+  let musicEnergy = 0;
+  let musicReactiveActive = false;
 
   const query = <T extends Element>(selector: string): T | null =>
     root.querySelector<T>(selector);
@@ -78,6 +80,22 @@ export function mountPremiumLanding({
   const screenCard = query<HTMLElement>("#screenCard");
   const langButtons = queryAll<HTMLButtonElement>("[data-lang]");
   const pwaSlot = query<HTMLElement>("#pwaInstallSlot");
+  const immersiveGate = query<HTMLElement>("#immersiveGate");
+  const immersiveSoundEntry = query<HTMLButtonElement>("#immersiveSoundEntry");
+  const immersiveSilent = query<HTMLButtonElement>("[data-immersive-silent]");
+  const copyrightToggle = query<HTMLButtonElement>("[data-copyright-toggle]");
+  const copyrightPanel = query<HTMLElement>("#immersiveCopyright");
+  const neuralLobby = query<HTMLElement>("#neuralLobby");
+  const neuralLobbyLinks =
+    queryAll<HTMLAnchorElement>("[data-neural-lobby-link]");
+  const immersiveAudio = query<HTMLAudioElement>("#patroaiImmersiveAudio");
+  const musicDock = query<HTMLElement>("#musicDock");
+  const musicDockToggle = query<HTMLButtonElement>("#musicDockToggle");
+  const musicDockStatus = query<HTMLElement>("#musicDockStatus");
+  const musicDockIcon = query<HTMLElement>("[data-music-icon]");
+  const reducedMotionPreference = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  );
 
   onPwaSlot?.(pwaSlot);
 
@@ -213,8 +231,11 @@ export function mountPremiumLanding({
     });
   }
 
-  function initBrainCanvas() {
-    const canvas = query<HTMLCanvasElement>("#brainCanvas");
+  function initBrainCanvas(
+    selector = "#brainCanvas",
+    densityMultiplier = 1,
+  ) {
+    const canvas = query<HTMLCanvasElement>(selector);
     const stage = canvas?.parentElement as HTMLElement | null;
     const ctx = canvas?.getContext("2d");
 
@@ -245,8 +266,12 @@ export function mountPremiumLanding({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       nodes.length = 0;
-      const count =
+      const baseCount =
         width < 360 ? 34 : width < 720 ? 48 : 62;
+      const count = Math.max(
+        24,
+        Math.round(baseCount * densityMultiplier),
+      );
 
       for (let i = 0; i < count; i += 1) {
         const angle = (Math.PI * 2 * i) / count;
@@ -274,6 +299,17 @@ export function mountPremiumLanding({
       const t = time * 0.001;
       const cx = width * 0.5;
       const cy = height * 0.5;
+      const reactiveEnergy =
+        musicReactiveActive && !reducedMotion.matches
+          ? Math.min(1, Math.max(0, musicEnergy))
+          : 0;
+      const driftBoost = 1 + reactiveEnergy * 2.4;
+      const connectionDistance = 86 + reactiveEnergy * 28;
+      const connectionAlphaBoost = 1 + reactiveEnergy * 0.95;
+      const nodeRadiusBoost = reactiveEnergy * 1.2;
+      const haloBoost = reactiveEnergy * 9;
+      const coreRadius =
+        Math.min(width, height) * (0.34 + reactiveEnergy * 0.055);
 
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
@@ -282,13 +318,13 @@ export function mountPremiumLanding({
         if (advance) {
           const pull = pointer.active ? 0.0009 : 0.00035;
           node.x +=
-            node.vx +
+            node.vx * driftBoost +
             (0.5 - node.x) * pull +
-            Math.sin(t + index) * 0.00045;
+            Math.sin(t + index) * (0.00045 * driftBoost);
           node.y +=
-            node.vy +
+            node.vy * driftBoost +
             (0.5 - node.y) * pull +
-            Math.cos(t * 0.8 + index) * 0.00038;
+            Math.cos(t * 0.8 + index) * (0.00038 * driftBoost);
 
           if (pointer.active) {
             const dx = pointer.x - node.x;
@@ -315,8 +351,11 @@ export function mountPremiumLanding({
           const by = b.y * height;
           const dist = Math.hypot(ax - bx, ay - by);
 
-          if (dist < 86) {
-            const alpha = (1 - dist / 86) * 0.38;
+          if (dist < connectionDistance) {
+            const alpha =
+              (1 - dist / connectionDistance) *
+              0.38 *
+              connectionAlphaBoost;
             const goldPulse =
               0.5 + Math.sin(t * 2.1 + i + j) * 0.5;
             ctx.strokeStyle = `rgba(${
@@ -346,14 +385,26 @@ export function mountPremiumLanding({
           ? `rgba(255, 235, 176, ${0.42 + glow * 0.36})`
           : `rgba(40, 240, 181, ${0.28 + glow * 0.34})`;
         ctx.beginPath();
-        ctx.arc(x, y, nearCore ? 2.2 : 1.7, 0, Math.PI * 2);
+        ctx.arc(
+          x,
+          y,
+          (nearCore ? 2.2 : 1.7) + nodeRadiusBoost,
+          0,
+          Math.PI * 2,
+        );
         ctx.fill();
 
         if (index % 9 === 0) {
           ctx.strokeStyle =
             `rgba(217, 180, 95, ${0.14 + glow * 0.24})`;
           ctx.beginPath();
-          ctx.arc(x, y, 8 + glow * 7, 0, Math.PI * 2);
+          ctx.arc(
+            x,
+            y,
+            8 + glow * 7 + haloBoost,
+            0,
+            Math.PI * 2,
+          );
           ctx.stroke();
         }
       });
@@ -364,7 +415,7 @@ export function mountPremiumLanding({
         0,
         cx,
         cy,
-        Math.min(width, height) * 0.34,
+        coreRadius,
       );
       core.addColorStop(0, "rgba(255, 238, 174, 0.34)");
       core.addColorStop(0.35, "rgba(40, 240, 181, 0.14)");
@@ -374,7 +425,7 @@ export function mountPremiumLanding({
       ctx.arc(
         cx,
         cy,
-        Math.min(width, height) * 0.34,
+        coreRadius,
         0,
         Math.PI * 2,
       );
@@ -506,6 +557,369 @@ export function mountPremiumLanding({
     );
   });
 
+
+  if (immersiveGate) {
+    document.body.classList.add("immersive-gate-open");
+
+    const openNeuralLobby = () => {
+      if (!neuralLobby) return;
+      neuralLobby.classList.remove("is-exiting");
+      neuralLobby.classList.add("is-active");
+      neuralLobby.setAttribute("aria-hidden", "false");
+      document.body.classList.add("neural-lobby-open");
+    };
+
+    const closeImmersiveGate = () => {
+      immersiveGate.classList.add("is-leaving");
+      window.setTimeout(() => {
+        immersiveGate.hidden = true;
+        document.body.classList.remove("immersive-gate-open");
+        openNeuralLobby();
+      }, 520);
+    };
+
+    const closeNeuralLobby = (targetSelector?: string) => {
+      if (!neuralLobby) return;
+      neuralLobby.classList.add("is-exiting");
+      neuralLobby.classList.remove("is-active");
+      neuralLobby.setAttribute("aria-hidden", "true");
+
+      window.setTimeout(() => {
+        document.body.classList.remove("neural-lobby-open");
+        if (!targetSelector) return;
+        const target = document.querySelector<HTMLElement>(
+          targetSelector,
+        );
+        target?.scrollIntoView({
+          behavior: reducedMotionPreference.matches
+            ? "auto"
+            : "smooth",
+          block: "start",
+        });
+      }, 680);
+    };
+
+    const syncMusicDock = () => {
+      if (!immersiveAudio || !musicDock) return;
+      musicDock.hidden = false;
+      const paused = immersiveAudio.paused;
+      if (musicDockIcon) musicDockIcon.textContent = paused ? "▶" : "Ⅱ";
+      if (musicDockToggle) {
+        musicDockToggle.setAttribute(
+          "aria-label",
+          paused ? "Reproduzir música" : "Pausar música",
+        );
+      }
+      if (musicDockStatus) {
+        musicDockStatus.textContent = immersiveAudio.ended
+          ? "Obra concluída"
+          : paused
+            ? "Experiência sonora pausada"
+            : "Reproduzindo obra imersiva";
+      }
+    };
+
+    let audioContext: AudioContext | null = null;
+    let audioAnalyser: AnalyserNode | null = null;
+    let audioReactiveFrame = 0;
+    let audioReactiveLevel = 0;
+    let audioReactiveReady = false;
+
+    const resetAudioReactiveLogo = () => {
+      if (audioReactiveFrame) {
+        window.cancelAnimationFrame(audioReactiveFrame);
+        audioReactiveFrame = 0;
+      }
+      audioReactiveLevel = 0;
+      musicEnergy = 0;
+      musicReactiveActive = false;
+      root.classList.remove("music-reactive-active");
+      root.style.removeProperty("--music-logo-scale");
+      root.style.removeProperty("--music-logo-lift");
+      root.style.removeProperty("--music-logo-glow");
+      root.style.removeProperty("--music-aura-scale");
+      root.style.removeProperty("--music-aura-opacity");
+      root.style.removeProperty("--music-dock-energy");
+    };
+
+    const renderAudioReactiveLogo = () => {
+      if (
+        !immersiveAudio ||
+        !audioAnalyser ||
+        immersiveAudio.paused ||
+        immersiveAudio.ended ||
+        reducedMotionPreference.matches
+      ) {
+        resetAudioReactiveLogo();
+        return;
+      }
+
+      const frequencyData = new Uint8Array(
+        audioAnalyser.frequencyBinCount,
+      );
+      audioAnalyser.getByteFrequencyData(frequencyData);
+
+      // Use the lower ~60% of bins: enough musical body to feel the track
+      // without making the logo jitter on every high-frequency transient.
+      const usefulBins = Math.max(
+        1,
+        Math.floor(frequencyData.length * 0.6),
+      );
+      let energyTotal = 0;
+      for (let index = 0; index < usefulBins; index += 1) {
+        energyTotal += frequencyData[index];
+      }
+
+      const rawEnergy =
+        energyTotal / usefulBins / 255;
+
+      // Faster attack, slower release keeps the motion musical rather than noisy.
+      const smoothing =
+        rawEnergy > audioReactiveLevel ? 0.34 : 0.12;
+      audioReactiveLevel +=
+        (rawEnergy - audioReactiveLevel) * smoothing;
+
+      const normalized = Math.min(
+        1,
+        Math.max(0, audioReactiveLevel * 1.8),
+      );
+      musicEnergy = normalized;
+      musicReactiveActive = true;
+      const scale = 1 + normalized * 0.085;
+      const lift = -normalized * 3.2;
+      const glow = 0.32 + normalized * 0.62;
+      const auraScale = 0.98 + normalized * 0.18;
+      const auraOpacity = 0.58 + normalized * 0.4;
+
+      root.classList.add("music-reactive-active");
+      root.style.setProperty(
+        "--music-logo-scale",
+        scale.toFixed(4),
+      );
+      root.style.setProperty(
+        "--music-logo-lift",
+        `${lift.toFixed(2)}px`,
+      );
+      root.style.setProperty(
+        "--music-logo-glow",
+        glow.toFixed(3),
+      );
+      root.style.setProperty(
+        "--music-aura-scale",
+        auraScale.toFixed(4),
+      );
+      root.style.setProperty(
+        "--music-aura-opacity",
+        auraOpacity.toFixed(3),
+      );
+      root.style.setProperty(
+        "--music-dock-energy",
+        normalized.toFixed(3),
+      );
+
+      audioReactiveFrame = window.requestAnimationFrame(
+        renderAudioReactiveLogo,
+      );
+    };
+
+    const ensureAudioReactiveLogo = async () => {
+      if (
+        !immersiveAudio ||
+        reducedMotionPreference.matches ||
+        audioReactiveReady
+      ) {
+        return;
+      }
+
+      const AudioContextClass =
+        window.AudioContext ||
+        (
+          window as Window & {
+            webkitAudioContext?: typeof AudioContext;
+          }
+        ).webkitAudioContext;
+
+      if (!AudioContextClass) return;
+
+      try {
+        audioContext = new AudioContextClass();
+        const source =
+          audioContext.createMediaElementSource(immersiveAudio);
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 256;
+        audioAnalyser.smoothingTimeConstant = 0.72;
+        source.connect(audioAnalyser);
+        audioAnalyser.connect(audioContext.destination);
+        audioReactiveReady = true;
+
+        if (audioContext.state === "suspended") {
+          await audioContext.resume();
+        }
+      } catch {
+        // Audio playback remains functional even if visual analysis is unavailable.
+        audioAnalyser = null;
+        audioReactiveReady = false;
+      }
+    };
+
+    const startAudioReactiveLogo = () => {
+      if (
+        !audioAnalyser ||
+        !immersiveAudio ||
+        immersiveAudio.paused ||
+        reducedMotionPreference.matches
+      ) {
+        resetAudioReactiveLogo();
+        return;
+      }
+      if (audioReactiveFrame) {
+        window.cancelAnimationFrame(audioReactiveFrame);
+      }
+      audioReactiveFrame = window.requestAnimationFrame(
+        renderAudioReactiveLogo,
+      );
+    };
+
+    if (immersiveSoundEntry && immersiveAudio) {
+      const onSoundEntry = async () => {
+        try {
+          immersiveAudio.currentTime = 0;
+          await ensureAudioReactiveLogo();
+          if (audioContext?.state === "suspended") {
+            await audioContext.resume();
+          }
+          await immersiveAudio.play();
+          syncMusicDock();
+          startAudioReactiveLogo();
+          closeImmersiveGate();
+        } catch {
+          if (musicDockStatus) {
+            musicDockStatus.textContent =
+              "Não foi possível iniciar o áudio neste navegador.";
+          }
+          if (musicDock) musicDock.hidden = false;
+        }
+      };
+      immersiveSoundEntry.addEventListener("click", onSoundEntry);
+      cleanups.push(() =>
+        immersiveSoundEntry.removeEventListener("click", onSoundEntry),
+      );
+    }
+
+    if (immersiveSilent) {
+      const onSilentEntry = () => {
+        if (immersiveAudio) {
+          immersiveAudio.pause();
+          immersiveAudio.currentTime = 0;
+        }
+        resetAudioReactiveLogo();
+        if (musicDock) musicDock.hidden = true;
+        closeImmersiveGate();
+      };
+      immersiveSilent.addEventListener("click", onSilentEntry);
+      cleanups.push(() =>
+        immersiveSilent.removeEventListener("click", onSilentEntry),
+      );
+    }
+
+    if (immersiveAudio && musicDockToggle) {
+      const onMusicToggle = async () => {
+        if (immersiveAudio.paused) {
+          try {
+            await ensureAudioReactiveLogo();
+            if (audioContext?.state === "suspended") {
+              await audioContext.resume();
+            }
+            await immersiveAudio.play();
+            startAudioReactiveLogo();
+          } catch {
+            // Browser playback policy/error remains visible through dock state.
+          }
+        } else {
+          immersiveAudio.pause();
+          resetAudioReactiveLogo();
+        }
+        syncMusicDock();
+      };
+      const onPlay = () => {
+        syncMusicDock();
+        startAudioReactiveLogo();
+      };
+      const onPause = () => {
+        syncMusicDock();
+        resetAudioReactiveLogo();
+      };
+      const onEnded = () => {
+        syncMusicDock();
+        resetAudioReactiveLogo();
+      };
+
+      musicDockToggle.addEventListener("click", onMusicToggle);
+      immersiveAudio.addEventListener("play", onPlay);
+      immersiveAudio.addEventListener("pause", onPause);
+      immersiveAudio.addEventListener("ended", onEnded);
+
+      cleanups.push(() => {
+        musicDockToggle.removeEventListener("click", onMusicToggle);
+        immersiveAudio.removeEventListener("play", onPlay);
+        immersiveAudio.removeEventListener("pause", onPause);
+        immersiveAudio.removeEventListener("ended", onEnded);
+        immersiveAudio.pause();
+        resetAudioReactiveLogo();
+        if (audioContext && audioContext.state !== "closed") {
+          void audioContext.close();
+        }
+      });
+    }
+
+    neuralLobbyLinks.forEach((anchor) => {
+      const onLobbyLink = (event: MouseEvent) => {
+        const href = anchor.getAttribute("href") || "";
+        if (href.startsWith("#")) {
+          event.preventDefault();
+          closeNeuralLobby(href);
+          return;
+        }
+
+        // For canonical private access, let the existing auth handler own
+        // navigation while this visual layer exits.
+        closeNeuralLobby();
+      };
+
+      anchor.addEventListener("click", onLobbyLink);
+      cleanups.push(() =>
+        anchor.removeEventListener("click", onLobbyLink),
+      );
+    });
+
+    if (copyrightToggle && copyrightPanel) {
+      const onCopyrightToggle = () => {
+        const expanded =
+          copyrightToggle.getAttribute("aria-expanded") === "true";
+        copyrightToggle.setAttribute(
+          "aria-expanded",
+          String(!expanded),
+        );
+        copyrightPanel.hidden = expanded;
+      };
+      copyrightToggle.addEventListener(
+        "click",
+        onCopyrightToggle,
+      );
+      cleanups.push(() =>
+        copyrightToggle.removeEventListener(
+          "click",
+          onCopyrightToggle,
+        ),
+      );
+    }
+
+    cleanups.push(() => {
+      document.body.classList.remove("immersive-gate-open");
+      document.body.classList.remove("neural-lobby-open");
+    });
+  }
+
   queryAll<HTMLAnchorElement>("[data-private-entry]").forEach(
     (anchor) => {
       const onClick = (event: MouseEvent) => {
@@ -542,6 +956,7 @@ export function mountPremiumLanding({
   initReveal();
   initPointerGlow();
   initBrainCanvas();
+  initBrainCanvas("#lobbyBrainCanvas", 1.45);
 
   return () => {
     timers.forEach((timer) => window.clearInterval(timer));
