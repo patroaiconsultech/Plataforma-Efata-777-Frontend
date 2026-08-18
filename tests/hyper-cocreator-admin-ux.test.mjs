@@ -29,3 +29,15 @@ test("access portal surfaces access gate configuration failure", () => {
   assert.match(access, /ACCESS_GATE_DISABLED/);
   assert.match(access, /ACCESS_CODE_INVALID/);
 });
+
+
+test("visible co-creator identity does not leak legacy Josué label", () => {
+  assert.doesNotMatch(app, /const AGENT = "Josué"/);
+  assert.match(app, /visibleAgentAuthor/);
+  assert.match(app, /me\?\.admin_access[\s\S]*itemAgentName[\s\S]*selectedAgentName/);
+});
+
+test("admin catalog is role-aware while ordinary users remain canonical", () => {
+  assert.match(app, /setAgents\(me\?\.admin_access \? catalog : hyper \? \[hyper\] : \[\]\)/);
+  assert.match(app, /technicalAgentTarget\("orkio"\)/);
+});

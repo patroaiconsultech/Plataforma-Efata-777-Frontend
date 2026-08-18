@@ -44,7 +44,7 @@ import {
   formatMessageTimestamp,
 } from "../utils/chronology";
 
-const AGENT = "Josué";
+const DEFAULT_COCREATOR_LABEL = "Co-Criador";
 
 type VoiceState = "idle" | "recording" | "transcribing" | "review";
 type ExecutionMode = "individual" | "team";
@@ -290,7 +290,7 @@ export default function AppConsole() {
       const hyper = catalog.find(
         (agent) => agent.slug.toLowerCase() === "orkio",
       ) ?? null;
-      setAgents(hyper ? [hyper] : []);
+      setAgents(me?.admin_access ? catalog : hyper ? [hyper] : []);
       setSelectedAgent(hyper);
     } catch (err) {
       setAgents([]);
@@ -299,7 +299,7 @@ export default function AppConsole() {
     } finally {
       setAgentsBusy(false);
     }
-  }, [authenticated, configured]);
+  }, [authenticated, configured, me?.admin_access]);
 
   const refreshTeams = useCallback(async () => {
     if (!configured || !authenticated) return;
@@ -1290,7 +1290,11 @@ export default function AppConsole() {
 
   const activeThread = threads.find((thread) => thread.id === threadId) ?? null;
   const selectedAgentName =
-    me?.co_creator_name || "Co-Criador";
+    me?.co_creator_name || DEFAULT_COCREATOR_LABEL;
+  const visibleAgentAuthor = (itemAgentName?: string | null) =>
+    me?.admin_access
+      ? itemAgentName || selectedAgent?.display_name || selectedAgentName
+      : selectedAgentName;
   const selectedAgentRole =
     "Hyper Co-Criador · Estratégia, criatividade e execução de negócios";
   const selectedAgentInitial = selectedAgentName.slice(0, 1).toUpperCase();
@@ -1624,7 +1628,7 @@ export default function AppConsole() {
               >
                 <header className="message__meta">
                   <span className="message__author">
-                    {item.author_type === "agent" ? item.agent_name || AGENT : "Você"}
+                    {item.author_type === "agent" ? visibleAgentAuthor(item.agent_name) : "Você"}
                   </span>
                   <time
                     dateTime={item.created_at}
@@ -1665,7 +1669,7 @@ export default function AppConsole() {
             <article className="message agent message--streaming" aria-live="polite">
               <header className="message__meta">
                 <span className="message__author">
-                  {selectedAgent?.display_name || AGENT}
+                  {me?.admin_access ? selectedAgent?.display_name || selectedAgentName : selectedAgentName}
                 </span>
                 <span className="streaming-status">
                   <span className="streaming-status__dot" aria-hidden="true" />
