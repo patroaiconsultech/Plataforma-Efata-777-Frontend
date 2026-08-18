@@ -1501,18 +1501,22 @@ export default function AppConsole() {
             </Link>
             {authConfigured ? (
               authenticated ? (
-                {me?.admin_access ? (
-                <Link className="ghost-link" to="/admin">Painel admin</Link>
-              ) : null}
-              <button
-                  type="button"
-                  onClick={() => {
-                    logout();
-                    setAuthenticated(false);
-                  }}
-                >
-                  Sair
-                </button>
+                <>
+                  {me?.admin_access ? (
+                    <Link className="ghost-link" to="/admin">
+                      Painel admin
+                    </Link>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout();
+                      setAuthenticated(false);
+                    }}
+                  >
+                    Sair
+                  </button>
+                </>
               ) : (
                 <button
                   type="button"
