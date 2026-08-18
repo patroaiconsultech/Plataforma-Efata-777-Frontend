@@ -32,6 +32,7 @@ import {
   technicalAgentTarget,
   transcribeVoice,
   uploadAttachment,
+  updateCoCreatorName,
 } from "../api";
 import ArtifactCard from "../components/ArtifactCard";
 import PwaInstallButton from "../components/PwaInstallButton";
@@ -179,6 +180,9 @@ export default function AppConsole() {
   const [agents, setAgents] = useState<AgentDefinition[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<AgentDefinition | null>(null);
   const [showAgents, setShowAgents] = useState(false);
+  const [showRenameCoCreator, setShowRenameCoCreator] = useState(false);
+  const [renameCoCreatorValue, setRenameCoCreatorValue] = useState("");
+  const [renameCoCreatorBusy, setRenameCoCreatorBusy] = useState(false);
   const [agentsBusy, setAgentsBusy] = useState(false);
   const [agentsError, setAgentsError] = useState("");
   const [executionMode, setExecutionMode] = useState<ExecutionMode>("individual");
@@ -1263,6 +1267,27 @@ export default function AppConsole() {
     }
   }
 
+  async function saveCoCreatorName() {
+    const clean = renameCoCreatorValue.trim();
+    if (clean.length < 2 || renameCoCreatorBusy) return;
+    setRenameCoCreatorBusy(true);
+    setError("");
+    try {
+      const result = await updateCoCreatorName(clean);
+      setMe((current) =>
+        current
+          ? { ...current, co_creator_name: result.co_creator_name }
+          : current,
+      );
+      setShowRenameCoCreator(false);
+      setNotice(`Seu Co-Criador agora se chama ${result.co_creator_name}.`);
+    } catch (err) {
+      setError(describe(err));
+    } finally {
+      setRenameCoCreatorBusy(false);
+    }
+  }
+
   const activeThread = threads.find((thread) => thread.id === threadId) ?? null;
   const selectedAgentName =
     me?.co_creator_name || "Co-Criador";
@@ -1459,10 +1484,13 @@ export default function AppConsole() {
             <button
               type="button"
               className="active-agent-chip"
-              onClick={() => setShowAgents(true)}
+              onClick={() => {
+                setRenameCoCreatorValue(selectedAgentName);
+                setShowRenameCoCreator(true);
+              }}
               disabled={!authenticated}
-              aria-label={`Agente ativo: ${selectedAgentName}`}
-              title="Selecionar agente"
+              aria-label={`Co-Criador ativo: ${selectedAgentName}`}
+              title="Renomear Co-Criador"
             >
               <span className="active-agent-chip__avatar" aria-hidden="true">
                 {selectedAgentInitial}
@@ -1799,6 +1827,59 @@ export default function AppConsole() {
         </footer>
       </main>
 
+
+
+      {showRenameCoCreator ? (
+        <div className="modal" role="presentation">
+          <section
+            className="modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="rename-cocreator-title"
+          >
+            <div className="agent-picker__heading">
+              <div>
+                <h2 id="rename-cocreator-title">Renomear Co-Criador</h2>
+                <p>O nome é pessoal e não altera a identidade técnica do agente.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRenameCoCreator(false)}
+                aria-label="Fechar"
+              >
+                ×
+              </button>
+            </div>
+            <label className="field">
+              <span>Nome do Co-Criador</span>
+              <input
+                value={renameCoCreatorValue}
+                onChange={(event) => setRenameCoCreatorValue(event.target.value)}
+                maxLength={64}
+                placeholder="Ex.: Atlas, Sophia, Nexo…"
+                autoFocus
+              />
+            </label>
+            <div className="modal-actions">
+              <button
+                type="button"
+                onClick={() => setShowRenameCoCreator(false)}
+                disabled={renameCoCreatorBusy}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => void saveCoCreatorName()}
+                disabled={renameCoCreatorBusy || renameCoCreatorValue.trim().length < 2}
+              >
+                {renameCoCreatorBusy ? "Salvando…" : "Salvar nome"}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
 
 
       {false && showAgents ? (

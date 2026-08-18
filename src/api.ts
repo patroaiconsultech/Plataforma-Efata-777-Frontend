@@ -849,3 +849,32 @@ export async function getMe(): Promise<HyperCocreatorMe> {
 export async function getAdminOverview(): Promise<AdminOverview> {
   return apiJson<AdminOverview>("/api/v2/admin/overview");
 }
+
+
+export type AdminSecurityStatus = {
+  auth_mode: string;
+  demo_headers_enabled: boolean;
+  github_read_only: boolean;
+  evolution_execution_allowed: boolean;
+  access_gate_enabled: boolean;
+  access_gate_code_hash_count: number;
+  access_gate_tenant_configured: boolean;
+  access_gate_signing_secret_configured: boolean;
+};
+
+export async function updateCoCreatorName(
+  co_creator_name: string,
+): Promise<{
+  status: string;
+  co_creator_name: string;
+  onboarding_goal?: string | null;
+}> {
+  return apiJson("/api/v2/me/co-creator", {
+    method: "PATCH",
+    body: JSON.stringify({ co_creator_name }),
+  });
+}
+
+export async function getAdminSecurityStatus(): Promise<AdminSecurityStatus> {
+  return apiJson<AdminSecurityStatus>("/api/v2/admin/security/status");
+}

@@ -1,6 +1,6 @@
 import React, { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { validateAccessCode } from "../api";
+import { ApiError, validateAccessCode } from "../api";
 import { beginLogin, isOidcConfigured } from "../auth/oidc";
 import "../access.css";
 
@@ -49,8 +49,19 @@ export default function AccessPortal() {
       const response = await validateAccessCode(code.trim());
       setGrant(response.grant);
       setStep("cocreator");
-    } catch {
-      setError("Código inválido ou acesso temporariamente indisponível.");
+    } catch (err) {
+      const code = err instanceof ApiError ? err.code : "NETWORK_ERROR";
+      const message =
+        code === "ACCESS_CODE_INVALID"
+          ? "Código não reconhecido."
+          : code === "ACCESS_GATE_DISABLED"
+            ? "O cadastro por código ainda não está habilitado no backend desta implantação."
+            : code === "ACCESS_GATE_NOT_CONFIGURED"
+              ? "O acesso por código está habilitado, mas a configuração segura dos códigos ainda está incompleta no backend."
+              : code === "NETWORK_ERROR"
+              ? "Não foi possível alcançar o backend para validar o código."
+              : `Não foi possível validar o código (${code}).`;
+      setError(message);
     } finally {
       setBusy(false);
     }
