@@ -15,7 +15,8 @@ test("single Hyper Co-Creator uses the explicit canonical technical namespace", 
   assert.match(api, /export function technicalAgentTarget/);
   assert.match(api, /return `id:\$\{normalized\}`/);
   assert.match(consoleSource, /technicalAgentTarget\("orkio"\)/);
-  assert.match(consoleSource, /me\?\.co_creator_name \|\| "Co-Criador"/);
+  assert.match(consoleSource, /const DEFAULT_COCREATOR_LABEL = "Co-Criador"/);
+  assert.match(consoleSource, /me\?\.co_creator_name \|\| DEFAULT_COCREATOR_LABEL/);
 });
 
 test("multi-agent implementation remains internal but is not exposed in the initial Hyper Co-Creator UX", () => {
