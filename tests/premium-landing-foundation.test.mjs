@@ -224,3 +224,12 @@ test("touch logo control is bounded, keyboard accessible and connected to the ne
   assert.match(css, /\.neural-lobby__brand \{[\s\S]*pointer-events: auto/);
   assert.match(css, /touch-action: none/);
 });
+
+
+test("touch fallback and desktop canvas drift remain explicit", () => {
+  assert.match(interactions, /touchstart/);
+  assert.match(interactions, /touchmove/);
+  assert.match(interactions, /touchend/);
+  assert.match(css, /@keyframes neuralLobbyCanvasDrift/);
+  assert.match(css, /#lobbyBrainCanvas[\s\S]*animation: neuralLobbyCanvasDrift/);
+});

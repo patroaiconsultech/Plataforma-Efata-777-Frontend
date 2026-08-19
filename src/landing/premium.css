@@ -3150,3 +3150,22 @@ body.neural-lobby-open {
 .patroai-premium .neural-lobby__brand {
   pointer-events: auto;
 }
+
+
+@media (prefers-reduced-motion: no-preference) {
+  .patroai-premium .neural-lobby.is-active #lobbyBrainCanvas {
+    animation: neuralLobbyCanvasDrift 11s ease-in-out infinite;
+    transform-origin: 50% 50%;
+  }
+}
+
+@keyframes neuralLobbyCanvasDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0.8%, -0.6%, 0) scale(1.025); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium .neural-lobby.is-active #lobbyBrainCanvas {
+    animation: none !important;
+  }
+}

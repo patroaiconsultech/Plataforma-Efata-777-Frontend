@@ -710,7 +710,11 @@ export function mountPremiumLanding({
     const releasePointer = () => {
       drag.active = false;
       neuralLobbyBrand.classList.remove("is-dragging");
-      if (drag.pointerId !== null && neuralLobbyBrand.hasPointerCapture(drag.pointerId)) {
+      if (
+        drag.pointerId !== null &&
+        drag.pointerId >= 0 &&
+        neuralLobbyBrand.hasPointerCapture(drag.pointerId)
+      ) {
         neuralLobbyBrand.releasePointerCapture(drag.pointerId);
       }
       drag.pointerId = null;
@@ -732,7 +736,7 @@ export function mountPremiumLanding({
     };
 
     const onPointerDown = (event: PointerEvent) => {
-      if (event.pointerType !== "touch" && event.button !== 0) return;
+      if (drag.active || (event.pointerType !== "touch" && event.button !== 0)) return;
       drag.pointerId = event.pointerId;
       drag.startX = event.clientX;
       drag.startY = event.clientY;
@@ -756,6 +760,38 @@ export function mountPremiumLanding({
 
     const onPointerUp = (event: PointerEvent) => {
       if (drag.pointerId !== event.pointerId) return;
+      releasePointer();
+    };
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (drag.active) return;
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+      drag.pointerId = -1;
+      drag.startX = touch.clientX;
+      drag.startY = touch.clientY;
+      drag.originX = position.x;
+      drag.originY = position.y;
+      drag.active = true;
+      neuralLobbyBrand.classList.add("is-dragging");
+      if (neuralLobbyDragHint) neuralLobbyDragHint.hidden = true;
+      event.preventDefault();
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (!drag.active || drag.pointerId !== -1) return;
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+      applyPosition(
+        drag.originX + touch.clientX - drag.startX,
+        drag.originY + touch.clientY - drag.startY,
+      );
+      event.preventDefault();
+    };
+
+    const onTouchEnd = (event: TouchEvent) => {
+      if (drag.pointerId !== -1) return;
+      event.preventDefault();
       releasePointer();
     };
 
@@ -783,6 +819,10 @@ export function mountPremiumLanding({
     neuralLobbyBrand.addEventListener("pointermove", onPointerMove);
     neuralLobbyBrand.addEventListener("pointerup", onPointerUp);
     neuralLobbyBrand.addEventListener("pointercancel", onPointerUp);
+    neuralLobbyBrand.addEventListener("touchstart", onTouchStart, { passive: false });
+    neuralLobbyBrand.addEventListener("touchmove", onTouchMove, { passive: false });
+    neuralLobbyBrand.addEventListener("touchend", onTouchEnd, { passive: false });
+    neuralLobbyBrand.addEventListener("touchcancel", onTouchEnd, { passive: false });
     neuralLobbyBrand.addEventListener("keydown", onKeyDown);
     neuralLobbyBrand.addEventListener("dblclick", recenter);
     applyPosition(0, 0);
@@ -795,6 +835,10 @@ export function mountPremiumLanding({
       neuralLobbyBrand.removeEventListener("pointermove", onPointerMove);
       neuralLobbyBrand.removeEventListener("pointerup", onPointerUp);
       neuralLobbyBrand.removeEventListener("pointercancel", onPointerUp);
+      neuralLobbyBrand.removeEventListener("touchstart", onTouchStart);
+      neuralLobbyBrand.removeEventListener("touchmove", onTouchMove);
+      neuralLobbyBrand.removeEventListener("touchend", onTouchEnd);
+      neuralLobbyBrand.removeEventListener("touchcancel", onTouchEnd);
       neuralLobbyBrand.removeEventListener("keydown", onKeyDown);
       neuralLobbyBrand.removeEventListener("dblclick", recenter);
       neuralLobbyBrand.style.removeProperty("--logo-drag-x");
