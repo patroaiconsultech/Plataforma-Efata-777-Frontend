@@ -203,3 +203,24 @@ test("Rev O provides a fullscreen neural gateway before site navigation", () => 
   assert.match(css, /\.neural-lobby\.is-active/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
+
+
+test("desktop neural motion exposes a verifiable running heartbeat", () => {
+  assert.match(neuralWebgl, /canvas\.dataset\.neuralMotion = "running"/);
+  assert.match(neuralWebgl, /canvas\.dataset\.neuralFrame/);
+  assert.match(css, /prefers-reduced-motion: no-preference\) and \(min-width: 821px\)/);
+  assert.match(css, /animation-play-state: running !important/);
+});
+
+test("touch logo control is bounded, keyboard accessible and connected to the neural pointer", () => {
+  assert.match(markup, /data-neural-logo-control/);
+  assert.match(markup, /id="neuralLobbyDragHint"/);
+  assert.match(markup, /aria-describedby="neuralLobbyDragHint"/);
+  assert.match(interactions, /pointerdown/);
+  assert.match(interactions, /pointermove/);
+  assert.match(interactions, /setPointerCapture/);
+  assert.match(interactions, /ArrowLeft/);
+  assert.match(interactions, /lobbyPointer\.active/);
+  assert.match(css, /\.neural-lobby__brand \{[\s\S]*pointer-events: auto/);
+  assert.match(css, /touch-action: none/);
+});

@@ -3061,3 +3061,92 @@ body.neural-lobby-open {
     filter: none !important;
   }
 }
+
+
+/* === DESKTOP MOTION GUARANTEE + TOUCH LOGO CONTROL === */
+@media (prefers-reduced-motion: no-preference) and (min-width: 821px) {
+  .patroai-premium .neural-lobby.is-active .neural-lobby__canvas-stage,
+  .patroai-premium .neural-lobby.is-active .neural-lobby__canvas-stage::after,
+  .patroai-premium .neural-lobby.is-active #lobbyBrainCanvas,
+  .patroai-premium .neural-lobby.is-active .neural-lobby__brand-halo,
+  .patroai-premium .neural-lobby.is-active .neural-lobby__brand-orbit {
+    animation-play-state: running !important;
+  }
+}
+
+.patroai-premium .neural-lobby__brand {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transform: translate3d(var(--logo-drag-x, 0px), var(--logo-drag-y, 0px), 0);
+  transition: transform 420ms cubic-bezier(.23, 1, .32, 1), filter 260ms ease;
+}
+
+.patroai-premium .neural-lobby__brand.is-dragging {
+  cursor: grabbing;
+  transition: none;
+  filter: drop-shadow(0 0 24px rgba(52, 231, 193, .18));
+}
+
+.patroai-premium .neural-lobby__brand.is-recentering {
+  transition: transform 260ms cubic-bezier(.23, 1, .32, 1);
+}
+
+.patroai-premium .neural-lobby__brand:focus-visible {
+  outline: 2px solid rgba(255, 226, 143, .96);
+  outline-offset: 12px;
+}
+
+.patroai-premium .neural-lobby__drag-hint {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  z-index: 8;
+  max-width: min(86vw, 290px);
+  margin: 0;
+  padding: 8px 13px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(217, 180, 95, .24);
+  border-radius: 999px;
+  color: rgba(239, 247, 242, .7);
+  background: rgba(2, 12, 9, .62);
+  box-shadow: 0 0 22px rgba(52, 231, 193, .07);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-align: center;
+  pointer-events: none;
+}
+
+.patroai-premium .neural-lobby__drag-hint[hidden] {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .patroai-premium .neural-lobby__drag-hint {
+    display: block;
+    animation: neuralTouchHint 2.8s ease-in-out infinite;
+  }
+}
+
+@keyframes neuralTouchHint {
+  0%, 100% { opacity: .5; transform: translateX(-50%) translateY(0); }
+  50% { opacity: .95; transform: translateX(-50%) translateY(-3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium .neural-lobby__brand {
+    cursor: default;
+    transition: none !important;
+  }
+  .patroai-premium .neural-lobby__drag-hint {
+    animation: none !important;
+  }
+}
+
+
+/* The center copy is click-through, but the logo itself is an interactive touch target. */
+.patroai-premium .neural-lobby__brand {
+  pointer-events: auto;
+}

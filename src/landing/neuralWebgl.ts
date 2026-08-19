@@ -1,6 +1,13 @@
+type NeuralPointerState = {
+  x: number;
+  y: number;
+  active: boolean;
+};
+
 type NeuralWebglOptions = {
   getEnergy?: () => number;
   getReactive?: () => boolean;
+  getPointer?: () => NeuralPointerState | null;
 };
 
 const MAX_PIXEL_COUNT = 2_250_000;
@@ -252,6 +259,13 @@ export function initNeuralWebgl(
     if (disposed) return;
     const isVisible = inViewport && document.visibilityState === "visible";
     if (!isVisible) return;
+    const externalPointer = options.getPointer?.();
+    if (externalPointer?.active) {
+      pointer.active = true;
+      pointer.x = Math.min(1, Math.max(0, externalPointer.x));
+      pointer.y = Math.min(1, Math.max(0, externalPointer.y));
+    }
+
     const reactive = options.getReactive?.() ? 1 : 0;
     const audioEnergy = Math.min(1, Math.max(0, options.getEnergy?.() || 0));
     const energy = reactive * audioEnergy;
@@ -278,6 +292,8 @@ export function initNeuralWebgl(
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
+      canvas.dataset.neuralMotion = "running";
+      canvas.dataset.neuralFrame = String(Math.floor(now / 120));
     }
     schedule();
   };
@@ -308,6 +324,8 @@ export function initNeuralWebgl(
       document.removeEventListener("visibilitychange", onVisibilityChange);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
+      delete canvas.dataset.neuralMotion;
+      delete canvas.dataset.neuralFrame;
     },
     setViewport(value: boolean) {
       inViewport = value;

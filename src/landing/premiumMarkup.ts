@@ -88,8 +88,15 @@ export const premiumMarkup = String.raw`
   <div class="neural-lobby__vignette" aria-hidden="true"></div>
 
   <div class="neural-lobby__center">
-    <div class="neural-lobby__brand" aria-hidden="true">
-      <span class="neural-lobby__brand-halo"></span>
+    <div
+      class="neural-lobby__brand"
+      tabindex="0"
+      role="button"
+      aria-label="Conduzir núcleo PatroAI"
+      aria-describedby="neuralLobbyDragHint"
+      data-neural-logo-control
+    >
+      <span class="neural-lobby__brand-halo" aria-hidden="true"></span>
       <span class="neural-lobby__brand-orbit neural-lobby__brand-orbit--outer"></span>
       <span class="neural-lobby__brand-orbit neural-lobby__brand-orbit--inner"></span>
       <img
@@ -139,6 +146,9 @@ export const premiumMarkup = String.raw`
     <span></span>
     <small data-i18n="lobby.hint">Selecione um núcleo para entrar</small>
   </div>
+  <p class="neural-lobby__drag-hint" id="neuralLobbyDragHint" data-i18n="lobby.dragHint">
+    Toque e conduza o núcleo
+  </p>
 </section>
 
 <audio

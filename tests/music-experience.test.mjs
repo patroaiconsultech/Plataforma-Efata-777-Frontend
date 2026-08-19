@@ -101,8 +101,9 @@ test("neural lobby exposes governed site-entry targets without inventing routes"
 test("lobby reuses the same neural renderer and music-energy signal", () => {
   assert.match(
     interactions,
-    /initBrainCanvas\("#lobbyBrainCanvas", 1\.45\)/,
+    /initBrainCanvas\("#lobbyBrainCanvas", 1\.45, \{/,
   );
+  assert.match(interactions, /getPointer: \(\) => \(lobbyPointer\.active \? lobbyPointer : null\)/);
   assert.match(interactions, /musicEnergy = normalized/);
   assert.match(interactions, /musicReactiveActive/);
 });

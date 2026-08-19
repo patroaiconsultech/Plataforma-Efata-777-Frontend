@@ -8,7 +8,7 @@ type PremiumLandingOptions = {
 
 const translations: Record<string, Record<string, string>> = {
         pt: {
-          "nav.ecosystem": "Ecossistema", "nav.governance": "Governança", "nav.method": "Método", "nav.contact": "Contato", "nav.careers": "Carreiras", "nav.cocreator": "Co-Criador", "nav.private": "Acesso privado", "immersive.eyebrow": "PATROAI · EXPERIÊNCIA IMERSIVA", "immersive.title": "Este é um ambiente imersivo.", "immersive.copy": "Escolha como deseja iniciar sua experiência PatroAI.", "immersive.sound.cta": "Entrar com experiência sonora", "immersive.sound.copy": "Iniciar a obra dentro da experiência PatroAI", "immersive.silent": "Explorar sem som", "immersive.direct": "Ir direto para a apresentação", "immersive.headphones": "Recomendamos o uso de fones de ouvido para uma experiência mais imersiva.", "lobby.eyebrow": "PATROAI · NÚCLEO IMERSIVO", "lobby.title": "Escolha por onde deseja entrar.", "lobby.copy": "Navegue pelo ecossistema enquanto a experiência sonora permanece ativa.", "lobby.node.about": "Conheça a PatroAI", "lobby.node.ecosystem": "Ecossistema", "lobby.node.governance": "Governança", "lobby.node.method": "Método", "lobby.node.careers": "Carreiras & Talentos", "lobby.node.contact": "Contato Estratégico", "lobby.node.platform": "Acessar Plataforma", "lobby.hint": "Selecione um núcleo para entrar",
+          "nav.ecosystem": "Ecossistema", "nav.governance": "Governança", "nav.method": "Método", "nav.contact": "Contato", "nav.careers": "Carreiras", "nav.cocreator": "Co-Criador", "nav.private": "Acesso privado", "immersive.eyebrow": "PATROAI · EXPERIÊNCIA IMERSIVA", "immersive.title": "Este é um ambiente imersivo.", "immersive.copy": "Escolha como deseja iniciar sua experiência PatroAI.", "immersive.sound.cta": "Entrar com experiência sonora", "immersive.sound.copy": "Iniciar a obra dentro da experiência PatroAI", "immersive.silent": "Explorar sem som", "immersive.direct": "Ir direto para a apresentação", "immersive.headphones": "Recomendamos o uso de fones de ouvido para uma experiência mais imersiva.", "lobby.eyebrow": "PATROAI · NÚCLEO IMERSIVO", "lobby.title": "Escolha por onde deseja entrar.", "lobby.copy": "Navegue pelo ecossistema enquanto a experiência sonora permanece ativa.", "lobby.node.about": "Conheça a PatroAI", "lobby.node.ecosystem": "Ecossistema", "lobby.node.governance": "Governança", "lobby.node.method": "Método", "lobby.node.careers": "Carreiras & Talentos", "lobby.node.contact": "Contato Estratégico", "lobby.node.platform": "Acessar Plataforma", "lobby.hint": "Selecione um núcleo para entrar", "lobby.dragHint": "Toque e conduza o núcleo",
           "hero.eyebrow": "Acesso privado e controlado", "hero.title": "Sistemas governados de <span>IA</span> para fluxos executivos.", "hero.copy": "O Grupo PatroAI une consultoria estratégica, tecnologia aplicada e desenvolvimento de novos negócios para transformar informação complexa em clareza, decisão e execução.", "hero.primary": "Falar com um especialista", "hero.secondary": "Conhecer atuação", "hero.kpi1": "frentes integradas para estratégia, capital relacional e tecnologia.", "hero.kpi2": "por cento orientado a governança, rastreabilidade e decisão.", "hero.kpi3": "ambiente privado para relacionamento qualificado e seguro.",
           "screen.title": "Governança antes da automação.", "screen.copy": "Uma camada executiva para organizar dados, agentes, documentos, risco e decisão com trilhas claras de responsabilidade.", "screen.signal1": "Estratégia aplicada", "screen.signal2": "Teses e parcerias", "screen.signal3": "Sistemas sob medida", "screen.signal4": "Perpetuação responsável", "phone.title": "Sistemas governados de <span class=\"accent\">IA</span>", "phone.copy": "Clareza estratégica, tecnologia e governança para decisão executiva.",
           "ecosystem.eyebrow": "Ecossistema PatroAI", "ecosystem.title": "Três frentes para construir vantagem com critério.", "ecosystem.copy": "A proposta combina visão executiva, estrutura de negócios e engenharia aplicada para projetos que precisam sair do discurso e entrar em operação com controle.",
@@ -19,7 +19,7 @@ const translations: Record<string, Record<string, string>> = {
           "contact.eyebrow": "Pré-onboarding qualificado", "contact.title": "Solicite uma conversa estratégica.", "contact.copy": "Use este canal para oportunidades estratégicas, acesso privado, implantação, parcerias ou interesse profissional. Conte o contexto em poucas linhas e nossa equipe retornará após uma triagem inicial.", "contact.whatsapp": "WhatsApp estratégico", "form.name": "Nome completo", "form.email": "E-mail", "form.profile": "Perfil", "form.select": "Selecione", "form.profileA": "Empresa / Cliente", "form.profileB": "Investidor", "form.profileC": "Consultor associado", "form.profileD": "Parceiro estratégico", "form.whatsapp": "WhatsApp", "form.challenge": "Oportunidade ou desafio", "form.submit": "Preparar contato", "footer.left": "Grupo PatroAI. Consultech, Holding e AI Factory.", "footer.privacy": "Privacidade e termos", "footer.contact": "Contato", "footer.right": "Acesso privado. Proposta sob análise.", "status": "{name}, seu contato foi preparado para triagem ({profile}).", "meta.title": "Grupo PatroAI | Sistemas governados de IA", "meta.description": "Consultoria estratégica, tecnologia aplicada e sistemas governados de IA para decisões executivas, novos negócios e perpetuação responsável.",
         },
         es: {
-          "nav.ecosystem": "Ecosistema", "nav.governance": "Gobernanza", "nav.method": "Método", "nav.contact": "Contacto", "nav.careers": "Carreras", "nav.cocreator": "Co-Creador", "nav.private": "Acceso privado", "immersive.eyebrow": "PATROAI · EXPERIENCIA INMERSIVA", "immersive.title": "Este es un entorno inmersivo.", "immersive.copy": "Elige cómo quieres iniciar tu experiencia PatroAI.", "immersive.sound.cta": "Entrar con experiencia sonora", "immersive.sound.copy": "Iniciar la obra dentro de la experiencia PatroAI", "immersive.silent": "Explorar sin sonido", "immersive.direct": "Ir directamente a la presentación", "immersive.headphones": "Recomendamos usar auriculares para una experiencia más inmersiva.", "lobby.eyebrow": "PATROAI · NÚCLEO INMERSIVO", "lobby.title": "Elige por dónde quieres entrar.", "lobby.copy": "Navega por el ecosistema mientras la experiencia sonora permanece activa.", "lobby.node.about": "Conoce PatroAI", "lobby.node.ecosystem": "Ecosistema", "lobby.node.governance": "Gobernanza", "lobby.node.method": "Método", "lobby.node.careers": "Carreras y Talentos", "lobby.node.contact": "Contacto Estratégico", "lobby.node.platform": "Acceder a la Plataforma", "lobby.hint": "Selecciona un núcleo para entrar",
+          "nav.ecosystem": "Ecosistema", "nav.governance": "Gobernanza", "nav.method": "Método", "nav.contact": "Contacto", "nav.careers": "Carreras", "nav.cocreator": "Co-Creador", "nav.private": "Acceso privado", "immersive.eyebrow": "PATROAI · EXPERIENCIA INMERSIVA", "immersive.title": "Este es un entorno inmersivo.", "immersive.copy": "Elige cómo quieres iniciar tu experiencia PatroAI.", "immersive.sound.cta": "Entrar con experiencia sonora", "immersive.sound.copy": "Iniciar la obra dentro de la experiencia PatroAI", "immersive.silent": "Explorar sin sonido", "immersive.direct": "Ir directamente a la presentación", "immersive.headphones": "Recomendamos usar auriculares para una experiencia más inmersiva.", "lobby.eyebrow": "PATROAI · NÚCLEO INMERSIVO", "lobby.title": "Elige por dónde quieres entrar.", "lobby.copy": "Navega por el ecosistema mientras la experiencia sonora permanece activa.", "lobby.node.about": "Conoce PatroAI", "lobby.node.ecosystem": "Ecosistema", "lobby.node.governance": "Gobernanza", "lobby.node.method": "Método", "lobby.node.careers": "Carreras y Talentos", "lobby.node.contact": "Contacto Estratégico", "lobby.node.platform": "Acceder a la Plataforma", "lobby.hint": "Selecciona un núcleo para entrar", "lobby.dragHint": "Toca y conduce el núcleo",
           "hero.eyebrow": "Acceso privado y controlado", "hero.title": "Sistemas gobernados de <span>IA</span> para flujos ejecutivos.", "hero.copy": "Grupo PatroAI une consultoría estratégica, tecnología aplicada y desarrollo de nuevos negocios para transformar información compleja en claridad, decisión y ejecución.", "hero.primary": "Hablar con un especialista", "hero.secondary": "Conocer el alcance", "hero.kpi1": "frentes integrados para estrategia, capital relacional y tecnología.", "hero.kpi2": "por ciento orientado a gobernanza, trazabilidad y decisión.", "hero.kpi3": "entorno privado para relaciones calificadas y seguras.",
           "screen.title": "Gobernanza antes de la automatización.", "screen.copy": "Una capa ejecutiva para organizar datos, agentes, documentos, riesgos y decisiones con trazabilidad clara de responsabilidad.", "screen.signal1": "Estrategia aplicada", "screen.signal2": "Tesis y alianzas", "screen.signal3": "Sistemas a medida", "screen.signal4": "Continuidad responsable", "phone.title": "Sistemas gobernados de <span class=\"accent\">IA</span>", "phone.copy": "Claridad estratégica, tecnología y gobernanza para la decisión ejecutiva.",
           "ecosystem.eyebrow": "Ecosistema PatroAI", "ecosystem.title": "Tres frentes para construir ventaja con criterio.", "ecosystem.copy": "La propuesta combina visión ejecutiva, estructura de negocios e ingeniería aplicada para proyectos que necesitan pasar del discurso a la operación con control.",
@@ -30,7 +30,7 @@ const translations: Record<string, Record<string, string>> = {
           "contact.eyebrow": "Pre-onboarding calificado", "contact.title": "Solicite una conversación estratégica.", "contact.copy": "Utiliza este canal para oportunidades estratégicas, acceso privado, implantación, alianzas o interés profesional. Cuenta el contexto en pocas líneas y nuestro equipo responderá tras una evaluación inicial.", "contact.whatsapp": "WhatsApp estratégico", "form.name": "Nombre completo", "form.email": "Correo electrónico", "form.profile": "Perfil", "form.select": "Seleccione", "form.profileA": "Empresa / Cliente", "form.profileB": "Inversor", "form.profileC": "Consultor asociado", "form.profileD": "Socio estratégico", "form.whatsapp": "WhatsApp", "form.challenge": "Oportunidad o desafío", "form.submit": "Preparar contacto", "footer.left": "Grupo PatroAI. Consultech, Holding y AI Factory.", "footer.privacy": "Privacidad y términos", "footer.contact": "Contacto", "footer.right": "Acceso privado. Propuesta bajo análisis.", "status": "{name}, su contacto fue preparado para evaluación ({profile}).", "meta.title": "Grupo PatroAI | Sistemas gobernados de IA", "meta.description": "Consultoría estratégica, tecnología aplicada y sistemas gobernados de IA para decisiones ejecutivas, nuevos negocios y continuidad responsable.",
         },
         en: {
-          "nav.ecosystem": "Ecosystem", "nav.governance": "Governance", "nav.method": "Method", "nav.contact": "Contact", "nav.careers": "Careers", "nav.cocreator": "Co-Creator", "nav.private": "Private access", "immersive.eyebrow": "PATROAI · IMMERSIVE EXPERIENCE", "immersive.title": "This is an immersive environment.", "immersive.copy": "Choose how you want to start your PatroAI experience.", "immersive.sound.cta": "Enter with sound experience", "immersive.sound.copy": "Start the work inside the PatroAI experience", "immersive.silent": "Explore without sound", "immersive.direct": "Go directly to the presentation", "immersive.headphones": "Headphones are recommended for a more immersive experience.", "lobby.eyebrow": "PATROAI · IMMERSIVE CORE", "lobby.title": "Choose where you want to enter.", "lobby.copy": "Explore the ecosystem while the sound experience remains active.", "lobby.node.about": "Meet PatroAI", "lobby.node.ecosystem": "Ecosystem", "lobby.node.governance": "Governance", "lobby.node.method": "Method", "lobby.node.careers": "Careers & Talent", "lobby.node.contact": "Strategic Contact", "lobby.node.platform": "Access Platform", "lobby.hint": "Select a core to enter",
+          "nav.ecosystem": "Ecosystem", "nav.governance": "Governance", "nav.method": "Method", "nav.contact": "Contact", "nav.careers": "Careers", "nav.cocreator": "Co-Creator", "nav.private": "Private access", "immersive.eyebrow": "PATROAI · IMMERSIVE EXPERIENCE", "immersive.title": "This is an immersive environment.", "immersive.copy": "Choose how you want to start your PatroAI experience.", "immersive.sound.cta": "Enter with sound experience", "immersive.sound.copy": "Start the work inside the PatroAI experience", "immersive.silent": "Explore without sound", "immersive.direct": "Go directly to the presentation", "immersive.headphones": "Headphones are recommended for a more immersive experience.", "lobby.eyebrow": "PATROAI · IMMERSIVE CORE", "lobby.title": "Choose where you want to enter.", "lobby.copy": "Explore the ecosystem while the sound experience remains active.", "lobby.node.about": "Meet PatroAI", "lobby.node.ecosystem": "Ecosystem", "lobby.node.governance": "Governance", "lobby.node.method": "Method", "lobby.node.careers": "Careers & Talent", "lobby.node.contact": "Strategic Contact", "lobby.node.platform": "Access Platform", "lobby.hint": "Select a core to enter", "lobby.dragHint": "Touch and guide the core",
           "hero.eyebrow": "Private and controlled access", "hero.title": "Governed <span>AI</span> systems for executive workflows.", "hero.copy": "Grupo PatroAI combines strategic consulting, applied technology and new-business development to turn complex information into clarity, decisions and execution.", "hero.primary": "Talk to a specialist", "hero.secondary": "Explore our work", "hero.kpi1": "integrated fronts for strategy, relationship capital and technology.", "hero.kpi2": "percent oriented to governance, traceability and decision-making.", "hero.kpi3": "private environment for qualified and secure relationships.",
           "screen.title": "Governance before automation.", "screen.copy": "An executive layer to organize data, agents, documents, risk and decisions with clear accountability trails.", "screen.signal1": "Applied strategy", "screen.signal2": "Theses and partnerships", "screen.signal3": "Tailored systems", "screen.signal4": "Responsible continuity", "phone.title": "Governed <span class=\"accent\">AI</span> systems", "phone.copy": "Strategic clarity, technology and governance for executive decision-making.",
           "ecosystem.eyebrow": "PatroAI Ecosystem", "ecosystem.title": "Three fronts to build advantage with discipline.", "ecosystem.copy": "The proposition combines executive vision, business structure and applied engineering for projects that need to move from discourse into controlled operation.",
@@ -136,6 +136,16 @@ type NeuralNode = {
   pulse: number;
 };
 
+type NeuralPointerState = {
+  x: number;
+  y: number;
+  active: boolean;
+};
+
+type NeuralInputOptions = {
+  getPointer?: () => NeuralPointerState | null;
+};
+
 export function mountPremiumLanding({
   root,
   onPrivateAccess,
@@ -154,6 +164,8 @@ export function mountPremiumLanding({
   let currentLang = translations[requestedLang] ? requestedLang : "pt";
   let musicEnergy = 0;
   let musicReactiveActive = false;
+  const lobbyPointer: NeuralPointerState = { x: 0.5, y: 0.5, active: false };
+  let lobbyPointerReleaseTimer: number | null = null;
 
   const query = <T extends Element>(selector: string): T | null =>
     root.querySelector<T>(selector);
@@ -178,6 +190,8 @@ export function mountPremiumLanding({
   const neuralLobby = query<HTMLElement>("#neuralLobby");
   const neuralLobbyLinks =
     queryAll<HTMLAnchorElement>("[data-neural-lobby-link]");
+  const neuralLobbyBrand = query<HTMLElement>(".neural-lobby__brand");
+  const neuralLobbyDragHint = query<HTMLElement>("#neuralLobbyDragHint");
   const immersiveAudio = query<HTMLAudioElement>("#patroaiImmersiveAudio");
   const musicDock = query<HTMLElement>("#musicDock");
   const musicDockToggle = query<HTMLButtonElement>("#musicDockToggle");
@@ -350,6 +364,7 @@ export function mountPremiumLanding({
   function initBrainCanvas2D(
     selector = "#brainCanvas",
     densityMultiplier = 1,
+    options: NeuralInputOptions = {},
   ) {
     const canvas = query<HTMLCanvasElement>(selector);
     const stage = canvas?.parentElement as HTMLElement | null;
@@ -413,6 +428,12 @@ export function mountPremiumLanding({
     function draw(time: number, advance: boolean) {
       ctx.clearRect(0, 0, width, height);
       const t = time * 0.001;
+      const externalPointer = options.getPointer?.();
+      if (externalPointer?.active) {
+        pointer.active = true;
+        pointer.x = Math.min(1, Math.max(0, externalPointer.x));
+        pointer.y = Math.min(1, Math.max(0, externalPointer.y));
+      }
       const cx = width * 0.5;
       const cy = height * 0.5;
       const reactiveEnergy =
@@ -547,6 +568,8 @@ export function mountPremiumLanding({
       );
       ctx.fill();
       ctx.restore();
+      canvas.dataset.neuralMotion = reducedMotion.matches ? "reduced" : "running";
+      canvas.dataset.neuralFrame = String(Math.floor(time / 120));
     }
 
     function frame(time: number) {
@@ -641,12 +664,149 @@ export function mountPremiumLanding({
         onVisibilityChange,
       );
       reducedMotion.removeEventListener("change", onMotionChange);
+      delete canvas.dataset.neuralRenderer;
+      delete canvas.dataset.neuralMotion;
+      delete canvas.dataset.neuralFrame;
+    });
+    canvas.dataset.neuralRenderer = "canvas2d";
+  }
+
+  function initLobbyLogoControl() {
+    if (!neuralLobby || !neuralLobbyBrand) return;
+
+    const position = { x: 0, y: 0 };
+    const drag = {
+      pointerId: null as number | null,
+      startX: 0,
+      startY: 0,
+      originX: 0,
+      originY: 0,
+      active: false,
+    };
+
+    const clamp = (value: number, min: number, max: number) =>
+      Math.min(max, Math.max(min, value));
+
+    const updateNeuralPointer = () => {
+      const rect = neuralLobby.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      lobbyPointer.x = clamp((rect.width * 0.5 + position.x) / rect.width, 0, 1);
+      lobbyPointer.y = clamp((rect.height * 0.5 + position.y) / rect.height, 0, 1);
+      lobbyPointer.active = true;
+    };
+
+    const applyPosition = (x: number, y: number) => {
+      const rect = neuralLobby.getBoundingClientRect();
+      const halfLogo = Math.max(42, neuralLobbyBrand.offsetWidth * 0.5);
+      const safeX = Math.max(24, rect.width * 0.5 - halfLogo - 18);
+      const safeY = Math.max(24, rect.height * 0.5 - halfLogo - 18);
+      position.x = clamp(x, -safeX, safeX);
+      position.y = clamp(y, -safeY, safeY);
+      neuralLobbyBrand.style.setProperty("--logo-drag-x", `${position.x.toFixed(2)}px`);
+      neuralLobbyBrand.style.setProperty("--logo-drag-y", `${position.y.toFixed(2)}px`);
+      updateNeuralPointer();
+    };
+
+    const releasePointer = () => {
+      drag.active = false;
+      neuralLobbyBrand.classList.remove("is-dragging");
+      if (drag.pointerId !== null && neuralLobbyBrand.hasPointerCapture(drag.pointerId)) {
+        neuralLobbyBrand.releasePointerCapture(drag.pointerId);
+      }
+      drag.pointerId = null;
+      if (lobbyPointerReleaseTimer !== null) {
+        window.clearTimeout(lobbyPointerReleaseTimer);
+      }
+      lobbyPointerReleaseTimer = window.setTimeout(() => {
+        lobbyPointer.active = false;
+        lobbyPointerReleaseTimer = null;
+      }, 900);
+    };
+
+    const recenter = () => {
+      applyPosition(0, 0);
+      neuralLobbyBrand.classList.add("is-recentering");
+      window.setTimeout(() => neuralLobbyBrand.classList.remove("is-recentering"), 260);
+      if (neuralLobbyDragHint) neuralLobbyDragHint.hidden = false;
+      releasePointer();
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== "touch" && event.button !== 0) return;
+      drag.pointerId = event.pointerId;
+      drag.startX = event.clientX;
+      drag.startY = event.clientY;
+      drag.originX = position.x;
+      drag.originY = position.y;
+      drag.active = true;
+      neuralLobbyBrand.classList.add("is-dragging");
+      if (neuralLobbyDragHint) neuralLobbyDragHint.hidden = true;
+      neuralLobbyBrand.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (!drag.active || drag.pointerId !== event.pointerId) return;
+      applyPosition(
+        drag.originX + event.clientX - drag.startX,
+        drag.originY + event.clientY - drag.startY,
+      );
+      event.preventDefault();
+    };
+
+    const onPointerUp = (event: PointerEvent) => {
+      if (drag.pointerId !== event.pointerId) return;
+      releasePointer();
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Home" || event.key === "Escape") {
+        event.preventDefault();
+        recenter();
+        return;
+      }
+      const step = event.shiftKey ? 28 : 14;
+      const offsets: Record<string, [number, number]> = {
+        ArrowLeft: [-step, 0],
+        ArrowRight: [step, 0],
+        ArrowUp: [0, -step],
+        ArrowDown: [0, step],
+      };
+      const offset = offsets[event.key];
+      if (!offset) return;
+      event.preventDefault();
+      applyPosition(position.x + offset[0], position.y + offset[1]);
+      if (neuralLobbyDragHint) neuralLobbyDragHint.hidden = true;
+    };
+
+    neuralLobbyBrand.addEventListener("pointerdown", onPointerDown);
+    neuralLobbyBrand.addEventListener("pointermove", onPointerMove);
+    neuralLobbyBrand.addEventListener("pointerup", onPointerUp);
+    neuralLobbyBrand.addEventListener("pointercancel", onPointerUp);
+    neuralLobbyBrand.addEventListener("keydown", onKeyDown);
+    neuralLobbyBrand.addEventListener("dblclick", recenter);
+    applyPosition(0, 0);
+
+    cleanups.push(() => {
+      if (lobbyPointerReleaseTimer !== null) {
+        window.clearTimeout(lobbyPointerReleaseTimer);
+      }
+      neuralLobbyBrand.removeEventListener("pointerdown", onPointerDown);
+      neuralLobbyBrand.removeEventListener("pointermove", onPointerMove);
+      neuralLobbyBrand.removeEventListener("pointerup", onPointerUp);
+      neuralLobbyBrand.removeEventListener("pointercancel", onPointerUp);
+      neuralLobbyBrand.removeEventListener("keydown", onKeyDown);
+      neuralLobbyBrand.removeEventListener("dblclick", recenter);
+      neuralLobbyBrand.style.removeProperty("--logo-drag-x");
+      neuralLobbyBrand.style.removeProperty("--logo-drag-y");
+      lobbyPointer.active = false;
     });
   }
 
   function initBrainCanvas(
     selector = "#brainCanvas",
     densityMultiplier = 1,
+    options: NeuralInputOptions = {},
   ) {
     const canvas = query<HTMLCanvasElement>(selector);
     const stage = canvas?.parentElement as HTMLElement | null;
@@ -655,10 +815,11 @@ export function mountPremiumLanding({
     const webgl = initNeuralWebgl(canvas, stage, {
       getEnergy: () => musicEnergy,
       getReactive: () => musicReactiveActive,
+      getPointer: options.getPointer,
     });
 
     if (!webgl) {
-      initBrainCanvas2D(selector, densityMultiplier);
+      initBrainCanvas2D(selector, densityMultiplier, options);
       return;
     }
 
@@ -1183,8 +1344,11 @@ export function mountPremiumLanding({
   animateCounts();
   initReveal();
   initPointerGlow();
+  initLobbyLogoControl();
   initBrainCanvas();
-  initBrainCanvas("#lobbyBrainCanvas", 1.45);
+  initBrainCanvas("#lobbyBrainCanvas", 1.45, {
+    getPointer: () => (lobbyPointer.active ? lobbyPointer : null),
+  });
 
   return () => {
     timers.forEach((timer) => window.clearInterval(timer));
