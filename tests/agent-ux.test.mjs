@@ -19,11 +19,12 @@ test("ordinary-user Hyper Co-Criador keeps canonical orkio fallback", () => {
   assert.match(consoleSource, /me\?\.co_creator_name \|\| DEFAULT_COCREATOR_LABEL/);
 });
 
-test("multi-agent catalog is exposed only to admin and Team remains separately gated", () => {
+test("multi-agent catalog is exposed only to admin and Team is wired to governed backend runtime", () => {
   assert.match(consoleSource, /type ExecutionMode = "individual" \| "team"/);
   assert.match(consoleSource, /streamTeamMessage\(/);
   assert.match(consoleSource, /me\?\.admin_access && showAgents/);
-  assert.match(consoleSource, /Team permanece bloqueado neste patch/);
+  assert.match(consoleSource, /onClick=\{\(\) => setExecutionMode\("team"\)\}/);
+  assert.match(consoleSource, /if \(executionMode === "team" && teamDefinition\)/);
 });
 
 test("participant invite remains a separate capability", () => {

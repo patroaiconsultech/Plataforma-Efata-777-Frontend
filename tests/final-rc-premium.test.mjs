@@ -67,3 +67,12 @@ test("premium controls have explicit visual variants", () => {
   assert.match(styles, /--electric/);
   assert.match(styles, /--gold/);
 });
+
+
+test("Realtime microphone capture requests browser noise suppression and avoids automatic gain amplification", () => {
+  assert.match(console_, /const VOICE_INPUT_CONSTRAINTS: MediaStreamConstraints/);
+  assert.match(console_, /echoCancellation: true/);
+  assert.match(console_, /noiseSuppression: true/);
+  assert.match(console_, /autoGainControl: false/);
+  assert.match(console_, /getUserMedia\(VOICE_INPUT_CONSTRAINTS\)/);
+});
