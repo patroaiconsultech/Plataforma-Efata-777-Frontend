@@ -3337,3 +3337,65 @@ body.neural-lobby-open {
   32% { transform: translate3d(1.15%, -.8%, 0) scale(1.035); }
   67% { transform: translate3d(-.9%, .65%, 0) scale(1.018); }
 }
+
+
+/* === DESKTOP VISIBLE ENERGY PASS === */
+@media (min-width: 821px) and (prefers-reduced-motion: no-preference) {
+  .patroai-premium .immersive-gate__network::before,
+  .patroai-premium .neural-lobby__network::before {
+    content: "";
+    position: absolute;
+    inset: -55% -24%;
+    z-index: 4;
+    pointer-events: none;
+    background: linear-gradient(108deg,
+      transparent 0 39%,
+      rgba(52, 231, 193, .02) 43%,
+      rgba(255, 226, 143, .34) 49%,
+      rgba(52, 231, 193, .16) 53%,
+      transparent 59% 100%);
+    filter: blur(9px);
+    mix-blend-mode: screen;
+    animation: desktopNeuralBeam 3.8s cubic-bezier(.35, .05, .65, .95) infinite;
+  }
+
+  .patroai-premium .immersive-gate__network::after,
+  .patroai-premium .neural-lobby__network::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 46%;
+    height: 46%;
+    z-index: 4;
+    pointer-events: none;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(.72);
+    background: radial-gradient(circle, rgba(255, 226, 143, .2), rgba(52, 231, 193, .08) 32%, transparent 72%);
+    filter: blur(12px);
+    mix-blend-mode: screen;
+    animation: desktopNeuralCorePulse 2.6s ease-in-out infinite;
+  }
+}
+
+@keyframes desktopNeuralBeam {
+  0% { transform: translate3d(-58%, 0, 0) rotate(-7deg); opacity: .12; }
+  18% { opacity: .86; }
+  50% { transform: translate3d(0, 0, 0) rotate(-7deg); opacity: .92; }
+  82% { opacity: .64; }
+  100% { transform: translate3d(58%, 0, 0) rotate(-7deg); opacity: .12; }
+}
+
+@keyframes desktopNeuralCorePulse {
+  0%, 100% { opacity: .2; transform: translate(-50%, -50%) scale(.72); }
+  50% { opacity: .9; transform: translate(-50%, -50%) scale(1.18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium .immersive-gate__network::before,
+  .patroai-premium .immersive-gate__network::after,
+  .patroai-premium .neural-lobby__network::before,
+  .patroai-premium .neural-lobby__network::after {
+    animation: none !important;
+  }
+}
