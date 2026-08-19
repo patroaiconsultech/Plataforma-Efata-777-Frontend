@@ -49,6 +49,9 @@ test("neural renderer has a guarded WebGL2 path and performance limits", () => {
   assert.match(neuralWebgl, /ResizeObserver/);
   assert.match(interactions, /initNeuralWebgl/);
   assert.match(interactions, /initBrainCanvas2D/);
+  assert.match(interactions, /Audio is optional/);
+  assert.match(interactions, /finally/);
+  assert.match(interactions, /seguindo sem áudio/);
 });
 
 test("offline fallback keeps public PatroAI branding", () => {

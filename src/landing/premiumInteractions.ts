@@ -965,18 +965,34 @@ export function mountPremiumLanding({
           await immersiveAudio.play();
           syncMusicDock();
           startAudioReactiveLogo();
-          closeImmersiveGate();
         } catch {
           if (musicDockStatus) {
             musicDockStatus.textContent =
-              "Não foi possível iniciar o áudio neste navegador.";
+              "Experiência sonora indisponível; seguindo sem áudio.";
           }
           if (musicDock) musicDock.hidden = false;
+        } finally {
+          // Audio is optional. The neural lobby must never be blocked by
+          // autoplay policy, missing media, or an unavailable analyser.
+          syncMusicDock();
+          closeImmersiveGate();
         }
       };
       immersiveSoundEntry.addEventListener("click", onSoundEntry);
       cleanups.push(() =>
         immersiveSoundEntry.removeEventListener("click", onSoundEntry),
+      );
+    } else if (immersiveSoundEntry) {
+      const onSoundEntryWithoutAudio = () => closeImmersiveGate();
+      immersiveSoundEntry.addEventListener(
+        "click",
+        onSoundEntryWithoutAudio,
+      );
+      cleanups.push(() =>
+        immersiveSoundEntry.removeEventListener(
+          "click",
+          onSoundEntryWithoutAudio,
+        ),
       );
     }
 
