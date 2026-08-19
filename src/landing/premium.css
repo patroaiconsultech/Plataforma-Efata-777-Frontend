@@ -3169,3 +3169,70 @@ body.neural-lobby-open {
     animation: none !important;
   }
 }
+
+
+/* === VISIBLE NEURAL NETWORK FALLBACK === */
+.patroai-premium .neural-lobby__network {
+  position: absolute;
+  inset: -4%;
+  z-index: 3;
+  display: block;
+  pointer-events: none;
+  opacity: .86;
+  mix-blend-mode: screen;
+  overflow: hidden;
+}
+
+.patroai-premium .neural-lobby__network svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.patroai-premium .neural-lobby__network-lines path {
+  fill: none;
+  stroke: url(#neuralLobbyNetworkGradient);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.2;
+  stroke-dasharray: 8 18 2 22;
+  opacity: .7;
+  animation: neuralNetworkFlow calc(7.2s + (var(--i) * .34s)) linear infinite;
+  animation-delay: calc(var(--i) * -.43s);
+}
+
+.patroai-premium .neural-lobby__network-nodes circle {
+  fill: #ffe29a;
+  opacity: .75;
+  filter: drop-shadow(0 0 7px rgba(255, 226, 143, .9));
+  animation: neuralNetworkNode calc(2.6s + (var(--i) * .09s)) ease-in-out infinite;
+  animation-delay: calc(var(--i) * -.16s);
+}
+
+@keyframes neuralNetworkFlow {
+  0% { stroke-dashoffset: 0; opacity: .26; }
+  32% { opacity: .74; }
+  68% { opacity: .48; }
+  100% { stroke-dashoffset: -96; opacity: .26; }
+}
+
+@keyframes neuralNetworkNode {
+  0%, 100% { transform: scale(.72); opacity: .32; }
+  50% { transform: scale(1.55); opacity: .98; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium .neural-lobby__network-lines path,
+  .patroai-premium .neural-lobby__network-nodes circle {
+    animation: none !important;
+  }
+  .patroai-premium .neural-lobby__network-lines path {
+    opacity: .55;
+    stroke-dashoffset: 0;
+  }
+  .patroai-premium .neural-lobby__network-nodes circle {
+    opacity: .6;
+    transform: none;
+  }
+}

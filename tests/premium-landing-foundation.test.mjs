@@ -233,3 +233,15 @@ test("touch fallback and desktop canvas drift remain explicit", () => {
   assert.match(css, /@keyframes neuralLobbyCanvasDrift/);
   assert.match(css, /#lobbyBrainCanvas[\s\S]*animation: neuralLobbyCanvasDrift/);
 });
+
+
+test("visible neural network fallback remains layered above the canvas and behind the controls", () => {
+  assert.match(markup, /class="neural-lobby__network"/);
+  assert.match(markup, /neuralLobbyNetworkGradient/);
+  assert.match(markup, /neural-lobby__network-lines/);
+  assert.match(markup, /neural-lobby__network-nodes/);
+  assert.match(css, /\.neural-lobby__network \{[\s\S]*z-index: 3/);
+  assert.match(css, /neuralNetworkFlow/);
+  assert.match(css, /neuralNetworkNode/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+});

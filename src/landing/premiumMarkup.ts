@@ -85,6 +85,37 @@ export const premiumMarkup = String.raw`
     <canvas id="lobbyBrainCanvas"></canvas>
   </div>
 
+  <div class="neural-lobby__network" aria-hidden="true">
+    <svg viewBox="0 0 1000 700" preserveAspectRatio="none" role="presentation">
+      <defs>
+        <linearGradient id="neuralLobbyNetworkGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#36e7c1" stop-opacity=".08"></stop>
+          <stop offset=".5" stop-color="#ffe29a" stop-opacity=".72"></stop>
+          <stop offset="1" stop-color="#36e7c1" stop-opacity=".08"></stop>
+        </linearGradient>
+      </defs>
+      <g class="neural-lobby__network-lines">
+        <path style="--i:0" d="M24 126 L154 204 L286 118 L418 232 L560 146 L704 254 L846 144 L982 224"></path>
+        <path style="--i:1" d="M-20 350 L126 298 L260 376 L398 302 L536 412 L674 334 L826 404 L1020 322"></path>
+        <path style="--i:2" d="M48 582 L174 486 L314 548 L444 454 L594 548 L738 462 L894 536 L1026 464"></path>
+        <path style="--i:3" d="M154 204 L126 298 L174 486"></path>
+        <path style="--i:4" d="M286 118 L260 376 L314 548"></path>
+        <path style="--i:5" d="M418 232 L398 302 L444 454"></path>
+        <path style="--i:6" d="M560 146 L536 412 L594 548"></path>
+        <path style="--i:7" d="M704 254 L674 334 L738 462"></path>
+        <path style="--i:8" d="M846 144 L826 404 L894 536"></path>
+        <path style="--i:9" d="M286 118 L418 232 L536 412 L738 462"></path>
+        <path style="--i:10" d="M154 204 L398 302 L594 548 L894 536"></path>
+        <path style="--i:11" d="M48 582 L260 376 L560 146 L846 144"></path>
+      </g>
+      <g class="neural-lobby__network-nodes">
+        <circle style="--i:0" cx="24" cy="126" r="4"></circle><circle style="--i:1" cx="154" cy="204" r="5"></circle><circle style="--i:2" cx="286" cy="118" r="4"></circle><circle style="--i:3" cx="418" cy="232" r="5"></circle><circle style="--i:4" cx="560" cy="146" r="4"></circle><circle style="--i:5" cx="704" cy="254" r="5"></circle><circle style="--i:6" cx="846" cy="144" r="4"></circle><circle style="--i:7" cx="982" cy="224" r="4"></circle>
+        <circle style="--i:8" cx="126" cy="298" r="4"></circle><circle style="--i:9" cx="260" cy="376" r="5"></circle><circle style="--i:10" cx="398" cy="302" r="4"></circle><circle style="--i:11" cx="536" cy="412" r="5"></circle><circle style="--i:12" cx="674" cy="334" r="4"></circle><circle style="--i:13" cx="826" cy="404" r="5"></circle>
+        <circle style="--i:14" cx="174" cy="486" r="4"></circle><circle style="--i:15" cx="314" cy="548" r="5"></circle><circle style="--i:16" cx="444" cy="454" r="4"></circle><circle style="--i:17" cx="594" cy="548" r="5"></circle><circle style="--i:18" cx="738" cy="462" r="4"></circle><circle style="--i:19" cx="894" cy="536" r="5"></circle>
+      </g>
+    </svg>
+  </div>
+
   <div class="neural-lobby__vignette" aria-hidden="true"></div>
 
   <div class="neural-lobby__center">
