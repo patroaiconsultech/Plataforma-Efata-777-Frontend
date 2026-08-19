@@ -1,3 +1,5 @@
+import { initNeuralWebgl } from "./neuralWebgl";
+
 type PremiumLandingOptions = {
   root: HTMLElement;
   onPrivateAccess: () => void | Promise<void>;
@@ -6,44 +8,124 @@ type PremiumLandingOptions = {
 
 const translations: Record<string, Record<string, string>> = {
         pt: {
-          "nav.ecosystem": "Ecossistema", "nav.governance": "Governança", "nav.method": "Método", "nav.contact": "Contato", "nav.private": "Acesso privado",
+          "nav.ecosystem": "Ecossistema", "nav.governance": "Governança", "nav.method": "Método", "nav.contact": "Contato", "nav.careers": "Carreiras", "nav.cocreator": "Co-Criador", "nav.private": "Acesso privado", "immersive.eyebrow": "PATROAI · EXPERIÊNCIA IMERSIVA", "immersive.title": "Este é um ambiente imersivo.", "immersive.copy": "Escolha como deseja iniciar sua experiência PatroAI.", "immersive.sound.cta": "Entrar com experiência sonora", "immersive.sound.copy": "Iniciar a obra dentro da experiência PatroAI", "immersive.silent": "Explorar sem som", "immersive.direct": "Ir direto para a apresentação", "immersive.headphones": "Recomendamos o uso de fones de ouvido para uma experiência mais imersiva.", "lobby.eyebrow": "PATROAI · NÚCLEO IMERSIVO", "lobby.title": "Escolha por onde deseja entrar.", "lobby.copy": "Navegue pelo ecossistema enquanto a experiência sonora permanece ativa.", "lobby.node.about": "Conheça a PatroAI", "lobby.node.ecosystem": "Ecossistema", "lobby.node.governance": "Governança", "lobby.node.method": "Método", "lobby.node.careers": "Carreiras & Talentos", "lobby.node.contact": "Contato Estratégico", "lobby.node.platform": "Acessar Plataforma", "lobby.hint": "Selecione um núcleo para entrar",
           "hero.eyebrow": "Acesso privado e controlado", "hero.title": "Sistemas governados de <span>IA</span> para fluxos executivos.", "hero.copy": "O Grupo PatroAI une consultoria estratégica, tecnologia aplicada e desenvolvimento de novos negócios para transformar informação complexa em clareza, decisão e execução.", "hero.primary": "Falar com um especialista", "hero.secondary": "Conhecer atuação", "hero.kpi1": "frentes integradas para estratégia, capital relacional e tecnologia.", "hero.kpi2": "por cento orientado a governança, rastreabilidade e decisão.", "hero.kpi3": "ambiente privado para relacionamento qualificado e seguro.",
           "screen.title": "Governança antes da automação.", "screen.copy": "Uma camada executiva para organizar dados, agentes, documentos, risco e decisão com trilhas claras de responsabilidade.", "screen.signal1": "Estratégia aplicada", "screen.signal2": "Teses e parcerias", "screen.signal3": "Sistemas sob medida", "screen.signal4": "Perpetuação responsável", "phone.title": "Sistemas governados de <span class=\"accent\">IA</span>", "phone.copy": "Clareza estratégica, tecnologia e governança para decisão executiva.",
           "ecosystem.eyebrow": "Ecossistema PatroAI", "ecosystem.title": "Três frentes para construir vantagem com critério.", "ecosystem.copy": "A proposta combina visão executiva, estrutura de negócios e engenharia aplicada para projetos que precisam sair do discurso e entrar em operação com controle.",
           "unit.consultech.copy": "Planejamento, valuation, diagnóstico e apoio executivo para decisões de alto impacto.", "unit.consultech.a": "Business plan e estratégia", "unit.consultech.b": "Modelagens dinâmicas de valor", "unit.consultech.c": "Suporte executivo especializado", "unit.holding.copy": "Desenvolvimento de teses, novos negócios e parcerias com potencial de escala e sinergia.", "unit.holding.a": "Projetos por segmento", "unit.holding.b": "Conexão institucional", "unit.holding.c": "Construção de oportunidades", "unit.factory.copy": "Sistemas, automações e ambientes digitais seguros para gestão, decisão e escala operacional.", "unit.factory.a": "IA governada para empresas", "unit.factory.b": "Fluxos executivos inteligentes", "unit.factory.c": "Arquitetura sob medida",
           "governance.eyebrow": "Governança, ESG e perpetuação", "governance.title": "IA que respeita contexto, responsabilidade e continuidade.", "governance.a": "Rastreabilidade desde o desenho da solução.", "governance.b": "Decisões com critério, evidências e limites operacionais.", "governance.c": "Aplicação responsável para empresas, investidores e especialistas.", "governance.d": "Arquitetura preparada para continuidade, escala e controle.", "metric.a": "Diagnóstico estratégico antes de qualquer automação.", "metric.b": "Arquitetura de IA conectada ao negócio e ao risco.", "metric.c": "Rede qualificada para consultores, empresas e investidores.", "metric.d": "Operação privada, controlada e orientada a valor.",
           "method.eyebrow": "Método de implantação", "method.title": "Do briefing ao sistema governado.", "method.copy": "A jornada prioriza aderência, confidencialidade e maturidade operacional. A tecnologia entra quando a decisão, o dado e a responsabilidade já estão claros.", "timeline.a.title": "Triagem estratégica", "timeline.a.copy": "Entendimento do contexto, objetivo de negócio, riscos e prioridade real da organização.", "timeline.b.title": "Arquitetura de valor", "timeline.b.copy": "Modelagem da oportunidade, indicadores, governança e potencial de retorno operacional.", "timeline.c.title": "Protótipo controlado", "timeline.c.copy": "Desenho do fluxo, validação com usuários-chave e limites claros de acesso e execução.", "timeline.d.title": "Escala assistida", "timeline.d.copy": "Evolução incremental com auditoria, melhoria contínua e alinhamento executivo.",
-          "legal.eyebrow": "Privacidade e termos", "legal.title": "Uso responsável, dados e governança.", "legal.copy": "Versão operacional provisória baseada nos termos do ambiente anterior. O conteúdo poderá ser substituído por versão jurídica oficial.", "legal.privacy.title": "Política de Privacidade", "legal.privacy.copy": "Os dados tratados pela plataforma seguem critérios de segurança, confidencialidade e uso legítimo. Conteúdos enviados podem ser processados para análise, organização, respostas contextuais e funcionamento dos agentes.", "legal.privacy.a": "O usuário deve enviar apenas informações e documentos que tenha direito de compartilhar.", "legal.privacy.b": "Dados sensíveis devem ser tratados com cautela e somente quando necessários ao contexto.", "legal.privacy.c": "Solicitações sobre privacidade, acesso, correção ou exclusão de dados podem ser encaminhadas aos administradores do projeto.", "legal.terms.title": "Termos de Uso", "legal.terms.a": "A plataforma apoia agentes de inteligência artificial, automação assistida, organização de informações e suporte operacional em ambiente controlado.", "legal.terms.b": "Ao utilizar os recursos, o usuário concorda com uso responsável, ético e compatível com segurança, privacidade e governança.", "legal.terms.c": "É vedado uso ilegal, abusivo, fraudulento, discriminatório, invasivo ou que viole direitos de terceiros.", "legal.terms.d": "Respostas de IA podem conter imprecisões e devem ser revisadas antes de decisões operacionais, jurídicas, financeiras, médicas, técnicas ou estratégicas.", "legal.terms.e": "Execuções reais, escrita em repositório, criação de branch, abertura de PR, deploy ou alteração de ambiente dependem de aprovação explícita e fluxo governado.", "legal.terms.f": "Durante testes, podem ocorrer instabilidades, indisponibilidades, ajustes de interface e mudanças de comportamento dos agentes.", "legal.terms.g": "A plataforma é ferramenta de apoio e não substitui análise profissional especializada.", "legal.terms.h": "A continuidade de uso após atualizações poderá representar concordância com a nova versão dos termos.",
-          "contact.eyebrow": "Pré-onboarding qualificado", "contact.title": "Solicite uma conversa estratégica.", "contact.copy": "O acesso à tecnologia e aos projetos do Grupo PatroAI é concedido apenas após qualificação, validação interna e convite privado.", "contact.whatsapp": "WhatsApp estratégico", "form.name": "Nome completo", "form.email": "E-mail", "form.profile": "Perfil", "form.select": "Selecione", "form.profileA": "Empresa / Cliente", "form.profileB": "Investidor", "form.profileC": "Consultor associado", "form.profileD": "Parceiro estratégico", "form.whatsapp": "WhatsApp", "form.challenge": "Oportunidade ou desafio", "form.submit": "Preparar contato", "footer.left": "Grupo PatroAI. Consultech, Holding e AI Factory.", "footer.privacy": "Privacidade e termos", "footer.contact": "Contato", "footer.right": "Acesso privado. Proposta sob análise.", "status": "{name}, seu contato foi preparado para triagem ({profile})."
+          "legal.eyebrow": "Privacidade e termos", "legal.title": "Uso responsável, dados e governança.", "legal.copy": "Princípios de privacidade, segurança e uso responsável orientam o ambiente PatroAI e a forma como dados, agentes e decisões são tratados.", "legal.privacy.title": "Política de Privacidade", "legal.privacy.copy": "Os dados tratados pela plataforma seguem critérios de segurança, confidencialidade e uso legítimo. Conteúdos enviados podem ser processados para análise, organização, respostas contextuais e funcionamento dos agentes.", "legal.privacy.a": "O usuário deve enviar apenas informações e documentos que tenha direito de compartilhar.", "legal.privacy.b": "Dados sensíveis devem ser tratados com cautela e somente quando necessários ao contexto.", "legal.privacy.c": "Solicitações sobre privacidade, acesso, correção ou exclusão de dados podem ser encaminhadas aos administradores do projeto.", "legal.terms.title": "Termos de Uso", "legal.terms.a": "A plataforma apoia agentes de inteligência artificial, automação assistida, organização de informações e suporte operacional em ambiente controlado.", "legal.terms.b": "Ao utilizar os recursos, o usuário concorda com uso responsável, ético e compatível com segurança, privacidade e governança.", "legal.terms.c": "É vedado uso ilegal, abusivo, fraudulento, discriminatório, invasivo ou que viole direitos de terceiros.", "legal.terms.d": "Respostas de IA podem conter imprecisões e devem ser revisadas antes de decisões operacionais, jurídicas, financeiras, médicas, técnicas ou estratégicas.", "legal.terms.e": "Execuções reais, escrita em repositório, criação de branch, abertura de PR, deploy ou alteração de ambiente dependem de aprovação explícita e fluxo governado.", "legal.terms.f": "Durante testes, podem ocorrer instabilidades, indisponibilidades, ajustes de interface e mudanças de comportamento dos agentes.", "legal.terms.g": "A plataforma é ferramenta de apoio e não substitui análise profissional especializada.", "legal.terms.h": "A continuidade de uso após atualizações poderá representar concordância com a nova versão dos termos.",
+          "contact.eyebrow": "Pré-onboarding qualificado", "contact.title": "Solicite uma conversa estratégica.", "contact.copy": "Use este canal para oportunidades estratégicas, acesso privado, implantação, parcerias ou interesse profissional. Conte o contexto em poucas linhas e nossa equipe retornará após uma triagem inicial.", "contact.whatsapp": "WhatsApp estratégico", "form.name": "Nome completo", "form.email": "E-mail", "form.profile": "Perfil", "form.select": "Selecione", "form.profileA": "Empresa / Cliente", "form.profileB": "Investidor", "form.profileC": "Consultor associado", "form.profileD": "Parceiro estratégico", "form.whatsapp": "WhatsApp", "form.challenge": "Oportunidade ou desafio", "form.submit": "Preparar contato", "footer.left": "Grupo PatroAI. Consultech, Holding e AI Factory.", "footer.privacy": "Privacidade e termos", "footer.contact": "Contato", "footer.right": "Acesso privado. Proposta sob análise.", "status": "{name}, seu contato foi preparado para triagem ({profile}).", "meta.title": "Grupo PatroAI | Sistemas governados de IA", "meta.description": "Consultoria estratégica, tecnologia aplicada e sistemas governados de IA para decisões executivas, novos negócios e perpetuação responsável.",
         },
         es: {
-          "nav.ecosystem": "Ecosistema", "nav.governance": "Gobernanza", "nav.method": "Método", "nav.contact": "Contacto", "nav.private": "Acceso privado",
+          "nav.ecosystem": "Ecosistema", "nav.governance": "Gobernanza", "nav.method": "Método", "nav.contact": "Contacto", "nav.careers": "Carreras", "nav.cocreator": "Co-Creador", "nav.private": "Acceso privado", "immersive.eyebrow": "PATROAI · EXPERIENCIA INMERSIVA", "immersive.title": "Este es un entorno inmersivo.", "immersive.copy": "Elige cómo quieres iniciar tu experiencia PatroAI.", "immersive.sound.cta": "Entrar con experiencia sonora", "immersive.sound.copy": "Iniciar la obra dentro de la experiencia PatroAI", "immersive.silent": "Explorar sin sonido", "immersive.direct": "Ir directamente a la presentación", "immersive.headphones": "Recomendamos usar auriculares para una experiencia más inmersiva.", "lobby.eyebrow": "PATROAI · NÚCLEO INMERSIVO", "lobby.title": "Elige por dónde quieres entrar.", "lobby.copy": "Navega por el ecosistema mientras la experiencia sonora permanece activa.", "lobby.node.about": "Conoce PatroAI", "lobby.node.ecosystem": "Ecosistema", "lobby.node.governance": "Gobernanza", "lobby.node.method": "Método", "lobby.node.careers": "Carreras y Talentos", "lobby.node.contact": "Contacto Estratégico", "lobby.node.platform": "Acceder a la Plataforma", "lobby.hint": "Selecciona un núcleo para entrar",
           "hero.eyebrow": "Acceso privado y controlado", "hero.title": "Sistemas gobernados de <span>IA</span> para flujos ejecutivos.", "hero.copy": "Grupo PatroAI une consultoría estratégica, tecnología aplicada y desarrollo de nuevos negocios para transformar información compleja en claridad, decisión y ejecución.", "hero.primary": "Hablar con un especialista", "hero.secondary": "Conocer el alcance", "hero.kpi1": "frentes integrados para estrategia, capital relacional y tecnología.", "hero.kpi2": "por ciento orientado a gobernanza, trazabilidad y decisión.", "hero.kpi3": "entorno privado para relaciones calificadas y seguras.",
           "screen.title": "Gobernanza antes de la automatización.", "screen.copy": "Una capa ejecutiva para organizar datos, agentes, documentos, riesgos y decisiones con trazabilidad clara de responsabilidad.", "screen.signal1": "Estrategia aplicada", "screen.signal2": "Tesis y alianzas", "screen.signal3": "Sistemas a medida", "screen.signal4": "Continuidad responsable", "phone.title": "Sistemas gobernados de <span class=\"accent\">IA</span>", "phone.copy": "Claridad estratégica, tecnología y gobernanza para la decisión ejecutiva.",
           "ecosystem.eyebrow": "Ecosistema PatroAI", "ecosystem.title": "Tres frentes para construir ventaja con criterio.", "ecosystem.copy": "La propuesta combina visión ejecutiva, estructura de negocios e ingeniería aplicada para proyectos que necesitan pasar del discurso a la operación con control.",
           "unit.consultech.copy": "Planificación, valuation, diagnóstico y apoyo ejecutivo para decisiones de alto impacto.", "unit.consultech.a": "Business plan y estrategia", "unit.consultech.b": "Modelos dinámicos de valor", "unit.consultech.c": "Soporte ejecutivo especializado", "unit.holding.copy": "Desarrollo de tesis, nuevos negocios y alianzas con potencial de escala y sinergia.", "unit.holding.a": "Proyectos por segmento", "unit.holding.b": "Conexión institucional", "unit.holding.c": "Construcción de oportunidades", "unit.factory.copy": "Sistemas, automatizaciones y entornos digitales seguros para gestión, decisión y escala operativa.", "unit.factory.a": "IA gobernada para empresas", "unit.factory.b": "Flujos ejecutivos inteligentes", "unit.factory.c": "Arquitectura a medida",
           "governance.eyebrow": "Gobernanza, ESG y continuidad", "governance.title": "IA que respeta contexto, responsabilidad y continuidad.", "governance.a": "Trazabilidad desde el diseño de la solución.", "governance.b": "Decisiones con criterio, evidencias y límites operativos.", "governance.c": "Aplicación responsable para empresas, inversores y especialistas.", "governance.d": "Arquitectura preparada para continuidad, escala y control.", "metric.a": "Diagnóstico estratégico antes de cualquier automatización.", "metric.b": "Arquitectura de IA conectada al negocio y al riesgo.", "metric.c": "Red calificada para consultores, empresas e inversores.", "metric.d": "Operación privada, controlada y orientada al valor.",
           "method.eyebrow": "Método de implementación", "method.title": "Del briefing al sistema gobernado.", "method.copy": "El recorrido prioriza adherencia, confidencialidad y madurez operativa. La tecnología entra cuando la decisión, el dato y la responsabilidad ya están claros.", "timeline.a.title": "Evaluación estratégica", "timeline.a.copy": "Comprensión del contexto, objetivo de negocio, riesgos y prioridad real de la organización.", "timeline.b.title": "Arquitectura de valor", "timeline.b.copy": "Modelado de la oportunidad, indicadores, gobernanza y potencial de retorno operativo.", "timeline.c.title": "Prototipo controlado", "timeline.c.copy": "Diseño del flujo, validación con usuarios clave y límites claros de acceso y ejecución.", "timeline.d.title": "Escala asistida", "timeline.d.copy": "Evolución incremental con auditoría, mejora continua y alineación ejecutiva.",
-          "legal.eyebrow": "Privacidad y términos", "legal.title": "Uso responsable, datos y gobernanza.", "legal.copy": "Versión operativa provisional basada en los términos del entorno anterior. El contenido podrá ser sustituido por una versión jurídica oficial.", "legal.privacy.title": "Política de Privacidad", "legal.privacy.copy": "Los datos tratados por la plataforma siguen criterios de seguridad, confidencialidad y uso legítimo. Los contenidos enviados pueden procesarse para análisis, organización, respuestas contextuales y funcionamiento de los agentes.", "legal.privacy.a": "El usuario debe enviar únicamente información y documentos que tenga derecho a compartir.", "legal.privacy.b": "Los datos sensibles deben tratarse con cautela y solo cuando sean necesarios para el contexto.", "legal.privacy.c": "Las solicitudes sobre privacidad, acceso, corrección o eliminación de datos pueden enviarse a los administradores del proyecto.", "legal.terms.title": "Términos de Uso", "legal.terms.a": "La plataforma apoya agentes de inteligencia artificial, automatización asistida, organización de información y soporte operativo en un entorno controlado.", "legal.terms.b": "Al utilizar los recursos, el usuario acepta un uso responsable, ético y compatible con seguridad, privacidad y gobernanza.", "legal.terms.c": "Está prohibido el uso ilegal, abusivo, fraudulento, discriminatorio, invasivo o que viole derechos de terceros.", "legal.terms.d": "Las respuestas de IA pueden contener imprecisiones y deben revisarse antes de decisiones operativas, jurídicas, financieras, médicas, técnicas o estratégicas.", "legal.terms.e": "Las ejecuciones reales, escritura en repositorios, creación de ramas, apertura de PR, despliegues o cambios de entorno dependen de aprobación explícita y flujo gobernado.", "legal.terms.f": "Durante las pruebas pueden ocurrir inestabilidades, indisponibilidades, ajustes de interfaz y cambios en el comportamiento de los agentes.", "legal.terms.g": "La plataforma es una herramienta de apoyo y no sustituye el análisis profesional especializado.", "legal.terms.h": "La continuidad de uso después de actualizaciones podrá representar aceptación de la nueva versión de los términos.",
-          "contact.eyebrow": "Pre-onboarding calificado", "contact.title": "Solicite una conversación estratégica.", "contact.copy": "El acceso a la tecnología y a los proyectos de Grupo PatroAI se concede solo después de calificación, validación interna e invitación privada.", "contact.whatsapp": "WhatsApp estratégico", "form.name": "Nombre completo", "form.email": "Correo electrónico", "form.profile": "Perfil", "form.select": "Seleccione", "form.profileA": "Empresa / Cliente", "form.profileB": "Inversor", "form.profileC": "Consultor asociado", "form.profileD": "Socio estratégico", "form.whatsapp": "WhatsApp", "form.challenge": "Oportunidad o desafío", "form.submit": "Preparar contacto", "footer.left": "Grupo PatroAI. Consultech, Holding y AI Factory.", "footer.privacy": "Privacidad y términos", "footer.contact": "Contacto", "footer.right": "Acceso privado. Propuesta bajo análisis.", "status": "{name}, su contacto fue preparado para evaluación ({profile})."
+          "legal.eyebrow": "Privacidad y términos", "legal.title": "Uso responsable, datos y gobernanza.", "legal.copy": "Los principios de privacidad, seguridad y uso responsable orientan el entorno PatroAI y la forma en que se tratan los datos, agentes y decisiones.", "legal.privacy.title": "Política de Privacidad", "legal.privacy.copy": "Los datos tratados por la plataforma siguen criterios de seguridad, confidencialidad y uso legítimo. Los contenidos enviados pueden procesarse para análisis, organización, respuestas contextuales y funcionamiento de los agentes.", "legal.privacy.a": "El usuario debe enviar únicamente información y documentos que tenga derecho a compartir.", "legal.privacy.b": "Los datos sensibles deben tratarse con cautela y solo cuando sean necesarios para el contexto.", "legal.privacy.c": "Las solicitudes sobre privacidad, acceso, corrección o eliminación de datos pueden enviarse a los administradores del proyecto.", "legal.terms.title": "Términos de Uso", "legal.terms.a": "La plataforma apoya agentes de inteligencia artificial, automatización asistida, organización de información y soporte operativo en un entorno controlado.", "legal.terms.b": "Al utilizar los recursos, el usuario acepta un uso responsable, ético y compatible con seguridad, privacidad y gobernanza.", "legal.terms.c": "Está prohibido el uso ilegal, abusivo, fraudulento, discriminatorio, invasivo o que viole derechos de terceros.", "legal.terms.d": "Las respuestas de IA pueden contener imprecisiones y deben revisarse antes de decisiones operativas, jurídicas, financieras, médicas, técnicas o estratégicas.", "legal.terms.e": "Las ejecuciones reales, escritura en repositorios, creación de ramas, apertura de PR, despliegues o cambios de entorno dependen de aprobación explícita y flujo gobernado.", "legal.terms.f": "Durante las pruebas pueden ocurrir inestabilidades, indisponibilidades, ajustes de interfaz y cambios en el comportamiento de los agentes.", "legal.terms.g": "La plataforma es una herramienta de apoyo y no sustituye el análisis profesional especializado.", "legal.terms.h": "La continuidad de uso después de actualizaciones podrá representar aceptación de la nueva versión de los términos.",
+          "contact.eyebrow": "Pre-onboarding calificado", "contact.title": "Solicite una conversación estratégica.", "contact.copy": "Utiliza este canal para oportunidades estratégicas, acceso privado, implantación, alianzas o interés profesional. Cuenta el contexto en pocas líneas y nuestro equipo responderá tras una evaluación inicial.", "contact.whatsapp": "WhatsApp estratégico", "form.name": "Nombre completo", "form.email": "Correo electrónico", "form.profile": "Perfil", "form.select": "Seleccione", "form.profileA": "Empresa / Cliente", "form.profileB": "Inversor", "form.profileC": "Consultor asociado", "form.profileD": "Socio estratégico", "form.whatsapp": "WhatsApp", "form.challenge": "Oportunidad o desafío", "form.submit": "Preparar contacto", "footer.left": "Grupo PatroAI. Consultech, Holding y AI Factory.", "footer.privacy": "Privacidad y términos", "footer.contact": "Contacto", "footer.right": "Acceso privado. Propuesta bajo análisis.", "status": "{name}, su contacto fue preparado para evaluación ({profile}).", "meta.title": "Grupo PatroAI | Sistemas gobernados de IA", "meta.description": "Consultoría estratégica, tecnología aplicada y sistemas gobernados de IA para decisiones ejecutivas, nuevos negocios y continuidad responsable.",
         },
         en: {
-          "nav.ecosystem": "Ecosystem", "nav.governance": "Governance", "nav.method": "Method", "nav.contact": "Contact", "nav.private": "Private access",
+          "nav.ecosystem": "Ecosystem", "nav.governance": "Governance", "nav.method": "Method", "nav.contact": "Contact", "nav.careers": "Careers", "nav.cocreator": "Co-Creator", "nav.private": "Private access", "immersive.eyebrow": "PATROAI · IMMERSIVE EXPERIENCE", "immersive.title": "This is an immersive environment.", "immersive.copy": "Choose how you want to start your PatroAI experience.", "immersive.sound.cta": "Enter with sound experience", "immersive.sound.copy": "Start the work inside the PatroAI experience", "immersive.silent": "Explore without sound", "immersive.direct": "Go directly to the presentation", "immersive.headphones": "Headphones are recommended for a more immersive experience.", "lobby.eyebrow": "PATROAI · IMMERSIVE CORE", "lobby.title": "Choose where you want to enter.", "lobby.copy": "Explore the ecosystem while the sound experience remains active.", "lobby.node.about": "Meet PatroAI", "lobby.node.ecosystem": "Ecosystem", "lobby.node.governance": "Governance", "lobby.node.method": "Method", "lobby.node.careers": "Careers & Talent", "lobby.node.contact": "Strategic Contact", "lobby.node.platform": "Access Platform", "lobby.hint": "Select a core to enter",
           "hero.eyebrow": "Private and controlled access", "hero.title": "Governed <span>AI</span> systems for executive workflows.", "hero.copy": "Grupo PatroAI combines strategic consulting, applied technology and new-business development to turn complex information into clarity, decisions and execution.", "hero.primary": "Talk to a specialist", "hero.secondary": "Explore our work", "hero.kpi1": "integrated fronts for strategy, relationship capital and technology.", "hero.kpi2": "percent oriented to governance, traceability and decision-making.", "hero.kpi3": "private environment for qualified and secure relationships.",
           "screen.title": "Governance before automation.", "screen.copy": "An executive layer to organize data, agents, documents, risk and decisions with clear accountability trails.", "screen.signal1": "Applied strategy", "screen.signal2": "Theses and partnerships", "screen.signal3": "Tailored systems", "screen.signal4": "Responsible continuity", "phone.title": "Governed <span class=\"accent\">AI</span> systems", "phone.copy": "Strategic clarity, technology and governance for executive decision-making.",
           "ecosystem.eyebrow": "PatroAI Ecosystem", "ecosystem.title": "Three fronts to build advantage with discipline.", "ecosystem.copy": "The proposition combines executive vision, business structure and applied engineering for projects that need to move from discourse into controlled operation.",
           "unit.consultech.copy": "Planning, valuation, diagnosis and executive support for high-impact decisions.", "unit.consultech.a": "Business plan and strategy", "unit.consultech.b": "Dynamic value modeling", "unit.consultech.c": "Specialized executive support", "unit.holding.copy": "Development of theses, new businesses and partnerships with scale and synergy potential.", "unit.holding.a": "Segment-based projects", "unit.holding.b": "Institutional connection", "unit.holding.c": "Opportunity building", "unit.factory.copy": "Systems, automations and secure digital environments for management, decision-making and operational scale.", "unit.factory.a": "Governed AI for companies", "unit.factory.b": "Intelligent executive workflows", "unit.factory.c": "Tailored architecture",
           "governance.eyebrow": "Governance, ESG and continuity", "governance.title": "AI that respects context, responsibility and continuity.", "governance.a": "Traceability from the solution design stage.", "governance.b": "Decisions with discipline, evidence and operational boundaries.", "governance.c": "Responsible application for companies, investors and specialists.", "governance.d": "Architecture prepared for continuity, scale and control.", "metric.a": "Strategic diagnosis before any automation.", "metric.b": "AI architecture connected to business and risk.", "metric.c": "Qualified network for consultants, companies and investors.", "metric.d": "Private, controlled and value-oriented operation.",
           "method.eyebrow": "Implementation method", "method.title": "From briefing to governed system.", "method.copy": "The journey prioritizes fit, confidentiality and operational maturity. Technology enters when the decision, data and accountability are already clear.", "timeline.a.title": "Strategic triage", "timeline.a.copy": "Understanding the context, business objective, risks and the organization's real priority.", "timeline.b.title": "Value architecture", "timeline.b.copy": "Modeling the opportunity, indicators, governance and operational return potential.", "timeline.c.title": "Controlled prototype", "timeline.c.copy": "Workflow design, validation with key users and clear limits for access and execution.", "timeline.d.title": "Assisted scale", "timeline.d.copy": "Incremental evolution with audit, continuous improvement and executive alignment.",
-          "legal.eyebrow": "Privacy and terms", "legal.title": "Responsible use, data and governance.", "legal.copy": "Provisional operational version based on the previous environment terms. This content may be replaced by an official legal version.", "legal.privacy.title": "Privacy Policy", "legal.privacy.copy": "Data processed by the platform follows security, confidentiality and legitimate-use criteria. Submitted content may be processed for analysis, organization, contextual responses and agent operation.", "legal.privacy.a": "Users should submit only information and documents they are entitled to share.", "legal.privacy.b": "Sensitive data should be handled carefully and only when needed for the context.", "legal.privacy.c": "Privacy, access, correction or deletion requests may be sent to the project administrators.", "legal.terms.title": "Terms of Use", "legal.terms.a": "The platform supports artificial intelligence agents, assisted automation, information organization and operational support in a controlled environment.", "legal.terms.b": "By using the resources, users agree to responsible, ethical use compatible with security, privacy and governance.", "legal.terms.c": "Illegal, abusive, fraudulent, discriminatory, invasive use or use that violates third-party rights is prohibited.", "legal.terms.d": "AI responses may contain inaccuracies and must be reviewed before operational, legal, financial, medical, technical or strategic decisions.", "legal.terms.e": "Real executions, repository writes, branch creation, PR opening, deployment or environment changes require explicit approval and a governed flow.", "legal.terms.f": "During testing, instability, downtime, interface adjustments and changes in agent behavior may occur.", "legal.terms.g": "The platform is a support tool and does not replace specialized professional analysis.", "legal.terms.h": "Continued use after updates may represent acceptance of the new terms version.",
-          "contact.eyebrow": "Qualified pre-onboarding", "contact.title": "Request a strategic conversation.", "contact.copy": "Access to Grupo PatroAI technology and projects is granted only after qualification, internal validation and private invitation.", "contact.whatsapp": "Strategic WhatsApp", "form.name": "Full name", "form.email": "Email", "form.profile": "Profile", "form.select": "Select", "form.profileA": "Company / Client", "form.profileB": "Investor", "form.profileC": "Associated consultant", "form.profileD": "Strategic partner", "form.whatsapp": "WhatsApp", "form.challenge": "Opportunity or challenge", "form.submit": "Prepare contact", "footer.left": "Grupo PatroAI. Consultech, Holding and AI Factory.", "footer.privacy": "Privacy and terms", "footer.contact": "Contact", "footer.right": "Private access. Proposal under review.", "status": "{name}, your contact was prepared for triage ({profile})."
+          "legal.eyebrow": "Privacy and terms", "legal.title": "Responsible use, data and governance.", "legal.copy": "Privacy, security and responsible-use principles guide the PatroAI environment and the way data, agents and decisions are handled.", "legal.privacy.title": "Privacy Policy", "legal.privacy.copy": "Data processed by the platform follows security, confidentiality and legitimate-use criteria. Submitted content may be processed for analysis, organization, contextual responses and agent operation.", "legal.privacy.a": "Users should submit only information and documents they are entitled to share.", "legal.privacy.b": "Sensitive data should be handled carefully and only when needed for the context.", "legal.privacy.c": "Privacy, access, correction or deletion requests may be sent to the project administrators.", "legal.terms.title": "Terms of Use", "legal.terms.a": "The platform supports artificial intelligence agents, assisted automation, information organization and operational support in a controlled environment.", "legal.terms.b": "By using the resources, users agree to responsible, ethical use compatible with security, privacy and governance.", "legal.terms.c": "Illegal, abusive, fraudulent, discriminatory, invasive use or use that violates third-party rights is prohibited.", "legal.terms.d": "AI responses may contain inaccuracies and must be reviewed before operational, legal, financial, medical, technical or strategic decisions.", "legal.terms.e": "Real executions, repository writes, branch creation, PR opening, deployment or environment changes require explicit approval and a governed flow.", "legal.terms.f": "During testing, instability, downtime, interface adjustments and changes in agent behavior may occur.", "legal.terms.g": "The platform is a support tool and does not replace specialized professional analysis.", "legal.terms.h": "Continued use after updates may represent acceptance of the new terms version.",
+          "contact.eyebrow": "Qualified pre-onboarding", "contact.title": "Request a strategic conversation.", "contact.copy": "Use this channel for strategic opportunities, private access, implementation, partnerships or professional interest. Share the context in a few lines and our team will respond after an initial review.", "contact.whatsapp": "Strategic WhatsApp", "form.name": "Full name", "form.email": "Email", "form.profile": "Profile", "form.select": "Select", "form.profileA": "Company / Client", "form.profileB": "Investor", "form.profileC": "Associated consultant", "form.profileD": "Strategic partner", "form.whatsapp": "WhatsApp", "form.challenge": "Opportunity or challenge", "form.submit": "Prepare contact", "footer.left": "Grupo PatroAI. Consultech, Holding and AI Factory.", "footer.privacy": "Privacy and terms", "footer.contact": "Contact", "footer.right": "Private access. Proposal under review.", "status": "{name}, your contact was prepared for triage ({profile}).", "meta.title": "Grupo PatroAI | Governed AI systems", "meta.description": "Strategic consulting, applied technology and governed AI systems for executive decisions, new ventures and responsible continuity.",
         }
       };
 
-const FORM_PENDING: Record<string, string> = {
-  pt: "Envio online em ativação. Para atendimento imediato, use o WhatsApp estratégico.",
-  es: "El envío online está en activación. Para atención inmediata, use el WhatsApp estratégico.",
-  en: "Online submission is being activated. For immediate contact, use Strategic WhatsApp.",
+Object.assign(translations.pt, {
+  "careers.eyebrow": "Trabalhe conosco",
+  "careers.title": "Experiência encontra inteligência.",
+  "careers.copy": "Estamos formando uma rede de profissionais capazes de compreender ambientes reais, implantar inteligência artificial com governança e acelerar a evolução de empresas.",
+  "careers.consulting.title": "Consultores de implantação de IA",
+  "careers.consulting.copy": "Executivos, especialistas de setor e profissionais experientes para diagnóstico, desenho de processos, implantação e adoção de IA.",
+  "careers.consulting.cta": "Quero atuar como consultor →",
+  "careers.engineering.title": "Engenharia & IA",
+  "careers.engineering.copy": "Software, agentes, dados, infraestrutura, segurança e produto para construir a próxima camada do ecossistema PatroAI.",
+  "careers.engineering.cta": "Quero construir com a PatroAI →",
+  "careers.partnerships.title": "Comercial & Parcerias",
+  "careers.partnerships.copy": "Venda consultiva B2B, desenvolvimento de negócios e relacionamento estratégico.",
+  "careers.partnerships.cta": "Quero desenvolver negócios →",
+  "careers.talent.title": "Banco de talentos",
+  "careers.talent.copy": "Perfis multidisciplinares para projetos, programas de formação e futuras oportunidades.",
+  "careers.talent.cta": "Entrar no banco de talentos →",
+  "careers.note": "As candidaturas passam por triagem qualificada, consentimento e análise de aderência ao ecossistema PatroAI.",
+  "cocreator.eyebrow": "Hyper Co-Criador",
+  "cocreator.title": "Um parceiro criativo para pensar e construir negócios com você.",
+  "cocreator.copy": "Um único Co-Criador combina estratégia, produto, finanças, marketing, vendas, operações, tecnologia e inovação para transformar ideias e desafios em hipóteses, decisões, documentos, análises e próximos passos.",
+  "cocreator.kicker": "Um agente · múltiplas capacidades",
+  "cocreator.note": "Arquivos, artefatos, voz, realtime e histórico usam as capacidades governadas já disponíveis na Plataforma. A evolução da própria Plataforma permanece restrita ao plano administrativo.",
+});
+
+Object.assign(translations.es, {
+  "careers.eyebrow": "Trabaja con nosotros",
+  "careers.title": "La experiencia encuentra la inteligencia.",
+  "careers.copy": "Estamos formando una red de profesionales capaces de comprender entornos reales, implantar inteligencia artificial con gobernanza y acelerar la evolución de empresas.",
+  "careers.consulting.title": "Consultores de implantación de IA",
+  "careers.consulting.copy": "Ejecutivos, especialistas de sector y profesionales experimentados para diagnóstico, diseño de procesos, implantación y adopción de IA.",
+  "careers.consulting.cta": "Quiero trabajar como consultor →",
+  "careers.engineering.title": "Ingeniería e IA",
+  "careers.engineering.copy": "Software, agentes, datos, infraestructura, seguridad y producto para construir la próxima capa del ecosistema PatroAI.",
+  "careers.engineering.cta": "Quiero construir con PatroAI →",
+  "careers.partnerships.title": "Comercial y alianzas",
+  "careers.partnerships.copy": "Venta consultiva B2B, desarrollo de negocios y relaciones estratégicas.",
+  "careers.partnerships.cta": "Quiero desarrollar negocios →",
+  "careers.talent.title": "Banco de talentos",
+  "careers.talent.copy": "Perfiles multidisciplinarios para proyectos, programas de formación y futuras oportunidades.",
+  "careers.talent.cta": "Entrar en el banco de talentos →",
+  "careers.note": "Las candidaturas pasan por evaluación calificada, consentimiento y análisis de adecuación al ecosistema PatroAI.",
+  "cocreator.eyebrow": "Hyper Co-Creador",
+  "cocreator.title": "Un socio creativo para pensar y construir negocios contigo.",
+  "cocreator.copy": "Un único Co-Creador combina estrategia, producto, finanzas, marketing, ventas, operaciones, tecnología e innovación para transformar ideas y desafíos en hipótesis, decisiones, documentos, análisis y próximos pasos.",
+  "cocreator.kicker": "Un agente · múltiples capacidades",
+  "cocreator.note": "Archivos, artefactos, voz, realtime e historial utilizan las capacidades gobernadas ya disponibles en la Plataforma. La evolución de la propia Plataforma permanece restringida al plan administrativo.",
+});
+
+Object.assign(translations.en, {
+  "careers.eyebrow": "Work with us",
+  "careers.title": "Where experience meets intelligence.",
+  "careers.copy": "We are building a network of professionals who understand real environments, deploy governed artificial intelligence and accelerate business evolution.",
+  "careers.consulting.title": "AI implementation consultants",
+  "careers.consulting.copy": "Executives, sector specialists and experienced professionals for diagnosis, process design, implementation and AI adoption.",
+  "careers.consulting.cta": "I want to work as a consultant →",
+  "careers.engineering.title": "Engineering & AI",
+  "careers.engineering.copy": "Software, agents, data, infrastructure, security and product for the next layer of the PatroAI ecosystem.",
+  "careers.engineering.cta": "I want to build with PatroAI →",
+  "careers.partnerships.title": "Commercial & Partnerships",
+  "careers.partnerships.copy": "B2B consultative sales, business development and strategic relationships.",
+  "careers.partnerships.cta": "I want to develop business →",
+  "careers.talent.title": "Talent network",
+  "careers.talent.copy": "Multidisciplinary profiles for projects, training programs and future opportunities.",
+  "careers.talent.cta": "Join the talent network →",
+  "careers.note": "Applications go through qualified review, consent and fit analysis for the PatroAI ecosystem.",
+  "cocreator.eyebrow": "Hyper Co-Creator",
+  "cocreator.title": "A creative partner to think through and build businesses with you.",
+  "cocreator.copy": "One Co-Creator combines strategy, product, finance, marketing, sales, operations, technology and innovation to turn ideas and challenges into hypotheses, decisions, documents, analyses and next steps.",
+  "cocreator.kicker": "One agent · multiple capabilities",
+  "cocreator.note": "Files, artifacts, voice, realtime and history use the governed capabilities already available in the Platform. Evolution of the Platform itself remains restricted to the administrative plan.",
+});
+
+const STRATEGIC_WHATSAPP = "https://wa.me/5551989697605";
+
+const CONTACT_STATUS: Record<string, string> = {
+  pt: "Mensagem preparada no WhatsApp. Revise os dados e envie quando estiver pronto.",
+  es: "Mensaje preparado en WhatsApp. Revisa los datos y envíalo cuando estés listo.",
+  en: "Message prepared in WhatsApp. Review the details and send it when ready.",
+};
+
+const CONTACT_ERROR: Record<string, string> = {
+  pt: "Revise os campos obrigatórios antes de continuar.",
+  es: "Revisa los campos obligatorios antes de continuar.",
+  en: "Review the required fields before continuing.",
 };
 
 type NeuralNode = {
@@ -62,7 +144,14 @@ export function mountPremiumLanding({
   const cleanups: Array<() => void> = [];
   const timers = new Set<number>();
   const previousLang = document.documentElement.lang || "pt-BR";
-  let currentLang = "pt";
+  const requestedLang = new URLSearchParams(window.location.search).get("lang") || (() => {
+    try {
+      return window.localStorage.getItem("patroai-language") || "pt";
+    } catch {
+      return "pt";
+    }
+  })();
+  let currentLang = translations[requestedLang] ? requestedLang : "pt";
   let musicEnergy = 0;
   let musicReactiveActive = false;
 
@@ -83,6 +172,7 @@ export function mountPremiumLanding({
   const immersiveGate = query<HTMLElement>("#immersiveGate");
   const immersiveSoundEntry = query<HTMLButtonElement>("#immersiveSoundEntry");
   const immersiveSilent = query<HTMLButtonElement>("[data-immersive-silent]");
+  const immersiveDirect = query<HTMLAnchorElement>("[data-immersive-direct]");
   const copyrightToggle = query<HTMLButtonElement>("[data-copyright-toggle]");
   const copyrightPanel = query<HTMLElement>("#immersiveCopyright");
   const neuralLobby = query<HTMLElement>("#neuralLobby");
@@ -127,11 +217,37 @@ export function mountPremiumLanding({
       }
     });
 
+    const localizedTitle = translations[currentLang]?.["meta.title"];
+    const localizedDescription = translations[currentLang]?.["meta.description"];
+    if (localizedTitle) document.title = localizedTitle;
+    if (localizedDescription) {
+      document.querySelector('meta[name="description"]')?.setAttribute("content", localizedDescription);
+      document.querySelector('meta[property="og:description"]')?.setAttribute("content", localizedDescription);
+      document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", localizedDescription);
+    }
+
+    try {
+      window.localStorage.setItem("patroai-language", currentLang);
+    } catch {
+      /* armazenamento indisponível: o idioma permanece nesta sessão */
+    }
+
+    const localizedUrl = new URL(window.location.href);
+    if (currentLang === "pt") localizedUrl.searchParams.delete("lang");
+    else localizedUrl.searchParams.set("lang", currentLang);
+    const localizedHref = localizedUrl.toString();
+    document.querySelector('link[rel="canonical"]')?.setAttribute("href", localizedHref);
+    document.querySelector('meta[property="og:url"]')?.setAttribute("content", localizedHref);
+    window.history.replaceState(
+      null,
+      "",
+      `${localizedUrl.pathname}${localizedUrl.search}${localizedUrl.hash}`,
+    );
+
     langButtons.forEach((button) => {
-      button.classList.toggle(
-        "active",
-        button.dataset.lang === currentLang,
-      );
+      const isActive = button.dataset.lang === currentLang;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
     });
   }
 
@@ -231,7 +347,7 @@ export function mountPremiumLanding({
     });
   }
 
-  function initBrainCanvas(
+  function initBrainCanvas2D(
     selector = "#brainCanvas",
     densityMultiplier = 1,
   ) {
@@ -528,6 +644,46 @@ export function mountPremiumLanding({
     });
   }
 
+  function initBrainCanvas(
+    selector = "#brainCanvas",
+    densityMultiplier = 1,
+  ) {
+    const canvas = query<HTMLCanvasElement>(selector);
+    const stage = canvas?.parentElement as HTMLElement | null;
+    if (!canvas || !stage) return;
+
+    const webgl = initNeuralWebgl(canvas, stage, {
+      getEnergy: () => musicEnergy,
+      getReactive: () => musicReactiveActive,
+    });
+
+    if (!webgl) {
+      initBrainCanvas2D(selector, densityMultiplier);
+      return;
+    }
+
+    canvas.dataset.neuralRenderer = "webgl2";
+    let inViewport = true;
+    const observer = "IntersectionObserver" in window
+      ? new IntersectionObserver(
+          (entries) => {
+            inViewport = entries.some(
+              (entry) => entry.target === stage && entry.isIntersecting,
+            );
+            webgl.setViewport(inViewport);
+          },
+          { threshold: 0.05 },
+        )
+      : null;
+    observer?.observe(stage);
+
+    cleanups.push(() => {
+      observer?.disconnect();
+      webgl.destroy();
+      delete canvas.dataset.neuralRenderer;
+    });
+  }
+
   if (menuButton && navLinks) {
     const onMenu = () => {
       const open = navLinks.classList.toggle("open");
@@ -557,6 +713,7 @@ export function mountPremiumLanding({
     );
   });
 
+  applyLanguage(currentLang);
 
   if (immersiveGate) {
     document.body.classList.add("immersive-gate-open");
@@ -567,6 +724,7 @@ export function mountPremiumLanding({
       neuralLobby.classList.add("is-active");
       neuralLobby.setAttribute("aria-hidden", "false");
       document.body.classList.add("neural-lobby-open");
+      window.setTimeout(() => neuralLobbyLinks[0]?.focus(), 40);
     };
 
     const closeImmersiveGate = () => {
@@ -575,6 +733,22 @@ export function mountPremiumLanding({
         immersiveGate.hidden = true;
         document.body.classList.remove("immersive-gate-open");
         openNeuralLobby();
+      }, 520);
+    };
+
+    const enterPresentationDirectly = (event?: Event) => {
+      event?.preventDefault();
+      immersiveGate.classList.add("is-leaving");
+      window.setTimeout(() => {
+        immersiveGate.hidden = true;
+        document.body.classList.remove("immersive-gate-open");
+        neuralLobby?.classList.remove("is-active");
+        neuralLobby?.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("neural-lobby-open");
+        document.querySelector<HTMLElement>("#top")?.scrollIntoView({
+          behavior: reducedMotionPreference.matches ? "auto" : "smooth",
+          block: "start",
+        });
       }, 520);
     };
 
@@ -822,6 +996,20 @@ export function mountPremiumLanding({
       );
     }
 
+    if (immersiveDirect) {
+      immersiveDirect.addEventListener("click", enterPresentationDirectly);
+      cleanups.push(() =>
+        immersiveDirect.removeEventListener("click", enterPresentationDirectly),
+      );
+    }
+
+    const onGateKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") enterPresentationDirectly(event);
+    };
+    document.addEventListener("keydown", onGateKeyDown);
+    cleanups.push(() => document.removeEventListener("keydown", onGateKeyDown));
+    window.setTimeout(() => immersiveSoundEntry?.focus(), 40);
+
     if (immersiveAudio && musicDockToggle) {
       const onMusicToggle = async () => {
         if (immersiveAudio.paused) {
@@ -936,8 +1124,32 @@ export function mountPremiumLanding({
   if (leadForm && formStatus) {
     const onSubmit = (event: SubmitEvent) => {
       event.preventDefault();
-      formStatus.textContent =
-        FORM_PENDING[currentLang] || FORM_PENDING.pt;
+      const data = new FormData(leadForm);
+      const name = String(data.get("nome") || "").trim();
+      const email = String(data.get("email") || "").trim();
+      const profile = String(data.get("perfil") || "").trim();
+      const whatsapp = String(data.get("whatsapp") || "").trim();
+      const challenge = String(data.get("mensagem") || "").trim();
+
+      if (!name || !email || !profile || !whatsapp || !challenge) {
+        formStatus.textContent = CONTACT_ERROR[currentLang] || CONTACT_ERROR.pt;
+        return;
+      }
+
+      const message = [
+        "Olá, Grupo PatroAI. Gostaria de falar sobre uma oportunidade estratégica.",
+        "",
+        `Nome: ${name}`,
+        `E-mail: ${email}`,
+        `Perfil: ${profile}`,
+        `WhatsApp: ${whatsapp}`,
+        `Contexto: ${challenge}`,
+      ].join("\\n");
+      const destination = new URL(STRATEGIC_WHATSAPP);
+      destination.searchParams.set("text", message);
+      window.open(destination.toString(), "_blank", "noopener,noreferrer");
+      formStatus.textContent = CONTACT_STATUS[currentLang] || CONTACT_STATUS.pt;
+      leadForm.reset();
     };
     leadForm.addEventListener("submit", onSubmit);
     cleanups.push(() =>

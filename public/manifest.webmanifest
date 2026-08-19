@@ -1,8 +1,8 @@
 {
   "id": "/app",
-  "name": "ORKIO — Inteligência Orquestrada",
-  "short_name": "ORKIO",
-  "description": "Plataforma premium de inteligência orquestrada, colaboração e governança.",
+  "name": "PatroAI — Executive OS",
+  "short_name": "PatroAI",
+  "description": "Plataforma privada de inteligência governada, colaboração executiva e decisão com rastreabilidade.",
   "lang": "pt-BR",
   "dir": "ltr",
   "start_url": "/app?source=pwa",
@@ -14,13 +14,10 @@
     "minimal-ui",
     "browser"
   ],
-  "theme_color": "#0B0F14",
-  "background_color": "#0B0F14",
+  "theme_color": "#020605",
+  "background_color": "#020605",
   "prefer_related_applications": false,
-  "categories": [
-    "business",
-    "productivity"
-  ],
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "/icons/orkio-192.png",
@@ -49,9 +46,9 @@
   ],
   "shortcuts": [
     {
-      "name": "Abrir Command Center",
-      "short_name": "Command Center",
-      "description": "Acessar a plataforma ORKIO.",
+      "name": "Abrir Executive OS",
+      "short_name": "Executive OS",
+      "description": "Acessar a plataforma privada PatroAI.",
       "url": "/app?source=pwa_shortcut",
       "icons": [
         {
@@ -62,9 +59,9 @@
       ]
     },
     {
-      "name": "Conhecer a ORKIO",
+      "name": "Conhecer a PatroAI",
       "short_name": "Início",
-      "description": "Abrir a apresentação da ORKIO.",
+      "description": "Abrir a experiência pública do Grupo PatroAI.",
       "url": "/?source=pwa_shortcut",
       "icons": [
         {

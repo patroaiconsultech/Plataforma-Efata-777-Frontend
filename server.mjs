@@ -32,6 +32,7 @@ const MIME_TYPES = new Map([
   [".txt", "text/plain; charset=utf-8"],
   [".webmanifest", "application/manifest+json; charset=utf-8"],
   [".woff2", "font/woff2"],
+  [".xml", "application/xml; charset=utf-8"],
 ]);
 
 function securityHeaders(response) {
@@ -73,6 +74,10 @@ function cacheHeaders(response, pathname) {
   }
   if (pathname === "/manifest.webmanifest") {
     response.setHeader("Cache-Control", "no-cache");
+    return;
+  }
+  if (pathname === "/robots.txt" || pathname === "/sitemap.xml") {
+    response.setHeader("Cache-Control", "public, max-age=3600");
     return;
   }
   if (pathname.startsWith("/assets/")) {

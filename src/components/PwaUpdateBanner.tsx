@@ -57,7 +57,7 @@ export default function PwaUpdateBanner() {
     <div className="update-banner" role="status" aria-live="polite">
       <span>
         {state === "UPDATE_AVAILABLE" &&
-          "Uma nova versão da ORKIO está disponível."}
+          "Uma nova versão da PatroAI está disponível."}
         {state === "ACTIVATING" && "Ativando atualização segura…"}
         {state === "ACTIVATED" && "Atualização ativada."}
         {state === "FAILED" &&

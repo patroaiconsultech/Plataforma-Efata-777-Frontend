@@ -75,6 +75,6 @@ test("public landing presents the single Hyper Co-Creator without legacy 67/77 b
 test("landing opens with an optional immersive music gateway", () => {
   assert.match(premiumMarkup, /Este é um ambiente imersivo/);
   assert.match(premiumMarkup, /Entrar com experiência sonora/);
-  assert.match(premiumMarkup, /Entrar em silêncio/);
+  assert.match(premiumMarkup, /Explorar sem som/);
   assert.match(premiumMarkup, /Recomendamos o uso de fones de ouvido/);
 });

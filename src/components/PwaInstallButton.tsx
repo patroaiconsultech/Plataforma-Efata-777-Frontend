@@ -26,7 +26,7 @@ export default function PwaInstallButton({
     } else if (outcome === "dismissed") {
       setStatus("Instalação cancelada.");
     } else if (outcome === "already-installed") {
-      setStatus("A ORKIO já está instalada.");
+      setStatus("A PatroAI já está instalada.");
     }
   }
 
@@ -70,7 +70,7 @@ export default function PwaInstallButton({
             <h2 id="install-guide-title">
               {platform === "ios"
                 ? "Instalar no iPhone ou iPad"
-                : "Instalar a ORKIO"}
+                : "Instalar a PatroAI"}
             </h2>
             {platform === "ios" ? (
               <ol>

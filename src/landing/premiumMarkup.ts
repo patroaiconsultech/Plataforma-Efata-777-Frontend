@@ -14,9 +14,9 @@ export const premiumMarkup = String.raw`
       <span class="immersive-gate__halo"></span>
       <img src="/assets/logo-patroai-oficial.png" alt="" />
     </div>
-    <p class="immersive-gate__eyebrow">PATROAI · EXPERIÊNCIA IMERSIVA</p>
-    <h1 id="immersiveTitle">Este é um ambiente imersivo.</h1>
-    <p id="immersiveCopy">Escolha como deseja iniciar sua experiência PatroAI.</p>
+    <p class="immersive-gate__eyebrow" data-i18n="immersive.eyebrow">PATROAI · EXPERIÊNCIA IMERSIVA</p>
+    <h1 id="immersiveTitle" data-i18n="immersive.title">Este é um ambiente imersivo.</h1>
+    <p id="immersiveCopy" data-i18n="immersive.copy">Escolha como deseja iniciar sua experiência PatroAI.</p>
 
     <div class="immersive-gate__actions">
       <button
@@ -34,17 +34,20 @@ export const premiumMarkup = String.raw`
           </svg>
         </span>
         <span>
-          <strong>Entrar com experiência sonora</strong>
-          <small>Iniciar a obra dentro da experiência PatroAI</small>
+          <strong data-i18n="immersive.sound.cta">Entrar com experiência sonora</strong>
+          <small data-i18n="immersive.sound.copy">Iniciar a obra dentro da experiência PatroAI</small>
         </span>
       </button>
 
       <button class="immersive-gate__silent" type="button" data-immersive-silent="true">
-        Entrar em silêncio
+        <span data-i18n="immersive.silent">Explorar sem som</span>
       </button>
+      <a class="immersive-gate__direct" href="#top" data-immersive-direct="true">
+        <span data-i18n="immersive.direct">Ir direto para a apresentação</span>
+      </a>
     </div>
 
-    <p class="immersive-gate__headphone-note">Recomendamos o uso de fones de ouvido para uma experiência mais imersiva.</p>
+    <p class="immersive-gate__headphone-note" data-i18n="immersive.headphones">Recomendamos o uso de fones de ouvido para uma experiência mais imersiva.</p>
 
     <div class="immersive-gate__footer">
       <button class="immersive-gate__copyright-link" type="button" aria-expanded="false" aria-controls="immersiveCopyright" data-copyright-toggle="true">
@@ -96,31 +99,31 @@ export const premiumMarkup = String.raw`
       />
     </div>
 
-    <p class="neural-lobby__eyebrow">PATROAI · NÚCLEO IMERSIVO</p>
-    <h2>Escolha por onde deseja entrar.</h2>
-    <p>
+    <p class="neural-lobby__eyebrow" data-i18n="lobby.eyebrow">PATROAI · NÚCLEO IMERSIVO</p>
+    <h2 data-i18n="lobby.title">Escolha por onde deseja entrar.</h2>
+    <p data-i18n="lobby.copy">
       Navegue pelo ecossistema enquanto a experiência sonora permanece ativa.
     </p>
   </div>
 
   <nav class="neural-lobby__nodes" aria-label="Navegação imersiva">
     <a class="neural-lobby__node neural-lobby__node--a" href="#top" data-neural-lobby-link>
-      <span>Conheça a PatroAI</span>
+      <span data-i18n="lobby.node.about">Conheça a PatroAI</span>
     </a>
     <a class="neural-lobby__node neural-lobby__node--b" href="#ecossistema" data-neural-lobby-link>
-      <span>Ecossistema</span>
+      <span data-i18n="lobby.node.ecosystem">Ecossistema</span>
     </a>
     <a class="neural-lobby__node neural-lobby__node--c" href="#governanca" data-neural-lobby-link>
-      <span>Governança</span>
+      <span data-i18n="lobby.node.governance">Governança</span>
     </a>
     <a class="neural-lobby__node neural-lobby__node--d" href="#metodo" data-neural-lobby-link>
-      <span>Método</span>
+      <span data-i18n="lobby.node.method">Método</span>
     </a>
     <a class="neural-lobby__node neural-lobby__node--e" href="#carreiras" data-neural-lobby-link>
-      <span>Carreiras &amp; Talentos</span>
+      <span data-i18n="lobby.node.careers">Carreiras &amp; Talentos</span>
     </a>
     <a class="neural-lobby__node neural-lobby__node--f" href="#contato" data-neural-lobby-link>
-      <span>Contato Estratégico</span>
+      <span data-i18n="lobby.node.contact">Contato Estratégico</span>
     </a>
     <a
       class="neural-lobby__node neural-lobby__node--g neural-lobby__node--private"
@@ -128,13 +131,13 @@ export const premiumMarkup = String.raw`
       data-neural-lobby-link
       data-private-entry="true"
     >
-      <span>Acessar Plataforma</span>
+      <span data-i18n="lobby.node.platform">Acessar Plataforma</span>
     </a>
   </nav>
 
   <div class="neural-lobby__hint" aria-hidden="true">
     <span></span>
-    <small>Selecione um núcleo para entrar</small>
+    <small data-i18n="lobby.hint">Selecione um núcleo para entrar</small>
   </div>
 </section>
 
@@ -182,15 +185,15 @@ export const premiumMarkup = String.raw`
           <a href="#ecossistema" data-i18n="nav.ecosystem">Ecossistema</a>
           <a href="#governanca" data-i18n="nav.governance">Governança</a>
           <a href="#metodo" data-i18n="nav.method">Método</a>
-          <a href="#carreiras">Carreiras</a>
-          <a href="#cocriador">Co-Criador</a>
+          <a href="#carreiras" data-i18n="nav.careers">Carreiras</a>
+          <a href="#cocriador" data-i18n="nav.cocreator">Co-Criador</a>
           <a href="#contato" data-i18n="nav.contact">Contato</a>
         </div>
         <div class="nav-actions">
           <div class="language-switch" aria-label="Selecionar idioma">
-            <button type="button" data-lang="pt" class="active">PT</button>
-            <button type="button" data-lang="es">ES</button>
-            <button type="button" data-lang="en">EN</button>
+            <button type="button" data-lang="pt" class="active" aria-pressed="true">PT</button>
+            <button type="button" data-lang="es" aria-pressed="false">ES</button>
+            <button type="button" data-lang="en" aria-pressed="false">EN</button>
           </div>
           <a class="button ghost" href="/app" data-private-entry="true" >Acessar Plataforma</a>
           <button class="icon-button" type="button" id="menuButton" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button>
@@ -305,7 +308,7 @@ export const premiumMarkup = String.raw`
             <div>
               <p class="eyebrow" data-i18n="legal.eyebrow">Privacidade e termos</p>
               <h2 id="legal-title" data-i18n="legal.title">Uso responsável, dados e governança.</h2>
-              <p class="legal-summary" data-i18n="legal.copy">Versão operacional provisória baseada nos termos do ambiente anterior. O conteúdo poderá ser substituído por versão jurídica oficial.</p>
+              <p class="legal-summary" data-i18n="legal.copy">Princípios de privacidade, segurança e uso responsável orientam o ambiente PatroAI e a forma como dados, agentes e decisões são tratados.</p>
             </div>
             <div class="legal-grid">
               <details class="legal-card" open>
@@ -339,38 +342,38 @@ export const premiumMarkup = String.raw`
       <section class="premium-band" id="carreiras" aria-labelledby="careers-title">
         <div class="section-inner">
           <div class="section-heading reveal">
-            <p class="eyebrow">Trabalhe conosco</p>
-            <h2 id="careers-title">Experiência encontra inteligência.</h2>
-            <p class="hero-copy">Estamos formando uma rede de profissionais capazes de compreender ambientes reais, implantar inteligência artificial com governança e acelerar a evolução de empresas.</p>
+            <p class="eyebrow" data-i18n="careers.eyebrow">Trabalhe conosco</p>
+            <h2 id="careers-title" data-i18n="careers.title">Experiência encontra inteligência.</h2>
+            <p class="hero-copy" data-i18n="careers.copy">Estamos formando uma rede de profissionais capazes de compreender ambientes reais, implantar inteligência artificial com governança e acelerar a evolução de empresas.</p>
           </div>
           <div class="career-grid">
             <article class="career-card reveal">
               <span class="career-index">01</span>
-              <h3>Consultores de implantação de IA</h3>
-              <p>Executivos, especialistas de setor e profissionais experientes para diagnóstico, desenho de processos, implantação e adoção de IA.</p>
-              <a href="#contato" class="text-link">Quero atuar como consultor →</a>
+              <h3 data-i18n="careers.consulting.title">Consultores de implantação de IA</h3>
+              <p data-i18n="careers.consulting.copy">Executivos, especialistas de setor e profissionais experientes para diagnóstico, desenho de processos, implantação e adoção de IA.</p>
+              <a href="#contato" class="text-link" data-i18n="careers.consulting.cta">Quero atuar como consultor →</a>
             </article>
             <article class="career-card reveal">
               <span class="career-index">02</span>
-              <h3>Engenharia &amp; IA</h3>
-              <p>Software, agentes, dados, infraestrutura, segurança e produto para construir a próxima camada do ecossistema PatroAI.</p>
-              <a href="#contato" class="text-link">Quero construir com a PatroAI →</a>
+              <h3 data-i18n="careers.engineering.title">Engenharia &amp; IA</h3>
+              <p data-i18n="careers.engineering.copy">Software, agentes, dados, infraestrutura, segurança e produto para construir a próxima camada do ecossistema PatroAI.</p>
+              <a href="#contato" class="text-link" data-i18n="careers.engineering.cta">Quero construir com a PatroAI →</a>
             </article>
             <article class="career-card reveal">
               <span class="career-index">03</span>
-              <h3>Comercial &amp; Parcerias</h3>
-              <p>Venda consultiva B2B, desenvolvimento de negócios e relacionamento estratégico.</p>
-              <a href="#contato" class="text-link">Quero desenvolver negócios →</a>
+              <h3 data-i18n="careers.partnerships.title">Comercial &amp; Parcerias</h3>
+              <p data-i18n="careers.partnerships.copy">Venda consultiva B2B, desenvolvimento de negócios e relacionamento estratégico.</p>
+              <a href="#contato" class="text-link" data-i18n="careers.partnerships.cta">Quero desenvolver negócios →</a>
             </article>
             <article class="career-card reveal">
               <span class="career-index">04</span>
-              <h3>Banco de talentos</h3>
-              <p>Perfis multidisciplinares para projetos, programas de formação e futuras oportunidades.</p>
-              <a href="#contato" class="text-link">Entrar no banco de talentos →</a>
+              <h3 data-i18n="careers.talent.title">Banco de talentos</h3>
+              <p data-i18n="careers.talent.copy">Perfis multidisciplinares para projetos, programas de formação e futuras oportunidades.</p>
+              <a href="#contato" class="text-link" data-i18n="careers.talent.cta">Entrar no banco de talentos →</a>
             </article>
           </div>
           <div class="preview-note reveal">
-            <strong>Próximo gate funcional:</strong> candidatura com currículo, consentimento, armazenamento seguro, triagem e Talent Admin.
+            <strong data-i18n="careers.note">As candidaturas passam por triagem qualificada, consentimento e análise de aderência ao ecossistema PatroAI.</strong>
           </div>
         </div>
       </section>
@@ -378,9 +381,9 @@ export const premiumMarkup = String.raw`
       <section class="premium-band migration-band" id="cocriador" aria-labelledby="cocriador-title">
         <div class="section-inner migration-grid">
           <div class="reveal">
-            <p class="eyebrow">Hyper Co-Criador</p>
-            <h2 id="cocriador-title">Um parceiro criativo para pensar e construir negócios com você.</h2>
-            <p class="hero-copy">
+            <p class="eyebrow" data-i18n="cocreator.eyebrow">Hyper Co-Criador</p>
+            <h2 id="cocriador-title" data-i18n="cocreator.title">Um parceiro criativo para pensar e construir negócios com você.</h2>
+            <p class="hero-copy" data-i18n="cocreator.copy">
               Um único Co-Criador combina estratégia, produto, finanças, marketing, vendas,
               operações, tecnologia e inovação para transformar ideias e desafios em hipóteses,
               decisões, documentos, análises e próximos passos.
@@ -390,11 +393,11 @@ export const premiumMarkup = String.raw`
             </div>
           </div>
           <div class="migration-card reveal">
-            <span class="migration-kicker">Um agente · múltiplas capacidades</span>
+            <span class="migration-kicker" data-i18n="cocreator.kicker">Um agente · múltiplas capacidades</span>
             <div class="migration-flow">
               <span>Ideia</span><i></i><span>Análise</span><i></i><span>Criação</span><i></i><span>Execução</span>
             </div>
-            <p>
+            <p data-i18n="cocreator.note">
               Arquivos, artefatos, voz, realtime e histórico usam as capacidades governadas
               já disponíveis na Plataforma. A evolução da própria Plataforma permanece
               restrita ao plano administrativo.
@@ -409,7 +412,7 @@ export const premiumMarkup = String.raw`
             <div>
               <p class="eyebrow" data-i18n="contact.eyebrow">Pré-onboarding qualificado</p>
               <h2 id="contact-title" data-i18n="contact.title">Converse com a PatroAI.</h2>
-              <p class="hero-copy" data-i18n="contact.copy">Use este canal para oportunidades estratégicas, acesso privado, implantação, parcerias ou interesse profissional. O envio online permanecerá em modo de preparação até a integração do intake ser comprovada.</p>
+              <p class="hero-copy" data-i18n="contact.copy">Use este canal para oportunidades estratégicas, acesso privado, implantação, parcerias ou interesse profissional. Conte o contexto em poucas linhas e nossa equipe retornará após uma triagem inicial.</p>
               <div class="hero-actions"><a class="button secondary" href="https://wa.me/5551989697605?text=Ol%C3%A1%2C%20Grupo%20PatroAI.%20Gostaria%20de%20falar%20sobre%20uma%20oportunidade%20estrat%C3%A9gica." data-i18n="contact.whatsapp">WhatsApp estratégico</a></div>
             </div>
             <form class="form-wrap" id="leadForm">
