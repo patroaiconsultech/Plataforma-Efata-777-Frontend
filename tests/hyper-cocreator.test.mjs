@@ -31,11 +31,11 @@ test("co-creator naming occurs in onboarding draft and is completed after auth",
   assert.match(console_, /ONBOARDING_DRAFT_KEY/);
 });
 
-test("user-facing console fixes the execution target to canonical orkio", () => {
-  assert.match(console_, /technicalAgentTarget\("orkio"\)/);
+test("ordinary user remains canonical orkio while admin may explicitly select an internal agent", () => {
+  assert.match(console_, /selectedAgent\.slug : "orkio"/);
   assert.match(console_, /Hyper Co-Criador/);
   assert.match(console_, /me\?\.co_creator_name/);
-  assert.match(console_, /\{false && showAgents/);
+  assert.match(console_, /me\?\.admin_access && showAgents/);
 });
 
 test("admin surface is backend-authorized rather than email hardcoded in frontend", () => {

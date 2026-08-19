@@ -11,19 +11,19 @@ test("agent catalog is backend-driven", () => {
   assert.doesNotMatch(consoleSource, /\["Orkio",\s*"Auditor"/);
 });
 
-test("single Hyper Co-Creator uses the explicit canonical technical namespace", () => {
+test("ordinary-user Hyper Co-Criador keeps canonical orkio fallback", () => {
   assert.match(api, /export function technicalAgentTarget/);
   assert.match(api, /return `id:\$\{normalized\}`/);
-  assert.match(consoleSource, /technicalAgentTarget\("orkio"\)/);
+  assert.match(consoleSource, /selectedAgent\.slug : "orkio"/);
   assert.match(consoleSource, /const DEFAULT_COCREATOR_LABEL = "Co-Criador"/);
   assert.match(consoleSource, /me\?\.co_creator_name \|\| DEFAULT_COCREATOR_LABEL/);
 });
 
-test("multi-agent implementation remains internal but is not exposed in the initial Hyper Co-Creator UX", () => {
+test("multi-agent catalog is exposed only to admin and Team remains separately gated", () => {
   assert.match(consoleSource, /type ExecutionMode = "individual" \| "team"/);
   assert.match(consoleSource, /streamTeamMessage\(/);
-  assert.match(consoleSource, /setExecutionMode\("individual"\)/);
-  assert.match(consoleSource, /\{false && showAgents/);
+  assert.match(consoleSource, /me\?\.admin_access && showAgents/);
+  assert.match(consoleSource, /Team permanece bloqueado neste patch/);
 });
 
 test("participant invite remains a separate capability", () => {

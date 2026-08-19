@@ -1159,7 +1159,9 @@ export default function AppConsole() {
         await streamMessage(
           threadId,
           content,
-          technicalAgentTarget("orkio"),
+          technicalAgentTarget(
+            me?.admin_access && selectedAgent?.slug ? selectedAgent.slug : "orkio",
+          ),
           commonHandlers,
           controller.signal,
         );
@@ -1291,8 +1293,10 @@ export default function AppConsole() {
   const activeThread = threads.find((thread) => thread.id === threadId) ?? null;
   const selectedAgentName =
     me?.co_creator_name || DEFAULT_COCREATOR_LABEL;
+  const hyperSelected =
+    !selectedAgent || selectedAgent.slug.toLowerCase() === "orkio";
   const visibleAgentAuthor = (itemAgentName?: string | null) =>
-    me?.admin_access
+    me?.admin_access && !hyperSelected
       ? itemAgentName || selectedAgent?.display_name || selectedAgentName
       : selectedAgentName;
   const selectedAgentRole =
@@ -1302,8 +1306,14 @@ export default function AppConsole() {
   const teamMin = activeTeam?.participant_policy.min_contributors ?? 2;
   const teamMax = activeTeam?.participant_policy.max_contributors ?? 0;
   const teamEligibleCount = activeTeam?.participant_policy.eligible_count ?? 0;
-  const executionTargetName = selectedAgentName;
-  const executionTargetRole = selectedAgentRole;
+  const executionTargetName =
+    me?.admin_access && !hyperSelected
+      ? selectedAgent?.display_name || selectedAgentName
+      : selectedAgentName;
+  const executionTargetRole =
+    me?.admin_access && !hyperSelected
+      ? selectedAgent?.role_label || "Especialista interno"
+      : selectedAgentRole;
   const realtimeReason =
     realtimeCapabilities?.orchestration_bridge?.reason_code ||
     realtimeCapabilities?.realtime_session?.reason_code ||
@@ -1669,7 +1679,7 @@ export default function AppConsole() {
             <article className="message agent message--streaming" aria-live="polite">
               <header className="message__meta">
                 <span className="message__author">
-                  {me?.admin_access ? selectedAgent?.display_name || selectedAgentName : selectedAgentName}
+                  {executionTargetName}
                 </span>
                 <span className="streaming-status">
                   <span className="streaming-status__dot" aria-hidden="true" />
@@ -1748,10 +1758,24 @@ export default function AppConsole() {
               disabled={!authenticated || !threadId || sending || uploading}
             />
           </label>
-          <div className="agent-trigger hyper-cocreator-badge" aria-label={`Co-Criador ativo: ${selectedAgentName}`}>
-            <span aria-hidden="true">✦</span>
-            <span className="agent-trigger__label">{selectedAgentName}</span>
-          </div>
+          {me?.admin_access ? (
+            <button
+              type="button"
+              className="agent-trigger"
+              onClick={() => setShowAgents(true)}
+              disabled={!authenticated || agentsBusy}
+              aria-label={`Selecionar agente. Ativo: ${executionTargetName}`}
+              title="Selecionar agente interno"
+            >
+              <span aria-hidden="true">✦</span>
+              <span className="agent-trigger__label">{executionTargetName}</span>
+            </button>
+          ) : (
+            <div className="agent-trigger hyper-cocreator-badge" aria-label={`Co-Criador ativo: ${selectedAgentName}`}>
+              <span aria-hidden="true">✦</span>
+              <span className="agent-trigger__label">{selectedAgentName}</span>
+            </div>
+          )}
           <textarea
             value={message}
             onChange={(event) => setMessage(event.target.value)}
@@ -1886,7 +1910,7 @@ export default function AppConsole() {
       ) : null}
 
 
-      {false && showAgents ? (
+      {me?.admin_access && showAgents ? (
         <div className="modal" role="presentation">
           <section
             className="modal-card agent-picker"
@@ -1917,13 +1941,8 @@ export default function AppConsole() {
                 type="button"
                 className={executionMode === "team" ? "agent-mode__active" : ""}
                 aria-pressed={executionMode === "team"}
-                onClick={() => setExecutionMode("team")}
-                disabled={teamsBusy || teams.length === 0}
-                title={
-                  teams.length
-                    ? "Usar orquestração Team governada"
-                    : "Nenhum Team disponível no backend"
-                }
+                disabled
+                title="Team permanece bloqueado neste patch até o gate específico de runtime."
               >
                 Team
               </button>
@@ -2023,6 +2042,10 @@ export default function AppConsole() {
                     executionMode === "team"
                       ? orchestrator || teamActive
                       : individualActive;
+                  const agentDisplayName =
+                    agent.slug.toLowerCase() === "orkio"
+                      ? selectedAgentName
+                      : agent.display_name;
                   return (
                     <button
                       type="button"
@@ -2038,14 +2061,14 @@ export default function AppConsole() {
                         }
                         setSelectedAgent(agent);
                         setShowAgents(false);
-                        setNotice(`Agente selecionado: ${agent.display_name}`);
+                        setNotice(`Agente selecionado: ${agentDisplayName}`);
                       }}
                     >
                       <span className="agent-card__avatar" aria-hidden="true">
-                        {agent.display_name.slice(0, 1).toUpperCase()}
+                        {agentDisplayName.slice(0, 1).toUpperCase()}
                       </span>
                       <span>
-                        <strong>{agent.display_name}</strong>
+                        <strong>{agentDisplayName}</strong>
                         <small>
                           {orchestrator
                             ? "Orquestrador canônico"
