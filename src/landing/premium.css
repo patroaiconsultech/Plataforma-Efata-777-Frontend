@@ -3236,3 +3236,70 @@ body.neural-lobby-open {
     transform: none;
   }
 }
+
+
+/* === DESKTOP-FIRST IMMERSIVE GATE NETWORK === */
+.patroai-premium .immersive-gate__network {
+  position: absolute;
+  inset: -4%;
+  z-index: -1;
+  display: block;
+  pointer-events: none;
+  opacity: .78;
+  mix-blend-mode: screen;
+  overflow: hidden;
+}
+
+.patroai-premium .immersive-gate__network svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.patroai-premium .immersive-gate__network-lines path {
+  fill: none;
+  stroke: url(#immersiveGateNetworkGradient);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.25;
+  stroke-dasharray: 8 18 2 22;
+  opacity: .78;
+  animation: immersiveGateNetworkFlow calc(6.4s + (var(--i) * .34s)) linear infinite;
+  animation-delay: calc(var(--i) * -.42s);
+}
+
+.patroai-premium .immersive-gate__network-nodes circle {
+  fill: #ffe29a;
+  opacity: .8;
+  filter: drop-shadow(0 0 8px rgba(255, 226, 143, .95));
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: immersiveGateNetworkNode calc(2.4s + (var(--i) * .08s)) ease-in-out infinite;
+  animation-delay: calc(var(--i) * -.15s);
+}
+
+@keyframes immersiveGateNetworkFlow {
+  0% { stroke-dashoffset: 0; opacity: .28; }
+  42% { opacity: .82; }
+  100% { stroke-dashoffset: -96; opacity: .28; }
+}
+
+@keyframes immersiveGateNetworkNode {
+  0%, 100% { transform: scale(.7); opacity: .32; }
+  50% { transform: scale(1.55); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium .immersive-gate__network-lines path,
+  .patroai-premium .immersive-gate__network-nodes circle {
+    animation: none !important;
+  }
+  .patroai-premium .immersive-gate__network-lines path {
+    opacity: .55;
+    stroke-dashoffset: 0;
+  }
+  .patroai-premium .immersive-gate__network-nodes circle {
+    opacity: .62;
+    transform: none;
+  }
+}

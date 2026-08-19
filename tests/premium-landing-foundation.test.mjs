@@ -245,3 +245,14 @@ test("visible neural network fallback remains layered above the canvas and behin
   assert.match(css, /neuralNetworkNode/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
+
+
+test("immersive gate exposes a visible animated neural field before lobby entry", () => {
+  assert.match(markup, /class="immersive-gate__network"/);
+  assert.match(markup, /immersiveGateNetworkGradient/);
+  assert.match(markup, /immersive-gate__network-lines/);
+  assert.match(markup, /immersive-gate__network-nodes/);
+  assert.match(css, /\.immersive-gate__network \{[\s\S]*z-index: -1/);
+  assert.match(css, /immersiveGateNetworkFlow/);
+  assert.match(css, /immersiveGateNetworkNode/);
+});

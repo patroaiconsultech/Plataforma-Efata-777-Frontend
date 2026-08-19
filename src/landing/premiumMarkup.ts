@@ -9,6 +9,32 @@ export const premiumMarkup = String.raw`
 
 <div class="immersive-gate" id="immersiveGate" role="dialog" aria-modal="true" aria-labelledby="immersiveTitle" aria-describedby="immersiveCopy">
   <div class="immersive-gate__backdrop" aria-hidden="true"></div>
+  <div class="immersive-gate__network" aria-hidden="true">
+    <svg viewBox="0 0 1000 700" preserveAspectRatio="none" role="presentation">
+      <defs>
+        <linearGradient id="immersiveGateNetworkGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#36e7c1" stop-opacity=".08"></stop>
+          <stop offset=".5" stop-color="#ffe29a" stop-opacity=".74"></stop>
+          <stop offset="1" stop-color="#36e7c1" stop-opacity=".08"></stop>
+        </linearGradient>
+      </defs>
+      <g class="immersive-gate__network-lines">
+        <path style="--i:0" d="M18 104 L144 194 L280 112 L418 236 L556 142 L704 248 L852 136 L990 220"></path>
+        <path style="--i:1" d="M-20 348 L128 288 L264 382 L404 300 L542 408 L680 330 L824 404 L1020 312"></path>
+        <path style="--i:2" d="M44 588 L176 486 L314 548 L450 454 L594 552 L742 460 L894 536 L1028 456"></path>
+        <path style="--i:3" d="M144 194 L128 288 L176 486"></path>
+        <path style="--i:4" d="M280 112 L264 382 L314 548"></path>
+        <path style="--i:5" d="M418 236 L404 300 L450 454"></path>
+        <path style="--i:6" d="M556 142 L542 408 L594 552"></path>
+        <path style="--i:7" d="M704 248 L680 330 L742 460"></path>
+        <path style="--i:8" d="M852 136 L824 404 L894 536"></path>
+      </g>
+      <g class="immersive-gate__network-nodes">
+        <circle style="--i:0" cx="18" cy="104" r="4"></circle><circle style="--i:1" cx="144" cy="194" r="5"></circle><circle style="--i:2" cx="280" cy="112" r="4"></circle><circle style="--i:3" cx="418" cy="236" r="5"></circle><circle style="--i:4" cx="556" cy="142" r="4"></circle><circle style="--i:5" cx="704" cy="248" r="5"></circle><circle style="--i:6" cx="852" cy="136" r="4"></circle><circle style="--i:7" cx="990" cy="220" r="4"></circle>
+        <circle style="--i:8" cx="128" cy="288" r="4"></circle><circle style="--i:9" cx="264" cy="382" r="5"></circle><circle style="--i:10" cx="404" cy="300" r="4"></circle><circle style="--i:11" cx="542" cy="408" r="5"></circle><circle style="--i:12" cx="680" cy="330" r="4"></circle><circle style="--i:13" cx="824" cy="404" r="5"></circle><circle style="--i:14" cx="176" cy="486" r="4"></circle><circle style="--i:15" cx="314" cy="548" r="5"></circle><circle style="--i:16" cx="450" cy="454" r="4"></circle><circle style="--i:17" cx="594" cy="552" r="5"></circle><circle style="--i:18" cx="742" cy="460" r="4"></circle><circle style="--i:19" cx="894" cy="536" r="5"></circle>
+      </g>
+    </svg>
+  </div>
   <div class="immersive-gate__panel">
     <div class="immersive-gate__brand" aria-hidden="true">
       <span class="immersive-gate__halo"></span>
