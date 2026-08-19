@@ -3303,3 +3303,37 @@ body.neural-lobby-open {
     transform: none;
   }
 }
+
+
+/* === DESKTOP PERCEPTUAL MOTION PASS === */
+@media (min-width: 821px) and (prefers-reduced-motion: no-preference) {
+  .patroai-premium .immersive-gate__network,
+  .patroai-premium .neural-lobby__network {
+    opacity: 1;
+  }
+
+  .patroai-premium .immersive-gate__network svg,
+  .patroai-premium .neural-lobby__network svg {
+    transform-origin: 50% 50%;
+    animation: desktopNeuralFieldDrift 8.5s ease-in-out infinite;
+  }
+
+  .patroai-premium .immersive-gate__network-lines path,
+  .patroai-premium .neural-lobby__network-lines path {
+    stroke-width: 2.15;
+    stroke-dasharray: 22 16 5 18;
+    animation-duration: calc(2.8s + (var(--i) * .22s));
+  }
+
+  .patroai-premium .immersive-gate__network-nodes circle,
+  .patroai-premium .neural-lobby__network-nodes circle {
+    filter: drop-shadow(0 0 11px rgba(255, 226, 143, 1));
+    animation-duration: calc(1.75s + (var(--i) * .06s));
+  }
+}
+
+@keyframes desktopNeuralFieldDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  32% { transform: translate3d(1.15%, -.8%, 0) scale(1.035); }
+  67% { transform: translate3d(-.9%, .65%, 0) scale(1.018); }
+}

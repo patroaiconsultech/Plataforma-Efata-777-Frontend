@@ -1,5 +1,5 @@
 /* ORKIO v2 Premium PWA — explicit public allowlist only */
-const VERSION = "orkio-v2-alpha2-2-pwa-20260806";
+const VERSION = "orkio-v2-alpha2-3-pwa-20260819-neural-desktop";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 const ORKIO_CACHE_PREFIX = "orkio-v2-";
