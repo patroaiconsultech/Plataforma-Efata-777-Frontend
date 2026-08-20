@@ -1095,6 +1095,8 @@ export function mountPremiumLanding({
     };
 
     let audioContext: AudioContext | null = null;
+    let audioMasterGain: GainNode | null = null;
+    let audioCompressor: DynamicsCompressorNode | null = null;
     let audioAnalyser: AnalyserNode | null = null;
     let audioReactiveFrame = 0;
     let audioReactiveLevel = 0;
@@ -1245,10 +1247,20 @@ export function mountPremiumLanding({
         audioContext = new AudioContextClass();
         const source =
           audioContext.createMediaElementSource(immersiveAudio);
+        audioMasterGain = audioContext.createGain();
+        audioMasterGain.gain.value = 0.72;
+        audioCompressor = audioContext.createDynamicsCompressor();
+        audioCompressor.threshold.value = -18;
+        audioCompressor.knee.value = 18;
+        audioCompressor.ratio.value = 3;
+        audioCompressor.attack.value = 0.003;
+        audioCompressor.release.value = 0.24;
         audioAnalyser = audioContext.createAnalyser();
         audioAnalyser.fftSize = 256;
         audioAnalyser.smoothingTimeConstant = 0.72;
-        source.connect(audioAnalyser);
+        source.connect(audioMasterGain);
+        audioMasterGain.connect(audioCompressor);
+        audioCompressor.connect(audioAnalyser);
         audioAnalyser.connect(audioContext.destination);
         audioReactiveReady = true;
 
@@ -1257,6 +1269,8 @@ export function mountPremiumLanding({
         }
       } catch {
         // Audio playback remains functional even if visual analysis is unavailable.
+        audioMasterGain = null;
+        audioCompressor = null;
         audioAnalyser = null;
         audioReactiveReady = false;
       }
