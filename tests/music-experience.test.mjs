@@ -12,20 +12,29 @@ const interactions = fs.readFileSync(
   path.join(root, "src/landing/premiumInteractions.ts"),
   "utf8",
 );
+const css = fs.readFileSync(
+  path.join(root, "src/landing/premium.css"),
+  "utf8",
+);
 
 test("immersive entry uses first-party MP3 instead of external track URL", () => {
   assert.match(markup, /id="patroaiImmersiveAudio"/);
-  assert.match(markup, /src="\/media\/patroai-immersive-111hz\.mp3"/);
+  assert.match(markup, /src="\/media\/landingpage111hz-remix\.mp3"/);
+  assert.match(interactions, /audioPlaylist/);
+  assert.match(interactions, /landingpage111hz-remix\.mp3/);
+  assert.match(interactions, /patroai-immersive-111hz\.mp3/);
   assert.doesNotMatch(markup, /href="https:\/\/suno\.com\/s\/B4WUrW9NOYAIrpfK"/);
 });
 
-test("single approved music asset exists", () => {
-  const mediaPath = path.join(
-    root,
-    "public/media/patroai-immersive-111hz.mp3",
-  );
-  assert.equal(fs.existsSync(mediaPath), true);
-  assert.ok(fs.statSync(mediaPath).size > 1_000_000);
+test("approved music queue assets exist", () => {
+  for (const filename of [
+    "landingpage111hz-remix.mp3",
+    "patroai-immersive-111hz.mp3",
+  ]) {
+    const mediaPath = path.join(root, "public/media", filename);
+    assert.equal(fs.existsSync(mediaPath), true);
+    assert.ok(fs.statSync(mediaPath).size > 1_000_000);
+  }
 });
 
 test("explicit user action starts first-party audio", () => {
@@ -106,4 +115,19 @@ test("lobby reuses the same neural renderer and music-energy signal", () => {
   assert.match(interactions, /getPointer: \(\) => \(lobbyPointer\.active \? lobbyPointer : null\)/);
   assert.match(interactions, /musicEnergy = normalized/);
   assert.match(interactions, /musicReactiveActive/);
+});
+
+
+test("music energy drives the neural field and pulse variables", () => {
+  assert.match(interactions, /--music-energy/);
+  assert.match(interactions, /--music-pulse/);
+  assert.match(css, /music-reactive-active \.neural-lobby__network/);
+  assert.match(css, /--music-energy/);
+  assert.match(css, /--music-pulse/);
+});
+
+test("audio queue advances to the current immersive track after the remix", () => {
+  assert.match(interactions, /playFollowingAudioTrack/);
+  assert.match(interactions, /audioTrackIndex < audioPlaylist\.length - 1/);
+  assert.match(interactions, /immersiveAudio\.addEventListener\("ended", onEnded\)/);
 });

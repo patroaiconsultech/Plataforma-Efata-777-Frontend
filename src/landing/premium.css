@@ -3450,3 +3450,45 @@ html[data-motion-override="on"] .patroai-premium .neural-lobby__network::after {
     animation: desktopNeuralBeam 3.8s cubic-bezier(.35, .05, .65, .95) infinite !important;
   }
 }
+
+
+/* === MUSIC-SYNCED NEURAL FIELD === */
+.patroai-premium.music-reactive-active .immersive-gate__network,
+.patroai-premium.music-reactive-active .neural-lobby__network {
+  opacity: calc(.78 + (var(--music-energy, 0) * .22));
+  filter: brightness(calc(1 + (var(--music-energy, 0) * .72))) saturate(calc(1 + (var(--music-energy, 0) * .42)));
+}
+
+.patroai-premium.music-reactive-active .immersive-gate__network svg,
+.patroai-premium.music-reactive-active .neural-lobby__network svg {
+  transform: scale(calc(1 + (var(--music-energy, 0) * .035)));
+  transition: transform 80ms linear;
+}
+
+.patroai-premium.music-reactive-active .immersive-gate__network-lines path,
+.patroai-premium.music-reactive-active .neural-lobby__network-lines path {
+  stroke-width: calc(1.45px + (var(--music-energy, 0) * 1.35px));
+  stroke-opacity: calc(.46 + (var(--music-energy, 0) * .5));
+  filter: drop-shadow(0 0 calc(2px + (var(--music-energy, 0) * 8px)) rgba(255, 226, 143, .6));
+}
+
+.patroai-premium.music-reactive-active .immersive-gate__network-nodes circle,
+.patroai-premium.music-reactive-active .neural-lobby__network-nodes circle {
+  filter: drop-shadow(0 0 calc(4px + (var(--music-pulse, 0) * 14px)) rgba(255, 226, 143, .92));
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(calc(1 + (var(--music-pulse, 0) * .5)));
+}
+
+.patroai-premium.music-reactive-active .immersive-gate__network::after,
+.patroai-premium.music-reactive-active .neural-lobby__network::after {
+  opacity: calc(.35 + (var(--music-pulse, 0) * .65));
+  transform: translate(-50%, -50%) scale(calc(.82 + (var(--music-pulse, 0) * .42)));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium.music-reactive-active .immersive-gate__network svg,
+  .patroai-premium.music-reactive-active .neural-lobby__network svg {
+    transition: none;
+  }
+}

@@ -167,9 +167,11 @@ test("language switcher persists locale and updates accessible state", () => {
   assert.match(interactions, /searchParams\.set\("lang", currentLang\)/);
 });
 
-test("immersive gate embeds the single approved work and keeps artist discovery external", () => {
+test("immersive gate embeds the approved sequential music queue and keeps artist discovery external", () => {
   assert.match(markup, /id="patroaiImmersiveAudio"/);
-  assert.match(markup, /\/media\/patroai-immersive-111hz\.mp3/);
+  assert.match(markup, /\/media\/landingpage111hz-remix\.mp3/);
+  assert.match(interactions, /audioPlaylist/);
+  assert.match(interactions, /\/media\/patroai-immersive-111hz\.mp3/);
   assert.match(markup, /https:\/\/suno\.com\/@daninavioficial/);
   assert.doesNotMatch(markup, /https:\/\/suno\.com\/s\/B4WUrW9NOYAIrpfK/);
   assert.doesNotMatch(markup, /https:\/\/suno\.com\/s\/Bl7U1mra7K6xyUGT/);

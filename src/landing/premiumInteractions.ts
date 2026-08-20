@@ -1009,6 +1009,24 @@ export function mountPremiumLanding({
     let audioReactiveFrame = 0;
     let audioReactiveLevel = 0;
     let audioReactiveReady = false;
+    const audioPlaylist = [
+      "/media/landingpage111hz-remix.mp3",
+      "/media/patroai-immersive-111hz.mp3",
+    ];
+    let audioTrackIndex = 0;
+
+    const selectAudioTrack = (index: number) => {
+      if (!immersiveAudio) return;
+      audioTrackIndex = Math.min(
+        Math.max(index, 0),
+        audioPlaylist.length - 1,
+      );
+      immersiveAudio.src = audioPlaylist[audioTrackIndex];
+      immersiveAudio.load();
+      if (musicDockStatus) {
+        musicDockStatus.textContent = `Faixa ${audioTrackIndex + 1} de ${audioPlaylist.length}`;
+      }
+    };
 
     const resetAudioReactiveLogo = () => {
       if (audioReactiveFrame) {
@@ -1025,6 +1043,8 @@ export function mountPremiumLanding({
       root.style.removeProperty("--music-aura-scale");
       root.style.removeProperty("--music-aura-opacity");
       root.style.removeProperty("--music-dock-energy");
+      root.style.removeProperty("--music-energy");
+      root.style.removeProperty("--music-pulse");
     };
 
     const renderAudioReactiveLogo = () => {
@@ -1068,6 +1088,7 @@ export function mountPremiumLanding({
         1,
         Math.max(0, audioReactiveLevel * 1.8),
       );
+      const pulse = Math.min(1, Math.max(0, rawEnergy * 2.45));
       musicEnergy = normalized;
       musicReactiveActive = true;
       const scale = 1 + normalized * 0.085;
@@ -1101,6 +1122,8 @@ export function mountPremiumLanding({
         "--music-dock-energy",
         normalized.toFixed(3),
       );
+      root.style.setProperty("--music-energy", normalized.toFixed(3));
+      root.style.setProperty("--music-pulse", pulse.toFixed(3));
 
       audioReactiveFrame = window.requestAnimationFrame(
         renderAudioReactiveLogo,
@@ -1147,6 +1170,25 @@ export function mountPremiumLanding({
       }
     };
 
+    const playFollowingAudioTrack = async () => {
+      if (!immersiveAudio || audioTrackIndex >= audioPlaylist.length - 1) {
+        syncMusicDock();
+        resetAudioReactiveLogo();
+        return;
+      }
+      selectAudioTrack(audioTrackIndex + 1);
+      try {
+        await immersiveAudio.play();
+        startAudioReactiveLogo();
+        syncMusicDock();
+      } catch {
+        if (musicDockStatus) {
+          musicDockStatus.textContent = "A próxima faixa está pronta para continuar.";
+        }
+        syncMusicDock();
+      }
+    };
+
     const startAudioReactiveLogo = () => {
       if (
         !audioAnalyser ||
@@ -1169,6 +1211,7 @@ export function mountPremiumLanding({
       const onSoundEntry = async () => {
         enableMotionOverride();
         try {
+          selectAudioTrack(0);
           immersiveAudio.currentTime = 0;
           await ensureAudioReactiveLogo();
           if (audioContext?.state === "suspended") {
@@ -1246,6 +1289,9 @@ export function mountPremiumLanding({
       const onMusicToggle = async () => {
         if (immersiveAudio.paused) {
           try {
+            if (immersiveAudio.ended && audioTrackIndex >= audioPlaylist.length - 1) {
+              selectAudioTrack(0);
+            }
             await ensureAudioReactiveLogo();
             if (audioContext?.state === "suspended") {
               await audioContext.resume();
@@ -1270,6 +1316,10 @@ export function mountPremiumLanding({
         resetAudioReactiveLogo();
       };
       const onEnded = () => {
+        if (audioTrackIndex < audioPlaylist.length - 1) {
+          void playFollowingAudioTrack();
+          return;
+        }
         syncMusicDock();
         resetAudioReactiveLogo();
       };
