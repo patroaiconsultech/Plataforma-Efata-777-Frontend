@@ -862,10 +862,23 @@ export function mountPremiumLanding({
     const sync = (next: number, focus = false) => {
       index = (next + neuralLobbyCarouselItems.length) % neuralLobbyCarouselItems.length;
       neuralLobbyCarouselTrack.style.setProperty("--carousel-index", String(index));
+      const itemCount = neuralLobbyCarouselItems.length;
+      const step = Math.min(window.innerWidth * .68, 250);
       neuralLobbyCarouselItems.forEach((item, itemIndex) => {
-        const active = itemIndex === index;
+        let offset = itemIndex - index;
+        if (offset > itemCount / 2) offset -= itemCount;
+        if (offset < -itemCount / 2) offset += itemCount;
+        const distance = Math.abs(offset);
+        const active = offset === 0;
         item.classList.toggle("is-active", active);
         item.setAttribute("aria-current", active ? "true" : "false");
+        item.style.setProperty("--carousel-x", `${offset * step}px`);
+        item.style.setProperty("--carousel-depth", `${-distance * 72}px`);
+        item.style.setProperty("--carousel-scale", String(Math.max(.58, 1 - distance * .16)));
+        item.style.setProperty("--carousel-rotate", `${offset * -18}deg`);
+        item.style.setProperty("--carousel-opacity", String(Math.max(.22, 1 - distance * .23)));
+        item.style.setProperty("--carousel-blur", `${Math.min(3, distance * .8)}px`);
+        item.style.setProperty("--carousel-z", String(itemCount - distance));
       });
       if (neuralLobbyCarouselCurrent) neuralLobbyCarouselCurrent.textContent = String(index + 1);
       if (focus) neuralLobbyCarouselItems[index]?.focus({ preventScroll: true });
@@ -902,6 +915,7 @@ export function mountPremiumLanding({
       dragging = false;
       pointerId = null;
     };
+    const onResize = () => sync(index);
 
     neuralLobbyCarouselSteps.forEach((button) => button.addEventListener("click", onStep));
     neuralLobbyCarousel.addEventListener("keydown", onKeyDown);
@@ -909,6 +923,7 @@ export function mountPremiumLanding({
     neuralLobbyCarousel.addEventListener("pointerup", onPointerUp);
     neuralLobbyCarousel.addEventListener("pointercancel", onPointerCancel);
     neuralLobbyCarousel.addEventListener("pointerleave", onPointerCancel);
+    window.addEventListener("resize", onResize, { passive: true });
     sync(0);
 
     cleanups.push(() => {
@@ -918,6 +933,7 @@ export function mountPremiumLanding({
       neuralLobbyCarousel.removeEventListener("pointerup", onPointerUp);
       neuralLobbyCarousel.removeEventListener("pointercancel", onPointerCancel);
       neuralLobbyCarousel.removeEventListener("pointerleave", onPointerCancel);
+      window.removeEventListener("resize", onResize);
     });
   }
 
