@@ -209,6 +209,23 @@ export const premiumMarkup = String.raw`
     </a>
   </nav>
 
+  <div class="neural-lobby__carousel" data-lobby-carousel aria-label="Fontes PatroAI">
+    <button class="neural-lobby__carousel-arrow" type="button" data-carousel-step="-1" aria-label="Fonte anterior">‹</button>
+    <div class="neural-lobby__carousel-viewport">
+      <div class="neural-lobby__carousel-track" data-lobby-carousel-track>
+        <a href="#top" class="neural-lobby__carousel-item is-active" data-neural-lobby-link data-carousel-item="0"><span data-i18n="lobby.node.about">Conheça a PatroAI</span></a>
+        <a href="#ecossistema" class="neural-lobby__carousel-item" data-neural-lobby-link data-carousel-item="1"><span data-i18n="lobby.node.ecosystem">Ecossistema</span></a>
+        <a href="#governanca" class="neural-lobby__carousel-item" data-neural-lobby-link data-carousel-item="2"><span data-i18n="lobby.node.governance">Governança</span></a>
+        <a href="#metodo" class="neural-lobby__carousel-item" data-neural-lobby-link data-carousel-item="3"><span data-i18n="lobby.node.method">Método</span></a>
+        <a href="#carreiras" class="neural-lobby__carousel-item" data-neural-lobby-link data-carousel-item="4"><span data-i18n="lobby.node.careers">Carreiras &amp; Talentos</span></a>
+        <a href="#contato" class="neural-lobby__carousel-item" data-neural-lobby-link data-carousel-item="5"><span data-i18n="lobby.node.contact">Contato Estratégico</span></a>
+        <a href="/app" class="neural-lobby__carousel-item neural-lobby__carousel-item--private" data-neural-lobby-link data-carousel-item="6" data-private-entry="true"><span data-i18n="lobby.node.platform">Acessar Plataforma</span></a>
+      </div>
+    </div>
+    <button class="neural-lobby__carousel-arrow" type="button" data-carousel-step="1" aria-label="Próxima fonte">›</button>
+    <div class="neural-lobby__carousel-count" aria-live="polite"><span data-carousel-current>1</span><span aria-hidden="true"> / 7</span></div>
+  </div>
+
   <div class="neural-lobby__hint" aria-hidden="true">
     <span></span>
     <small data-i18n="lobby.hint">Selecione um núcleo para entrar</small>

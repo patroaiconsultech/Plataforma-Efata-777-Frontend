@@ -260,3 +260,15 @@ test("immersive gate exposes a visible animated neural field before lobby entry"
   assert.match(css, /immersiveGateNetworkFlow/);
   assert.match(css, /immersiveGateNetworkNode/);
 });
+
+
+test("mobile lobby exposes an intuitive source carousel with keyboard and touch controls", () => {
+  assert.match(markup, /data-lobby-carousel/);
+  assert.match(markup, /data-lobby-carousel-track/);
+  assert.equal((markup.match(/data-carousel-item=/g) || []).length, 7);
+  assert.equal((markup.match(/data-carousel-step=/g) || []).length, 2);
+  assert.match(interactions, /initLobbyCarousel/);
+  assert.match(interactions, /ArrowLeft/);
+  assert.match(interactions, /ArrowRight/);
+  assert.match(css, /neural-lobby__carousel/);
+});

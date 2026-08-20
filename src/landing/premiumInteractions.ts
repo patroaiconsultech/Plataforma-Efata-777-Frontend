@@ -192,6 +192,11 @@ export function mountPremiumLanding({
     queryAll<HTMLAnchorElement>("[data-neural-lobby-link]");
   const neuralLobbyBrand = query<HTMLElement>(".neural-lobby__brand");
   const neuralLobbyDragHint = query<HTMLElement>("#neuralLobbyDragHint");
+  const neuralLobbyCarousel = query<HTMLElement>("[data-lobby-carousel]");
+  const neuralLobbyCarouselTrack = query<HTMLElement>("[data-lobby-carousel-track]");
+  const neuralLobbyCarouselItems = queryAll<HTMLAnchorElement>("[data-carousel-item]");
+  const neuralLobbyCarouselSteps = queryAll<HTMLButtonElement>("[data-carousel-step]");
+  const neuralLobbyCarouselCurrent = query<HTMLElement>("[data-carousel-current]");
   const immersiveAudio = query<HTMLAudioElement>("#patroaiImmersiveAudio");
   const musicDock = query<HTMLElement>("#musicDock");
   const musicDockToggle = query<HTMLButtonElement>("#musicDockToggle");
@@ -847,6 +852,75 @@ export function mountPremiumLanding({
     });
   }
 
+  function initLobbyCarousel() {
+    if (!neuralLobbyCarousel || !neuralLobbyCarouselTrack || neuralLobbyCarouselItems.length === 0) return;
+    let index = 0;
+    let startX = 0;
+    let dragging = false;
+    let pointerId: number | null = null;
+
+    const sync = (next: number, focus = false) => {
+      index = (next + neuralLobbyCarouselItems.length) % neuralLobbyCarouselItems.length;
+      neuralLobbyCarouselTrack.style.setProperty("--carousel-index", String(index));
+      neuralLobbyCarouselItems.forEach((item, itemIndex) => {
+        const active = itemIndex === index;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-current", active ? "true" : "false");
+      });
+      if (neuralLobbyCarouselCurrent) neuralLobbyCarouselCurrent.textContent = String(index + 1);
+      if (focus) neuralLobbyCarouselItems[index]?.focus({ preventScroll: true });
+    };
+
+    const onStep = (event: MouseEvent) => {
+      const step = Number((event.currentTarget as HTMLElement).dataset.carouselStep || 0);
+      sync(index + step, true);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        sync(index - 1, true);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        sync(index + 1, true);
+      }
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== "touch" && event.button !== 0) return;
+      dragging = true;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      neuralLobbyCarousel.setPointerCapture?.(event.pointerId);
+    };
+    const onPointerUp = (event: PointerEvent) => {
+      if (!dragging || pointerId !== event.pointerId) return;
+      const delta = event.clientX - startX;
+      dragging = false;
+      pointerId = null;
+      if (Math.abs(delta) > 28) sync(index + (delta < 0 ? 1 : -1), true);
+    };
+    const onPointerCancel = () => {
+      dragging = false;
+      pointerId = null;
+    };
+
+    neuralLobbyCarouselSteps.forEach((button) => button.addEventListener("click", onStep));
+    neuralLobbyCarousel.addEventListener("keydown", onKeyDown);
+    neuralLobbyCarousel.addEventListener("pointerdown", onPointerDown);
+    neuralLobbyCarousel.addEventListener("pointerup", onPointerUp);
+    neuralLobbyCarousel.addEventListener("pointercancel", onPointerCancel);
+    neuralLobbyCarousel.addEventListener("pointerleave", onPointerCancel);
+    sync(0);
+
+    cleanups.push(() => {
+      neuralLobbyCarouselSteps.forEach((button) => button.removeEventListener("click", onStep));
+      neuralLobbyCarousel.removeEventListener("keydown", onKeyDown);
+      neuralLobbyCarousel.removeEventListener("pointerdown", onPointerDown);
+      neuralLobbyCarousel.removeEventListener("pointerup", onPointerUp);
+      neuralLobbyCarousel.removeEventListener("pointercancel", onPointerCancel);
+      neuralLobbyCarousel.removeEventListener("pointerleave", onPointerCancel);
+    });
+  }
+
   function initBrainCanvas(
     selector = "#brainCanvas",
     densityMultiplier = 1,
@@ -1452,6 +1526,7 @@ export function mountPremiumLanding({
   initReveal();
   initPointerGlow();
   initLobbyLogoControl();
+  initLobbyCarousel();
   initBrainCanvas();
   initBrainCanvas("#lobbyBrainCanvas", 1.45, {
     getPointer: () => (lobbyPointer.active ? lobbyPointer : null),
