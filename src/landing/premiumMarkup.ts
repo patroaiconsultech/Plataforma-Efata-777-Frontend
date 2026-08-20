@@ -359,6 +359,28 @@ export const premiumMarkup = String.raw`
         </div>
       </section>
 
+      <section class="section level-six-section" id="nucleo-imersivo" aria-labelledby="level-six-title">
+        <div class="section-inner">
+          <div class="level-six-panel reveal">
+            <div class="level-six-panel__signal" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="level-six-panel__copy">
+              <p class="eyebrow" data-i18n="level6.eyebrow">Núcleo de Inteligência Artificial Imersiva</p>
+              <h2 id="level-six-title" data-i18n="level6.title">Nível 6: uma inteligência que estamos cocriando.</h2>
+              <p data-i18n="level6.copy">A PatroAI pesquisa e desenvolve uma nova camada de inteligência: sistemas que conectam agentes, contexto, presença, música, interface espacial, governança e impacto humano em uma experiência viva.</p>
+              <p class="level-six-panel__status" data-i18n="level6.status">Fronteira em cocriação · conceito em desenvolvimento</p>
+              <a class="button secondary" href="#contato" data-i18n="level6.cta">Cocriar essa fronteira</a>
+            </div>
+            <div class="level-six-panel__layers" aria-label="Camadas do Núcleo de IA Imersiva">
+              <span data-i18n="level6.layer.context">Contexto</span>
+              <span data-i18n="level6.layer.agents">Agentes</span>
+              <span data-i18n="level6.layer.presence">Presença</span>
+              <span data-i18n="level6.layer.governance">Governança</span>
+              <span data-i18n="level6.layer.impact">Impacto</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="section alt" id="ecossistema" aria-labelledby="ecosystem-title">
         <div class="section-inner">
           <div class="section-head">

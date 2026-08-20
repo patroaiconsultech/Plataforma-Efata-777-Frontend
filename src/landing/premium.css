@@ -4110,3 +4110,303 @@ html[data-motion-override="on"] .patroai-premium .neural-lobby__network::after {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* === MOBILE SOURCE REVEAL: FUNCTIONAL FINAL LAYOUT === */
+@media (max-width: 820px) {
+  .patroai-premium .neural-lobby__source-reveal {
+    inset: 13vh 14px 15vh;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: center;
+    align-items: center;
+    gap: 11px 10px;
+    overflow: visible;
+    pointer-events: auto;
+  }
+
+  .patroai-premium .neural-lobby__source-reveal a,
+  .patroai-premium .neural-lobby__source-reveal a:nth-child(n) {
+    position: relative;
+    inset: auto;
+    left: auto;
+    top: auto;
+    width: 100%;
+    min-height: 56px;
+    padding: 10px 8px;
+    font-size: clamp(14px, 4.2vw, 22px);
+    line-height: 1.04;
+    letter-spacing: -.035em;
+    opacity: 0;
+    transform: perspective(900px) translate3d(0, 0, 260px) scale(.12) rotateX(28deg) !important;
+    animation: sourceRevealGridIn 1.15s cubic-bezier(.2, .84, .24, 1) forwards;
+    animation-delay: calc(var(--reveal-index, 0) * 95ms);
+  }
+
+  .patroai-premium .neural-lobby__source-reveal a:nth-child(7) {
+    grid-column: 1 / -1;
+  }
+
+  .patroai-premium .neural-lobby__source-reveal a.is-pressed,
+  .patroai-premium .neural-lobby__source-reveal a:active {
+    transform: perspective(900px) translate3d(0, 2px, 0) scale(.97) !important;
+  }
+
+  @keyframes sourceRevealGridIn {
+    0% {
+      opacity: 0;
+      transform: perspective(900px) translate3d(0, 0, 260px) scale(.12) rotateX(28deg) !important;
+      filter: blur(9px);
+    }
+    42% {
+      opacity: 1;
+      transform: perspective(900px) translate3d(0, 0, 90px) scale(1.16) rotateX(0deg) !important;
+      filter: blur(0);
+    }
+    100% {
+      opacity: .96;
+      transform: perspective(900px) translate3d(0, 0, 0) scale(1) rotateX(0deg) !important;
+      filter: blur(0);
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .patroai-premium .neural-lobby__source-reveal {
+    inset: 15vh 11px 14vh;
+    gap: 8px 7px;
+  }
+
+  .patroai-premium .neural-lobby__source-reveal a,
+  .patroai-premium .neural-lobby__source-reveal a:nth-child(n) {
+    min-height: 52px;
+    padding-inline: 6px;
+    font-size: clamp(13px, 3.9vw, 18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium .neural-lobby__source-reveal a,
+  .patroai-premium .neural-lobby__source-reveal a:nth-child(n) {
+    opacity: .96;
+    transform: none !important;
+    animation: none !important;
+    filter: none !important;
+  }
+}
+
+
+/* === LEVEL 6 IMMERSIVE AI CORE === */
+.patroai-premium .level-six-section {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 42%, rgba(57, 235, 214, .09), transparent 27%),
+    radial-gradient(circle at 84% 58%, rgba(98, 124, 255, .1), transparent 30%),
+    #020807;
+}
+
+.patroai-premium .level-six-panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(240px, .9fr);
+  gap: clamp(32px, 7vw, 100px);
+  min-height: 430px;
+  align-items: center;
+  padding: clamp(32px, 7vw, 84px);
+  overflow: hidden;
+  border: 1px solid rgba(105, 228, 218, .23);
+  border-radius: 34px;
+  background:
+    linear-gradient(115deg, rgba(3, 25, 25, .86), rgba(8, 17, 32, .72)),
+    radial-gradient(circle at 76% 50%, rgba(52, 232, 255, .15), transparent 33%);
+  box-shadow: inset 0 0 65px rgba(57, 239, 213, .06), 0 28px 90px rgba(0, 0, 0, .27);
+}
+
+.patroai-premium .level-six-panel::before,
+.patroai-premium .level-six-panel::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(104, 233, 224, .12);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.patroai-premium .level-six-panel::before {
+  right: -9%;
+  top: -30%;
+  width: 52%;
+  aspect-ratio: 1;
+  box-shadow: 0 0 54px rgba(67, 246, 225, .08), inset 0 0 44px rgba(67, 246, 225, .04);
+  animation: levelSixOrbit 14s linear infinite;
+}
+
+.patroai-premium .level-six-panel::after {
+  right: 4%;
+  bottom: -35%;
+  width: 32%;
+  aspect-ratio: 1;
+  border-color: rgba(137, 155, 255, .17);
+  animation: levelSixOrbit 10s linear reverse infinite;
+}
+
+.patroai-premium .level-six-panel__copy,
+.patroai-premium .level-six-panel__layers {
+  position: relative;
+  z-index: 1;
+}
+
+.patroai-premium .level-six-panel__copy h2 {
+  max-width: 13ch;
+  margin: 12px 0 18px;
+  color: #f4ffff;
+  font-size: clamp(34px, 5.4vw, 76px);
+  line-height: .94;
+  letter-spacing: -.065em;
+}
+
+.patroai-premium .level-six-panel__copy > p:not(.level-six-panel__status) {
+  max-width: 58ch;
+  color: rgba(222, 244, 238, .74);
+  font-size: clamp(15px, 1.35vw, 19px);
+  line-height: 1.7;
+}
+
+.patroai-premium .level-six-panel__status {
+  display: inline-flex;
+  margin: 20px 0 26px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 226, 143, .32);
+  border-radius: 999px;
+  color: rgba(255, 235, 183, .82);
+  background: rgba(70, 46, 11, .16);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.patroai-premium .level-six-panel__signal {
+  position: absolute;
+  right: 28%;
+  top: 50%;
+  z-index: 0;
+  width: 170px;
+  height: 170px;
+  transform: translate(50%, -50%);
+  border: 1px solid rgba(72, 238, 219, .23);
+  border-radius: 50%;
+  box-shadow: 0 0 45px rgba(63, 230, 222, .12), inset 0 0 42px rgba(63, 230, 222, .08);
+}
+
+.patroai-premium .level-six-panel__signal::before,
+.patroai-premium .level-six-panel__signal::after {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 1px solid rgba(80, 234, 255, .28);
+  border-radius: 50%;
+}
+
+.patroai-premium .level-six-panel__signal::after {
+  inset: 42px;
+  border-color: rgba(255, 226, 143, .38);
+}
+
+.patroai-premium .level-six-panel__signal span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #66f6e8;
+  box-shadow: 0 0 18px #66f6e8, 0 0 34px rgba(109, 142, 255, .72);
+  transform: translate(-50%, -50%) rotate(calc(var(--signal-angle, 0deg))) translateY(-78px);
+  animation: levelSixPulse 2.7s ease-in-out infinite;
+}
+
+.patroai-premium .level-six-panel__signal span:nth-child(1) { --signal-angle: 0deg; }
+.patroai-premium .level-six-panel__signal span:nth-child(2) { --signal-angle: 120deg; animation-delay: .35s; }
+.patroai-premium .level-six-panel__signal span:nth-child(3) { --signal-angle: 240deg; animation-delay: .7s; }
+
+.patroai-premium .level-six-panel__layers {
+  display: grid;
+  gap: 10px;
+  padding: 24px;
+  border: 1px solid rgba(113, 224, 220, .16);
+  border-radius: 24px;
+  background: rgba(2, 18, 22, .52);
+  box-shadow: inset 0 0 28px rgba(57, 222, 223, .04);
+}
+
+.patroai-premium .level-six-panel__layers span {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(112, 222, 214, .12);
+  color: rgba(232, 255, 252, .8);
+  font-size: 13px;
+  letter-spacing: .06em;
+}
+
+.patroai-premium .level-six-panel__layers span::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #5bf4e0;
+  box-shadow: 0 0 14px #5bf4e0;
+}
+
+@keyframes levelSixOrbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes levelSixPulse {
+  0%, 100% { opacity: .38; transform: translate(-50%, -50%) rotate(var(--signal-angle)) translateY(-74px) scale(.72); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--signal-angle)) translateY(-82px) scale(1.3); }
+}
+
+@media (max-width: 820px) {
+  .patroai-premium .level-six-panel {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    gap: 30px;
+    padding: 28px 20px;
+    border-radius: 24px;
+  }
+
+  .patroai-premium .level-six-panel__copy h2 {
+    max-width: 12ch;
+    font-size: clamp(34px, 11vw, 58px);
+  }
+
+  .patroai-premium .level-six-panel__copy > p:not(.level-six-panel__status) {
+    font-size: 14px;
+    line-height: 1.58;
+  }
+
+  .patroai-premium .level-six-panel__signal {
+    right: 17%;
+    top: 19%;
+    width: 120px;
+    height: 120px;
+    opacity: .62;
+  }
+
+  .patroai-premium .level-six-panel__layers {
+    padding: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium .level-six-panel::before,
+  .patroai-premium .level-six-panel::after,
+  .patroai-premium .level-six-panel__signal span {
+    animation: none !important;
+  }
+}
