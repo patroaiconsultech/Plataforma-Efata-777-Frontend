@@ -1101,6 +1101,7 @@ export function mountPremiumLanding({
     let audioReactiveFrame = 0;
     let audioReactiveLevel = 0;
     let audioReactiveReady = false;
+    let desktopNeuralMotionFrame = 0;
     const audioPlaylist = [
       "/media/patroai-threshold.mp3",
       "/media/patroai-threshold-02.mp3",
@@ -1116,6 +1117,7 @@ export function mountPremiumLanding({
         audioPlaylist.length - 1,
       );
       immersiveAudio.src = audioPlaylist[audioTrackIndex];
+      immersiveAudio.volume = 0.58;
       immersiveAudio.load();
       if (musicDockStatus) {
         musicDockStatus.textContent = `Faixa ${audioTrackIndex + 1} de ${audioPlaylist.length}`;
@@ -1248,13 +1250,13 @@ export function mountPremiumLanding({
         const source =
           audioContext.createMediaElementSource(immersiveAudio);
         audioMasterGain = audioContext.createGain();
-        audioMasterGain.gain.value = 0.72;
+        audioMasterGain.gain.value = 0.48;
         audioCompressor = audioContext.createDynamicsCompressor();
-        audioCompressor.threshold.value = -18;
-        audioCompressor.knee.value = 18;
-        audioCompressor.ratio.value = 3;
+        audioCompressor.threshold.value = -24;
+        audioCompressor.knee.value = 24;
+        audioCompressor.ratio.value = 4.5;
         audioCompressor.attack.value = 0.003;
-        audioCompressor.release.value = 0.24;
+        audioCompressor.release.value = 0.3;
         audioAnalyser = audioContext.createAnalyser();
         audioAnalyser.fftSize = 256;
         audioAnalyser.smoothingTimeConstant = 0.72;
@@ -1294,6 +1296,42 @@ export function mountPremiumLanding({
         syncMusicDock();
       }
     };
+
+    const renderDesktopNeuralMotion = (timestamp: number) => {
+      const isDesktop = window.matchMedia('(min-width: 821px)').matches;
+      const reduced = reducedMotionPreference.matches && document.documentElement.dataset.motionOverride !== 'on';
+      if (isDesktop && !reduced && document.visibilityState === 'visible') {
+        const phase = timestamp * 0.001;
+        const fieldX = Math.sin(phase * 0.38) * 1.8;
+        const fieldY = Math.cos(phase * 0.29) * 1.25;
+        const fieldScale = 1.018 + ((Math.sin(phase * 0.23) + 1) * 0.008);
+        const beamX = Math.sin(phase * 0.52) * 58;
+        const coreScale = 0.92 + ((Math.sin(phase * 0.76) + 1) * 0.16);
+        root.style.setProperty('--desktop-field-x', `${fieldX.toFixed(3)}%`);
+        root.style.setProperty('--desktop-field-y', `${fieldY.toFixed(3)}%`);
+        root.style.setProperty('--desktop-field-scale', fieldScale.toFixed(4));
+        root.style.setProperty('--desktop-beam-x', `${beamX.toFixed(2)}%`);
+        root.style.setProperty('--desktop-core-scale', coreScale.toFixed(4));
+      } else if (!isDesktop || reduced) {
+        root.style.removeProperty('--desktop-field-x');
+        root.style.removeProperty('--desktop-field-y');
+        root.style.removeProperty('--desktop-field-scale');
+        root.style.removeProperty('--desktop-beam-x');
+        root.style.removeProperty('--desktop-core-scale');
+      }
+      desktopNeuralMotionFrame = window.requestAnimationFrame(renderDesktopNeuralMotion);
+    };
+
+    desktopNeuralMotionFrame = window.requestAnimationFrame(renderDesktopNeuralMotion);
+    cleanups.push(() => {
+      if (desktopNeuralMotionFrame) window.cancelAnimationFrame(desktopNeuralMotionFrame);
+      desktopNeuralMotionFrame = 0;
+      root.style.removeProperty('--desktop-field-x');
+      root.style.removeProperty('--desktop-field-y');
+      root.style.removeProperty('--desktop-field-scale');
+      root.style.removeProperty('--desktop-beam-x');
+      root.style.removeProperty('--desktop-core-scale');
+    });
 
     const startAudioReactiveLogo = () => {
       if (
