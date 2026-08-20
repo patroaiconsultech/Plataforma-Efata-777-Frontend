@@ -3399,3 +3399,54 @@ body.neural-lobby-open {
     animation: none !important;
   }
 }
+
+
+/* === EXPLICIT MOTION OPT-IN === */
+html[data-motion-override="on"] .patroai-premium .immersive-gate__network,
+html[data-motion-override="on"] .patroai-premium .neural-lobby__network {
+  opacity: 1 !important;
+}
+
+html[data-motion-override="on"] .patroai-premium .immersive-gate__network-lines path,
+html[data-motion-override="on"] .patroai-premium .neural-lobby__network-lines path {
+  animation: immersiveGateNetworkFlow 2.8s linear infinite !important;
+  animation-play-state: running !important;
+  opacity: .72 !important;
+}
+
+html[data-motion-override="on"] .patroai-premium .immersive-gate__network-nodes circle,
+html[data-motion-override="on"] .patroai-premium .neural-lobby__network-nodes circle {
+  animation: immersiveGateNetworkNode 1.8s ease-in-out infinite !important;
+  animation-play-state: running !important;
+  opacity: .9 !important;
+}
+
+html[data-motion-override="on"] .patroai-premium .immersive-gate__network svg,
+html[data-motion-override="on"] .patroai-premium .neural-lobby__network svg {
+  animation: desktopNeuralFieldDrift 8.5s ease-in-out infinite !important;
+  animation-play-state: running !important;
+}
+
+html[data-motion-override="on"] .patroai-premium .immersive-gate__network::before,
+html[data-motion-override="on"] .patroai-premium .immersive-gate__network::after,
+html[data-motion-override="on"] .patroai-premium .neural-lobby__network::before,
+html[data-motion-override="on"] .patroai-premium .neural-lobby__network::after {
+  animation-play-state: running !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion-override="on"] .patroai-premium .immersive-gate__network-lines path,
+  html[data-motion-override="on"] .patroai-premium .neural-lobby__network-lines path {
+    animation: immersiveGateNetworkFlow 2.8s linear infinite !important;
+  }
+  html[data-motion-override="on"] .patroai-premium .immersive-gate__network-nodes circle,
+  html[data-motion-override="on"] .patroai-premium .neural-lobby__network-nodes circle {
+    animation: immersiveGateNetworkNode 1.8s ease-in-out infinite !important;
+  }
+  html[data-motion-override="on"] .patroai-premium .immersive-gate__network::before,
+  html[data-motion-override="on"] .patroai-premium .immersive-gate__network::after,
+  html[data-motion-override="on"] .patroai-premium .neural-lobby__network::before,
+  html[data-motion-override="on"] .patroai-premium .neural-lobby__network::after {
+    animation: desktopNeuralBeam 3.8s cubic-bezier(.35, .05, .65, .95) infinite !important;
+  }
+}

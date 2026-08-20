@@ -932,6 +932,11 @@ export function mountPremiumLanding({
       window.setTimeout(() => neuralLobbyLinks[0]?.focus(), 40);
     };
 
+    const enableMotionOverride = () => {
+      document.documentElement.dataset.motionOverride = "on";
+      document.body.dataset.motionOverride = "on";
+    };
+
     const closeImmersiveGate = () => {
       immersiveGate.classList.add("is-leaving");
       window.setTimeout(() => {
@@ -942,6 +947,7 @@ export function mountPremiumLanding({
     };
 
     const enterPresentationDirectly = (event?: Event) => {
+      enableMotionOverride();
       event?.preventDefault();
       immersiveGate.classList.add("is-leaving");
       window.setTimeout(() => {
@@ -1161,6 +1167,7 @@ export function mountPremiumLanding({
 
     if (immersiveSoundEntry && immersiveAudio) {
       const onSoundEntry = async () => {
+        enableMotionOverride();
         try {
           immersiveAudio.currentTime = 0;
           await ensureAudioReactiveLogo();
@@ -1188,7 +1195,10 @@ export function mountPremiumLanding({
         immersiveSoundEntry.removeEventListener("click", onSoundEntry),
       );
     } else if (immersiveSoundEntry) {
-      const onSoundEntryWithoutAudio = () => closeImmersiveGate();
+      const onSoundEntryWithoutAudio = () => {
+        enableMotionOverride();
+        closeImmersiveGate();
+      };
       immersiveSoundEntry.addEventListener(
         "click",
         onSoundEntryWithoutAudio,
@@ -1203,6 +1213,7 @@ export function mountPremiumLanding({
 
     if (immersiveSilent) {
       const onSilentEntry = () => {
+        enableMotionOverride();
         if (immersiveAudio) {
           immersiveAudio.pause();
           immersiveAudio.currentTime = 0;
