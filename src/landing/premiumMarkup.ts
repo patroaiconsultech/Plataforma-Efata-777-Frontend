@@ -211,7 +211,7 @@ export const premiumMarkup = String.raw`
 <audio
   id="patroaiImmersiveAudio"
   preload="metadata"
-  src="/media/landingpage111hz-remix.mp3"
+  src="/media/patroai-threshold.mp3"
 ></audio>
 
 <aside class="music-dock" id="musicDock" hidden aria-label="Experiência sonora PatroAI">

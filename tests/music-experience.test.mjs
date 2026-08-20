@@ -19,8 +19,10 @@ const css = fs.readFileSync(
 
 test("immersive entry uses first-party MP3 instead of external track URL", () => {
   assert.match(markup, /id="patroaiImmersiveAudio"/);
-  assert.match(markup, /src="\/media\/landingpage111hz-remix\.mp3"/);
+  assert.match(markup, /src="\/media\/patroai-threshold\.mp3"/);
   assert.match(interactions, /audioPlaylist/);
+  assert.match(interactions, /patroai-threshold\.mp3/);
+  assert.match(interactions, /patroai-threshold-02\.mp3/);
   assert.match(interactions, /landingpage111hz-remix\.mp3/);
   assert.match(interactions, /patroai-immersive-111hz\.mp3/);
   assert.doesNotMatch(markup, /href="https:\/\/suno\.com\/s\/B4WUrW9NOYAIrpfK"/);
@@ -28,6 +30,8 @@ test("immersive entry uses first-party MP3 instead of external track URL", () =>
 
 test("approved music queue assets exist", () => {
   for (const filename of [
+    "patroai-threshold.mp3",
+    "patroai-threshold-02.mp3",
     "landingpage111hz-remix.mp3",
     "patroai-immersive-111hz.mp3",
   ]) {
