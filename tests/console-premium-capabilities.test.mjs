@@ -6,11 +6,10 @@ const api = fs.readFileSync("src/api.ts", "utf8");
 const console_ = fs.readFileSync("src/routes/AppConsole.tsx", "utf8");
 const styles = fs.readFileSync("src/styles.css", "utf8");
 
-test("Team implementation is available when backend teams are present", () => {
+test("Team implementation remains present but its UI stays gated in F3", () => {
   assert.match(console_, /type ExecutionMode = "individual" \| "team"/);
   assert.match(console_, /listTeams/);
-  assert.match(console_, /onClick=\{\(\) => setExecutionMode\("team"\)\}/);
-  assert.match(console_, /disabled=\{teamsBusy \|\| teams.length === 0\}/);
+  assert.match(console_, /Team permanece bloqueado neste patch/);
 });
 
 test("Team request uses the governed backend v1.1 contract", () => {

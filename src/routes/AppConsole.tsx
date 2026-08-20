@@ -46,15 +46,6 @@ import {
 
 const DEFAULT_COCREATOR_LABEL = "Co-Criador";
 
-const VOICE_INPUT_CONSTRAINTS: MediaStreamConstraints = {
-  audio: {
-    echoCancellation: true,
-    noiseSuppression: true,
-    autoGainControl: false,
-    channelCount: 1,
-  },
-};
-
 type VoiceState = "idle" | "recording" | "transcribing" | "review";
 type ExecutionMode = "individual" | "team";
 type RealtimeState =
@@ -593,7 +584,7 @@ export default function AppConsole() {
     const recordThreadId = threadId;
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia(VOICE_INPUT_CONSTRAINTS);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       if (sessionId !== voiceSessionRef.current) {
         stream.getTracks().forEach((track) => track.stop());
         return;
@@ -941,7 +932,7 @@ export default function AppConsole() {
     };
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia(VOICE_INPUT_CONSTRAINTS);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       if (sessionThreadId !== activeThreadRef.current) {
         stream.getTracks().forEach((track) => track.stop());
         peer.close();
@@ -957,7 +948,7 @@ export default function AppConsole() {
       if (!sdp) throw new ApiError(0, "REALTIME_SDP_EMPTY");
 
       const call =
-        executionMode === "team" && activeTeam
+        false && executionMode === "team" && activeTeam
           ? await createRealtimeCall(sessionThreadId, {
               sdp,
               target_mode: "team",
@@ -1046,7 +1037,7 @@ export default function AppConsole() {
 
     let teamDefinition: TeamDefinition | null = null;
     let teamContributorIds: string[] = [];
-    if (executionMode === "team") {
+    if (false && executionMode === "team") {
       teamDefinition =
         teams.find((team) => team.team_id === selectedTeamId) ?? null;
       if (!teamDefinition) {
@@ -1129,7 +1120,7 @@ export default function AppConsole() {
         },
       };
 
-      if (executionMode === "team" && teamDefinition) {
+      if (false && executionMode === "team" && teamDefinition) {
         setTeamRunStatus("Team iniciando…");
         await streamTeamMessage(
           threadId,
@@ -1950,13 +1941,8 @@ export default function AppConsole() {
                 type="button"
                 className={executionMode === "team" ? "agent-mode__active" : ""}
                 aria-pressed={executionMode === "team"}
-                onClick={() => setExecutionMode("team")}
-                disabled={teamsBusy || teams.length === 0}
-                title={
-                  teams.length
-                    ? "Usar orquestração Team governada"
-                    : "Nenhum Team disponível no backend"
-                }
+                disabled
+                title="Team permanece bloqueado neste patch até o gate específico de runtime."
               >
                 Team
               </button>

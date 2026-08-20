@@ -43,5 +43,5 @@ test("admin catalog is role-aware and explicit agent selection is wired to the s
   assert.match(app, /setAgents\(me\?\.admin_access \? catalog : hyper \? \[hyper\] : \[\]\)/);
   assert.match(app, /setSelectedAgent\(agent\)/);
   assert.match(app, /technicalAgentTarget\([\s\S]*selectedAgent\?\.slug[\s\S]*"orkio"/);
-  assert.match(app, /onClick=\{\(\) => setExecutionMode\("team"\)\}/);
+  assert.match(app, /Team permanece bloqueado neste patch/);
 });
