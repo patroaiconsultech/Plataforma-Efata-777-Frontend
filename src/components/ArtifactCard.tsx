@@ -16,6 +16,18 @@ function artifactTypeLabel(mimeType: string): string {
     return "Documento Word";
   if (mimeType === "text/plain") return "Texto";
   if (mimeType === "application/pdf") return "PDF";
+  if (mimeType === "text/markdown") return "Markdown";
+  if (mimeType === "application/json") return "JSON";
+  if (
+    mimeType ===
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+  )
+    return "PowerPoint";
+  if (
+    mimeType ===
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  )
+    return "Excel";
   return mimeType;
 }
 

@@ -33,6 +33,7 @@ import {
   transcribeVoice,
   uploadAttachment,
   updateCoCreatorName,
+  updateThreadTitle,
 } from "../api";
 import ArtifactCard from "../components/ArtifactCard";
 import PwaInstallButton from "../components/PwaInstallButton";
@@ -58,7 +59,7 @@ type RealtimeState =
   | "error";
 const VOICE_MAX_RECORDING_SECONDS = 90;
 const ATTACHMENT_ACCEPT =
-  ".pdf,.txt,.csv,.json,.docx,.xlsx,.pptx";
+  ".pdf,.txt,.csv,.md,.markdown,.json,.docx,.xlsx,.pptx";
 
 function formatVoiceElapsed(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
@@ -88,10 +89,27 @@ function describe(error: unknown): string {
     THREAD_NOT_FOUND: "Conversa não encontrada.",
     THREAD_ACCESS_DENIED: "Você não participa desta conversa.",
     THREAD_READ_ONLY: "Seu perfil nesta conversa é somente leitura.",
+    THREAD_RENAME_ROLE_REQUIRED:
+      "Apenas o proprietário ou moderador pode renomear esta conversa.",
+    THREAD_TITLE_REQUIRED: "Informe um nome para a conversa.",
     INVITE_ROLE_REQUIRED:
       "Apenas o proprietário ou um moderador pode convidar participantes.",
     AGENT_NOT_FOUND: "O agente selecionado não está disponível.",
     ARTIFACTS_DISABLED: "O envio de anexos está desabilitado no servidor.",
+    ARTIFACT_FORMAT_UNSUPPORTED:
+      "Este formato de documento ainda não está disponível para geração.",
+    ARTIFACT_PDF_RENDERER_UNAVAILABLE:
+      "O renderizador PDF não está instalado nesta implantação.",
+    ARTIFACT_PPTX_RENDERER_UNAVAILABLE:
+      "O renderizador PowerPoint não está instalado nesta implantação.",
+    ARTIFACT_JSON_INVALID:
+      "O conteúdo solicitado não é um JSON válido.",
+    ARTIFACT_PDF_VALIDATION_FAILED:
+      "O PDF foi gerado, mas não passou na validação final.",
+    ARTIFACT_PPTX_VALIDATION_FAILED:
+      "O PowerPoint foi gerado, mas não passou na validação final.",
+    ARTIFACT_JSON_VALIDATION_FAILED:
+      "O JSON gerado não passou na validação final.",
     ARTIFACT_METADATA_INVALID:
       "O servidor informou um artefato, mas a metadata terminal é inválida.",
     ARTIFACT_DOWNLOAD_PATH_INVALID:
@@ -103,6 +121,16 @@ function describe(error: unknown): string {
     ARTIFACT_INTEGRITY_MISMATCH:
       "A integridade do artefato não pôde ser confirmada.",
     UPLOAD_PERMISSION_REQUIRED: "Você não tem permissão para enviar arquivos.",
+    DOCUMENT_EXTRACTION_UNSUPPORTED:
+      "Este tipo de documento ainda não pode ser lido pela plataforma.",
+    DOCUMENT_EXTRACTION_FAILED:
+      "O documento foi recebido, mas a leitura do conteúdo falhou.",
+    DOCUMENT_PPTX_READER_UNAVAILABLE:
+      "O leitor de PowerPoint não está instalado nesta implantação.",
+    DOCUMENT_PPTX_EXTRACTION_FAILED:
+      "Não foi possível extrair o texto do PowerPoint.",
+    DOCUMENT_INTEGRITY_ERROR:
+      "A integridade do documento não pôde ser confirmada.",
     FILE_TOO_LARGE: "Arquivo acima do tamanho máximo permitido.",
     MIME_TYPE_NOT_ALLOWED: "Tipo de arquivo não permitido.",
     REALTIME_STREAMING_DISABLED: "O streaming em tempo real está desabilitado no servidor.",
@@ -169,6 +197,9 @@ export default function AppConsole() {
   const [threadId, setThreadId] = useState<string>(
     () => new URLSearchParams(window.location.search).get("thread") || "",
   );
+  const [showRenameThread, setShowRenameThread] = useState(false);
+  const [renameThreadValue, setRenameThreadValue] = useState("");
+  const [renameThreadBusy, setRenameThreadBusy] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [streamingText, setStreamingText] = useState("");
   const [sending, setSending] = useState(false);
@@ -238,6 +269,23 @@ export default function AppConsole() {
   const authConfigured = isOidcConfigured();
   const accountReady = authenticated && Boolean(me) && !provisioningBlocked;
 
+  function deriveThreadTitle(content: string): string {
+    const clean = content
+      .replace(/\s+/g, " ")
+      .replace(/[\r\n]+/g, " ")
+      .trim();
+    if (!clean) return "Nova conversa";
+    const sentence = clean.split(/(?<=[.!?])\s+/)[0] || clean;
+    return sentence.length > 64 ? `${sentence.slice(0, 61).trimEnd()}…` : sentence;
+  }
+
+  function scrollConversationToTop() {
+    document.querySelector<HTMLElement>(".thread")?.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
   const selectThread = useCallback((id: string) => {
     if (id !== activeThreadRef.current) {
       cancelVoiceCapture(true);
@@ -254,6 +302,7 @@ export default function AppConsole() {
     setArtifactDownloadBusy("");
     setArtifactDownloadErrors({});
     setShowMobileSidebar(false);
+    setShowRenameThread(false);
     setError("");
     const url = new URL(window.location.href);
     if (id) url.searchParams.set("thread", id);
@@ -1056,6 +1105,21 @@ export default function AppConsole() {
       return;
     }
 
+    const currentThread = threads.find((thread) => thread.id === threadId);
+    if (currentThread && (!currentThread.title || currentThread.title === "Nova conversa")) {
+      const autoTitle = deriveThreadTitle(content);
+      try {
+        const renamed = await updateThreadTitle(threadId, autoTitle);
+        setThreads((current) =>
+          current.map((thread) =>
+            thread.id === renamed.id ? { ...thread, title: renamed.title } : thread,
+          ),
+        );
+      } catch {
+        // O título não pode impedir a execução da mensagem.
+      }
+    }
+
     let teamDefinition: TeamDefinition | null = null;
     let teamContributorIds: string[] = [];
     if (executionMode === "team") {
@@ -1312,6 +1376,28 @@ export default function AppConsole() {
     }
   }
 
+  async function saveThreadTitle() {
+    const clean = renameThreadValue.trim();
+    if (!threadId || clean.length < 1 || renameThreadBusy) return;
+    if (!requireProvisioned()) return;
+    setRenameThreadBusy(true);
+    setError("");
+    try {
+      const result = await updateThreadTitle(threadId, clean);
+      setThreads((current) =>
+        current.map((thread) =>
+          thread.id === result.id ? { ...thread, title: result.title } : thread,
+        ),
+      );
+      setShowRenameThread(false);
+      setNotice("Nome da conversa atualizado.");
+    } catch (err) {
+      setError(describe(err));
+    } finally {
+      setRenameThreadBusy(false);
+    }
+  }
+
   const activeThread = threads.find((thread) => thread.id === threadId) ?? null;
   const selectedAgentName =
     me?.co_creator_name || DEFAULT_COCREATOR_LABEL;
@@ -1456,7 +1542,7 @@ export default function AppConsole() {
           ) : (
             <ul className="conversation-list">
               {threads.map((thread) => (
-                <li key={thread.id}>
+                <li key={thread.id} className="conversation-item-row">
                   <button
                     type="button"
                     className={
@@ -1477,6 +1563,20 @@ export default function AppConsole() {
                     >
                       {formatConversationTimestamp(thread.created_at)}
                     </time>
+                  </button>
+                  <button
+                    type="button"
+                    className="conversation-item__rename"
+                    aria-label={`Renomear conversa: ${thread.title || "Nova conversa"}`}
+                    title="Renomear conversa"
+                    onClick={() => {
+                      selectThread(thread.id);
+                      setRenameThreadValue(thread.title || "Nova conversa");
+                      setShowRenameThread(true);
+                    }}
+                    disabled={!accountReady}
+                  >
+                    ✎
                   </button>
                 </li>
               ))}
@@ -1506,9 +1606,26 @@ export default function AppConsole() {
             >
               ☰
             </button>
-            <div>
+            <div className="console-header__title">
               <span className="console-header__eyebrow">Conversa ativa</span>
-              <b>{activeThread?.title || "PatroAI Command Center"}</b>
+              <div className="console-header__title-row">
+                <b>{activeThread?.title || "PatroAI Command Center"}</b>
+                {activeThread ? (
+                  <button
+                    type="button"
+                    className="console-header__rename"
+                    aria-label="Renomear conversa ativa"
+                    title="Renomear conversa"
+                    onClick={() => {
+                      setRenameThreadValue(activeThread.title || "Nova conversa");
+                      setShowRenameThread(true);
+                    }}
+                    disabled={!accountReady}
+                  >
+                    ✎
+                  </button>
+                ) : null}
+              </div>
               <small>
                 {activeThread
                   ? formatDateTimeTitle(activeThread.created_at)
@@ -1563,6 +1680,15 @@ export default function AppConsole() {
             <Link className="ghost-link" to="/">
               Início
             </Link>
+            <button
+              type="button"
+              className="ghost-link console-top-link"
+              onClick={scrollConversationToTop}
+              aria-label="Voltar ao topo da conversa"
+              title="Voltar ao topo da conversa"
+            >
+              ↑ Topo
+            </button>
             {authConfigured ? (
               authenticated ? (
                 <>
@@ -1891,6 +2017,59 @@ export default function AppConsole() {
       </main>
 
 
+
+      {showRenameThread ? (
+        <div className="modal" role="presentation">
+          <section
+            className="modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="rename-thread-title"
+          >
+            <div className="agent-picker__heading">
+              <div>
+                <span className="console-header__eyebrow">Conversa ativa</span>
+                <h2 id="rename-thread-title">Renomear conversa</h2>
+                <p>Use um nome curto para encontrar este contexto rapidamente na sidebar.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRenameThread(false)}
+                aria-label="Fechar renomeação de conversa"
+              >
+                ×
+              </button>
+            </div>
+            <label className="field">
+              <span>Nome da conversa</span>
+              <input
+                value={renameThreadValue}
+                onChange={(event) => setRenameThreadValue(event.target.value)}
+                maxLength={240}
+                placeholder="Ex.: Plano de expansão 2026"
+                autoFocus
+              />
+            </label>
+            <div className="modal-actions">
+              <button
+                type="button"
+                onClick={() => setShowRenameThread(false)}
+                disabled={renameThreadBusy}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => void saveThreadTitle()}
+                disabled={renameThreadBusy || renameThreadValue.trim().length < 1}
+              >
+                {renameThreadBusy ? "Salvando…" : "Salvar nome"}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
 
       {showRenameCoCreator ? (
         <div className="modal" role="presentation">

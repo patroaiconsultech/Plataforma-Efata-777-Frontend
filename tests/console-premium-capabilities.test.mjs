@@ -52,7 +52,7 @@ test("Realtime control starts only through backend-governed canonical bridge", (
 
 test("attachment UX is explicit and mirrors backend-supported document types", () => {
   assert.match(console_, /const ATTACHMENT_ACCEPT/);
-  for (const ext of [".pdf", ".docx", ".xlsx", ".pptx", ".txt", ".csv", ".json"]) {
+  for (const ext of [".pdf", ".docx", ".xlsx", ".pptx", ".md", ".txt", ".csv", ".json"]) {
     assert.match(console_, new RegExp(ext.replace(".", "\\.")));
   }
   assert.match(console_, /Anexar documento/);

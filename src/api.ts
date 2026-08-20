@@ -260,6 +260,16 @@ export function createThread(title?: string): Promise<{ id: string; title: strin
   });
 }
 
+export function updateThreadTitle(
+  threadId: string,
+  title: string,
+): Promise<{ id: string; title: string }> {
+  return apiJson(`/api/v2/threads/${encodeURIComponent(threadId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ title }),
+  });
+}
+
 export function listMessages(threadId: string): Promise<ChatMessage[]> {
   return apiJson<ChatMessage[]>(
     `/api/v2/threads/${encodeURIComponent(threadId)}/messages`,

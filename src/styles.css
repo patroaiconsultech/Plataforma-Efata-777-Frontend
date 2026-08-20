@@ -1014,7 +1014,11 @@ button.header-cta {
 }
 
 .console-sidebar {
-  position: relative;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100svh;
+  max-height: 100svh;
   overflow: hidden;
 }
 
@@ -1028,7 +1032,10 @@ button.header-cta {
 }
 
 .conversation-nav {
+  display: flex;
   min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -1049,14 +1056,24 @@ button.header-cta {
 }
 
 .conversation-list {
-  max-height: min(58svh, 640px);
+  min-height: 0;
+  max-height: none;
+  flex: 1 1 auto;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
 
+.conversation-item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  align-items: stretch;
+  gap: 4px;
+}
+
 .conversation-item {
   display: grid;
+  min-width: 0;
   gap: 5px;
   transition:
     border-color 220ms ease,
@@ -1066,6 +1083,32 @@ button.header-cta {
 
 .conversation-item:hover {
   transform: translateX(2px);
+}
+
+.conversation-item__rename {
+  display: grid;
+  min-width: 34px;
+  min-height: 48px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #8fa3b6;
+  cursor: pointer;
+  opacity: 0.72;
+}
+
+.conversation-item__rename:hover,
+.conversation-item__rename:focus-visible {
+  border-color: rgba(246, 196, 83, 0.36);
+  background: rgba(246, 196, 83, 0.08);
+  color: var(--gold);
+  opacity: 1;
+}
+
+.conversation-item__rename:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
 }
 
 .conversation-item--active {
@@ -1103,6 +1146,35 @@ button.header-cta {
 
 .console-header__context > div {
   min-width: 0;
+}
+
+.console-header__title-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.console-header__title-row b {
+  min-width: 0;
+}
+
+.console-header__rename {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(246, 196, 83, 0.3);
+  border-radius: 8px;
+  background: rgba(246, 196, 83, 0.06);
+  color: var(--gold);
+  cursor: pointer;
+}
+
+.console-header__rename:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 .console-header__context b {
@@ -1355,6 +1427,8 @@ button.header-cta {
 @media (max-width: 760px) {
   .console-sidebar {
     position: fixed;
+    height: 100svh;
+    max-height: 100svh;
     inset:
       0
       auto
