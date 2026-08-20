@@ -4556,3 +4556,87 @@ html[data-motion-override="on"] .patroai-premium .neural-lobby__network::after {
     will-change: transform, opacity;
   }
 }
+
+
+/* === RADIAL CORE EMISSION — fixed vectors from the neural nucleus === */
+.aurora-particle-field > span,
+.patroai-premium .aurora-particle-field > span:nth-child(n) {
+  animation-name: auroraRadialCoreEmission !important;
+  animation-timing-function: cubic-bezier(.18, .72, .24, 1) !important;
+  animation-iteration-count: infinite !important;
+  will-change: transform, opacity, filter;
+}
+
+@keyframes auroraRadialCoreEmission {
+  0% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(0) scale(.08);
+    opacity: 0;
+    filter: brightness(.7) blur(1px);
+  }
+  12% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(7px) scale(.28);
+    opacity: calc(.34 + (var(--music-pulse, 0) * .24));
+    filter: brightness(1.2) blur(.2px);
+  }
+  36% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(10px + (min(42vw, 420px) * .22))) scale(calc(.68 + (var(--music-pulse, 0) * .24)));
+    opacity: calc(.72 + (var(--music-pulse, 0) * .2));
+    filter: brightness(calc(1.45 + (var(--music-pulse, 0) * .65))) blur(0);
+  }
+  58% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(10px + (min(42vw, 420px) * (.48 + (var(--music-energy, 0) * .18))))) scale(calc(.92 + (var(--music-pulse, 0) * .44)));
+    opacity: 1;
+    filter: brightness(calc(1.8 + (var(--music-pulse, 0) * .8))) blur(0);
+  }
+  78% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(10px + (min(42vw, 420px) * (.72 + (var(--music-energy, 0) * .16))))) scale(calc(.64 + (var(--music-pulse, 0) * .3)));
+    opacity: calc(.58 + (var(--music-energy, 0) * .3));
+    filter: brightness(calc(1.35 + (var(--music-energy, 0) * .5))) blur(.1px);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(10px + (min(42vw, 420px) * (.96 + (var(--music-energy, 0) * .12))))) scale(.06);
+    opacity: 0;
+    filter: brightness(.8) blur(1px);
+  }
+}
+
+@media (min-width: 821px) {
+  .aurora-particle-field > span,
+  .patroai-premium .aurora-particle-field > span:nth-child(n) {
+    animation-name: auroraRadialCoreEmissionDesktop !important;
+    animation-duration: calc(4.8s + (var(--i) * .11s)) !important;
+  }
+}
+
+@keyframes auroraRadialCoreEmissionDesktop {
+  0% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(0) scale(.06);
+    opacity: 0;
+  }
+  18% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(24px) scale(.42);
+    opacity: .7;
+  }
+  48% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(24px + (min(50vw, 520px) * .46))) scale(calc(.86 + (var(--music-pulse, 0) * .28)));
+    opacity: 1;
+  }
+  72% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(24px + (min(50vw, 520px) * .72))) scale(.55);
+    opacity: .62;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(24px + (min(50vw, 520px) * .98))) scale(.04);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-particle-field > span,
+  .patroai-premium .aurora-particle-field > span:nth-child(n) {
+    animation: none !important;
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(32px) scale(.48) !important;
+    opacity: .46 !important;
+    filter: none !important;
+  }
+}
