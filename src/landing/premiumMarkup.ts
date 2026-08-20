@@ -154,6 +154,16 @@ export const premiumMarkup = String.raw`
 
   <div class="neural-lobby__vignette" aria-hidden="true"></div>
 
+  <div class="neural-lobby__source-reveal" aria-label="Fontes PatroAI" data-source-reveal>
+    <a href="#top" data-neural-lobby-link data-reveal-index="0"><span data-i18n="lobby.node.about">Conheça a PatroAI</span></a>
+    <a href="#ecossistema" data-neural-lobby-link data-reveal-index="1"><span data-i18n="lobby.node.ecosystem">Ecossistema</span></a>
+    <a href="#governanca" data-neural-lobby-link data-reveal-index="2"><span data-i18n="lobby.node.governance">Governança</span></a>
+    <a href="#metodo" data-neural-lobby-link data-reveal-index="3"><span data-i18n="lobby.node.method">Método</span></a>
+    <a href="#carreiras" data-neural-lobby-link data-reveal-index="4"><span data-i18n="lobby.node.careers">Carreiras &amp; Talentos</span></a>
+    <a href="#contato" data-neural-lobby-link data-reveal-index="5"><span data-i18n="lobby.node.contact">Contato Estratégico</span></a>
+    <a href="/app" data-neural-lobby-link data-private-entry="true" data-reveal-index="6"><span data-i18n="lobby.node.platform">Acessar Plataforma</span></a>
+  </div>
+
   <div class="neural-lobby__center">
     <div
       class="neural-lobby__brand"
@@ -359,6 +369,18 @@ export const premiumMarkup = String.raw`
             <article class="unit-card reveal"><div class="unit-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 24 16 4l11 20H5Z" /><path d="M10 22h12M13 16h6" /></svg></div><h3>Consultech</h3><p data-i18n="unit.consultech.copy">Planejamento, valuation, diagnóstico e apoio executivo para decisões de alto impacto.</p><ul><li data-i18n="unit.consultech.a">Business plan e estratégia</li><li data-i18n="unit.consultech.b">Modelagens dinâmicas de valor</li><li data-i18n="unit.consultech.c">Suporte executivo especializado</li></ul></article>
             <article class="unit-card reveal"><div class="unit-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M6 26V14h5v12M14 26V7h5v19M22 26V11h5v15" /></svg></div><h3>Holding</h3><p data-i18n="unit.holding.copy">Desenvolvimento de teses, novos negócios e parcerias com potencial de escala e sinergia.</p><ul><li data-i18n="unit.holding.a">Projetos por segmento</li><li data-i18n="unit.holding.b">Conexão institucional</li><li data-i18n="unit.holding.c">Construção de oportunidades</li></ul></article>
             <article class="unit-card reveal"><div class="unit-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 3 27 9v14l-11 6-11-6V9l11-6Z" /><path d="M5 9l11 6 11-6M16 15v14" /></svg></div><h3>AI Factory</h3><p data-i18n="unit.factory.copy">Sistemas, automações e ambientes digitais seguros para gestão, decisão e escala operacional.</p><ul><li data-i18n="unit.factory.a">IA governada para empresas</li><li data-i18n="unit.factory.b">Fluxos executivos inteligentes</li><li data-i18n="unit.factory.c">Arquitetura sob medida</li></ul></article>
+          </div>
+          <div class="patroai-pillars" aria-labelledby="pillars-title">
+            <div class="patroai-pillars__intro">
+              <p class="eyebrow" data-i18n="pillars.eyebrow">Pilares de atuação</p>
+              <h3 id="pillars-title" data-i18n="pillars.title">Crescer com consciência, cocriação e impacto.</h3>
+              <p data-i18n="pillars.copy">A PatroAI conecta inteligência, pessoas e responsabilidade para transformar projetos em valor compartilhado.</p>
+            </div>
+            <div class="patroai-pillars__grid">
+              <article class="patroai-pillar reveal"><span class="patroai-pillar__index">01</span><h4 data-i18n="pillar.cocreation.title">Cocriação</h4><p data-i18n="pillar.cocreation.copy">Construímos com empreendedores, especialistas, comunidades e parceiros, convertendo repertório coletivo em soluções vivas.</p></article>
+              <article class="patroai-pillar reveal"><span class="patroai-pillar__index">02</span><h4 data-i18n="pillar.esg.title">ESG</h4><p data-i18n="pillar.esg.copy">Integramos governança, responsabilidade ambiental e valor social ao desenho das decisões, operações e tecnologias.</p></article>
+              <article class="patroai-pillar reveal"><span class="patroai-pillar__index">03</span><h4 data-i18n="pillar.impact.title">Impacto Social</h4><p data-i18n="pillar.impact.copy">Orientamos inovação para ampliar oportunidades, fortalecer culturas e gerar prosperidade com inclusão e continuidade.</p></article>
+            </div>
           </div>
         </div>
       </section>
