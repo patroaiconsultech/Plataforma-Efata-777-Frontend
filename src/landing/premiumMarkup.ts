@@ -34,6 +34,11 @@ export const premiumMarkup = String.raw`
         <circle style="--i:8" cx="128" cy="288" r="4"></circle><circle style="--i:9" cx="264" cy="382" r="5"></circle><circle style="--i:10" cx="404" cy="300" r="4"></circle><circle style="--i:11" cx="542" cy="408" r="5"></circle><circle style="--i:12" cx="680" cy="330" r="4"></circle><circle style="--i:13" cx="824" cy="404" r="5"></circle><circle style="--i:14" cx="176" cy="486" r="4"></circle><circle style="--i:15" cx="314" cy="548" r="5"></circle><circle style="--i:16" cx="450" cy="454" r="4"></circle><circle style="--i:17" cx="594" cy="552" r="5"></circle><circle style="--i:18" cx="742" cy="460" r="4"></circle><circle style="--i:19" cx="894" cy="536" r="5"></circle>
       </g>
     </svg>
+    <div class="aurora-particle-field aurora-particle-field--gate" aria-hidden="true">
+      <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span>
+      <span style="--i:4"></span><span style="--i:5"></span><span style="--i:6"></span><span style="--i:7"></span>
+      <span style="--i:8"></span><span style="--i:9"></span><span style="--i:10"></span><span style="--i:11"></span>
+    </div>
   </div>
   <div class="immersive-gate__panel">
     <div class="immersive-gate__brand" aria-hidden="true">
@@ -140,6 +145,11 @@ export const premiumMarkup = String.raw`
         <circle style="--i:14" cx="174" cy="486" r="4"></circle><circle style="--i:15" cx="314" cy="548" r="5"></circle><circle style="--i:16" cx="444" cy="454" r="4"></circle><circle style="--i:17" cx="594" cy="548" r="5"></circle><circle style="--i:18" cx="738" cy="462" r="4"></circle><circle style="--i:19" cx="894" cy="536" r="5"></circle>
       </g>
     </svg>
+    <div class="aurora-particle-field aurora-particle-field--lobby" aria-hidden="true">
+      <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span>
+      <span style="--i:4"></span><span style="--i:5"></span><span style="--i:6"></span><span style="--i:7"></span>
+      <span style="--i:8"></span><span style="--i:9"></span><span style="--i:10"></span><span style="--i:11"></span>
+    </div>
   </div>
 
   <div class="neural-lobby__vignette" aria-hidden="true"></div>
