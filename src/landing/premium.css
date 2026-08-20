@@ -3492,3 +3492,36 @@ html[data-motion-override="on"] .patroai-premium .neural-lobby__network::after {
     transition: none;
   }
 }
+
+
+/* === AUDIO-SYNCED NODE PULSE ONLY === */
+.patroai-premium.music-reactive-active .immersive-gate__network-nodes circle,
+.patroai-premium.music-reactive-active .neural-lobby__network-nodes circle {
+  animation-name: neuralMusicNodePulse;
+  animation-duration: calc(1.85s - (var(--music-pulse, 0) * .65s));
+  animation-timing-function: ease-in-out;
+  filter: drop-shadow(0 0 calc(5px + (var(--music-pulse, 0) * 17px)) rgba(255, 226, 143, .98));
+}
+
+@keyframes neuralMusicNodePulse {
+  0%, 100% {
+    transform: scale(calc(.72 + (var(--music-pulse, 0) * .18)));
+    opacity: calc(.36 + (var(--music-pulse, 0) * .3));
+  }
+  42% {
+    transform: scale(calc(1.05 + (var(--music-pulse, 0) * .42)));
+    opacity: calc(.68 + (var(--music-pulse, 0) * .3));
+  }
+  58% {
+    transform: scale(calc(.88 + (var(--music-pulse, 0) * .28)));
+    opacity: calc(.56 + (var(--music-pulse, 0) * .36));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium.music-reactive-active .immersive-gate__network-nodes circle,
+  .patroai-premium.music-reactive-active .neural-lobby__network-nodes circle {
+    animation: none !important;
+    transform: none;
+  }
+}
