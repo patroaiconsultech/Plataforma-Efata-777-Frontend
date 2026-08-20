@@ -108,7 +108,7 @@ function describe(error: unknown): string {
     REALTIME_STREAMING_DISABLED: "O streaming em tempo real está desabilitado no servidor.",
     REALTIME_VOICE_DISABLED: "A sessão Realtime de voz ainda não está habilitada.",
     REALTIME_ORCHESTRATION_BRIDGE_REQUIRED:
-      "Realtime ainda aguarda a ponte de orquestração canônica da ORKIO.",
+      "Realtime ainda aguarda a ponte de orquestração canônica da PatroAI.",
     REALTIME_VOICE_OUTPUT_REQUIRED:
       "Realtime precisa de uma voz canônica validada para o agente selecionado.",
     REALTIME_IDEMPOTENCY_KEY_INCOMPLETE:
@@ -177,6 +177,7 @@ export default function AppConsole() {
   const [error, setError] = useState("");
   const [authenticated, setAuthenticated] = useState(() => Boolean(getToken()));
   const [me, setMe] = useState<HyperCocreatorMe | null>(null);
+  const [provisioningBlocked, setProvisioningBlocked] = useState(false);
   const [agents, setAgents] = useState<AgentDefinition[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<AgentDefinition | null>(null);
   const [showAgents, setShowAgents] = useState(false);
@@ -235,6 +236,7 @@ export default function AppConsole() {
   const messageVoiceAbortRef = useRef<AbortController | null>(null);
   const configured = isApiBaseConfigured();
   const authConfigured = isOidcConfigured();
+  const accountReady = authenticated && Boolean(me) && !provisioningBlocked;
 
   const selectThread = useCallback((id: string) => {
     if (id !== activeThreadRef.current) {
@@ -357,6 +359,7 @@ export default function AppConsole() {
   useEffect(() => {
     if (!authenticated || !configured) {
       setMe(null);
+      setProvisioningBlocked(false);
       return;
     }
     let active = true;
@@ -383,9 +386,17 @@ export default function AppConsole() {
           }
         }
         const profile = await getMe();
-        if (active) setMe(profile);
+        if (active) {
+          setMe(profile);
+          setProvisioningBlocked(false);
+        }
       } catch (err) {
-        if (active) setError(describe(err));
+        if (active) {
+          setProvisioningBlocked(
+            err instanceof ApiError && err.code === "PRINCIPAL_NOT_PROVISIONED",
+          );
+          setError(describe(err));
+        }
       }
     };
     void bootstrap();
@@ -401,6 +412,10 @@ export default function AppConsole() {
   useEffect(() => {
     void refreshRealtimeCapabilities();
   }, [refreshRealtimeCapabilities]);
+
+  useEffect(() => {
+    if (showAgents && accountReady) void refreshTeams();
+  }, [accountReady, refreshTeams, showAgents]);
 
   useEffect(() => {
     void refreshThreads();
@@ -468,6 +483,17 @@ export default function AppConsole() {
         : "A autenticação OIDC ainda não está configurada nesta implantação.",
     );
     return false;
+  }
+
+  function requireProvisioned(): boolean {
+    if (!requireAuthenticated()) return false;
+    if (!me || provisioningBlocked) {
+      setError(
+        "Sua conta foi autenticada, mas ainda precisa ser ativada na organização PatroAI. Use o portal de ativação para concluir o acesso.",
+      );
+      return false;
+    }
+    return true;
   }
 
   function stopVoiceTracks() {
@@ -564,7 +590,7 @@ export default function AppConsole() {
   }
 
   async function startVoiceRecording() {
-    if (!requireAuthenticated()) return;
+    if (!requireProvisioned()) return;
     if (!threadId) {
       setError("Crie ou selecione uma conversa antes de gravar.");
       return;
@@ -751,7 +777,7 @@ export default function AppConsole() {
   }
 
   async function handleMessageVoice(messageId: string) {
-    if (!requireAuthenticated() || !threadId) return;
+    if (!requireProvisioned() || !threadId) return;
     if (speakingMessageId === messageId) {
       stopMessageAudio();
       return;
@@ -871,9 +897,15 @@ export default function AppConsole() {
   }
 
   async function startRealtimeSession() {
-    if (!requireAuthenticated()) return;
+    if (!requireProvisioned()) return;
     if (!threadId) {
       setError("Crie ou selecione uma conversa antes de iniciar o Realtime.");
+      return;
+    }
+    if (executionMode === "team") {
+      setError(
+        "Realtime Team ainda não está liberado; use o modo Individual para iniciar uma sessão de voz.",
+      );
       return;
     }
     if (!realtimeReady) {
@@ -947,23 +979,12 @@ export default function AppConsole() {
       const sdp = peer.localDescription?.sdp || offer.sdp || "";
       if (!sdp) throw new ApiError(0, "REALTIME_SDP_EMPTY");
 
-      const call =
-        false && executionMode === "team" && activeTeam
-          ? await createRealtimeCall(sessionThreadId, {
-              sdp,
-              target_mode: "team",
-              team_id: activeTeam.team_id,
-              selection_mode: teamSelectionMode,
-              contributor_agent_ids:
-                teamSelectionMode === "explicit" ? teamParticipants : undefined,
-              locale: "pt-BR",
-            })
-          : await createRealtimeCall(sessionThreadId, {
-              sdp,
-              target_mode: "direct",
-              agent: technicalAgentTarget("orkio"),
-              locale: "pt-BR",
-            });
+      const call = await createRealtimeCall(sessionThreadId, {
+        sdp,
+        target_mode: "direct",
+        agent: technicalAgentTarget("orkio"),
+        locale: "pt-BR",
+      });
 
       if (sessionThreadId !== activeThreadRef.current) {
         stopRealtimeSession();
@@ -1004,7 +1025,7 @@ export default function AppConsole() {
   }
 
   async function handleNewThread() {
-    if (!requireAuthenticated()) return;
+    if (!requireProvisioned()) return;
     if (!configured) {
       setError(describe("API_BASE_URL_NOT_CONFIGURED"));
       return;
@@ -1029,7 +1050,7 @@ export default function AppConsole() {
       voiceState === "transcribing"
     )
       return;
-    if (!requireAuthenticated()) return;
+    if (!requireProvisioned()) return;
     if (!threadId) {
       setError("Crie ou selecione uma conversa antes de enviar.");
       return;
@@ -1037,7 +1058,7 @@ export default function AppConsole() {
 
     let teamDefinition: TeamDefinition | null = null;
     let teamContributorIds: string[] = [];
-    if (false && executionMode === "team") {
+    if (executionMode === "team") {
       teamDefinition =
         teams.find((team) => team.team_id === selectedTeamId) ?? null;
       if (!teamDefinition) {
@@ -1120,7 +1141,7 @@ export default function AppConsole() {
         },
       };
 
-      if (false && executionMode === "team" && teamDefinition) {
+      if (executionMode === "team" && teamDefinition) {
         setTeamRunStatus("Team iniciando…");
         await streamTeamMessage(
           threadId,
@@ -1177,7 +1198,7 @@ export default function AppConsole() {
   }
 
   async function handleArtifactDownload(artifact: ArtifactMetadata) {
-    if (!requireAuthenticated()) return;
+    if (!requireProvisioned()) return;
     setArtifactDownloadBusy(artifact.artifact_id);
     setArtifactDownloadErrors((current) => ({
       ...current,
@@ -1200,7 +1221,7 @@ export default function AppConsole() {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
-    if (!requireAuthenticated()) return;
+    if (!requireProvisioned()) return;
     if (!threadId) {
       setError("Crie ou selecione uma conversa antes de anexar.");
       return;
@@ -1240,11 +1261,11 @@ export default function AppConsole() {
   }
 
   async function invite() {
-    if (!requireAuthenticated()) {
+    if (!requireProvisioned()) {
       setInviteError(
-        authConfigured
-          ? "Autentique-se para convidar participantes."
-          : "A autenticação OIDC ainda não está configurada.",
+        authenticated
+          ? "Ative sua conta na organização PatroAI antes de convidar participantes."
+          : "Autentique-se para convidar participantes.",
       );
       return;
     }
@@ -1272,6 +1293,7 @@ export default function AppConsole() {
   async function saveCoCreatorName() {
     const clean = renameCoCreatorValue.trim();
     if (clean.length < 2 || renameCoCreatorBusy) return;
+    if (!requireProvisioned()) return;
     setRenameCoCreatorBusy(true);
     setError("");
     try {
@@ -1420,7 +1442,7 @@ export default function AppConsole() {
           type="button"
           className="primary-button"
           onClick={handleNewThread}
-          disabled={!authenticated || !configured}
+              disabled={!accountReady || !configured}
         >
           + Nova conversa
         </button>
@@ -1486,7 +1508,7 @@ export default function AppConsole() {
             </button>
             <div>
               <span className="console-header__eyebrow">Conversa ativa</span>
-              <b>{activeThread?.title || "ORKIO Command Center"}</b>
+              <b>{activeThread?.title || "PatroAI Command Center"}</b>
               <small>
                 {activeThread
                   ? formatDateTimeTitle(activeThread.created_at)
@@ -1502,7 +1524,7 @@ export default function AppConsole() {
                 setRenameCoCreatorValue(selectedAgentName);
                 setShowRenameCoCreator(true);
               }}
-              disabled={!authenticated}
+              disabled={!accountReady}
               aria-label={`Co-Criador ativo: ${selectedAgentName}`}
               title="Renomear Co-Criador"
             >
@@ -1575,7 +1597,7 @@ export default function AppConsole() {
             <button
               type="button"
               onClick={() => setShowInvite(true)}
-              disabled={!authenticated}
+              disabled={!accountReady}
             >
               + Convidar
             </button>
@@ -1594,6 +1616,19 @@ export default function AppConsole() {
                 Entrar
               </button>
             ) : null}
+          </div>
+        ) : null}
+        {authenticated && provisioningBlocked ? (
+          <div className="console-alert console-alert--provisioning" role="alert">
+            <div>
+              <strong>Conta autenticada; ativação pendente.</strong>
+              <span>
+                O cadastro foi concluído, mas esta identidade ainda não está vinculada à organização PatroAI.
+              </span>
+            </div>
+            <Link className="primary-button" to="/access">
+              Ativar acesso PatroAI
+            </Link>
           </div>
         ) : null}
         {!configured ? (
@@ -1737,12 +1772,12 @@ export default function AppConsole() {
           <div className="composer__row">
           <label
             className={
-              !authenticated || !threadId || sending || uploading
+              !accountReady || !threadId || sending || uploading
                 ? "attachment-button attachment-button--disabled"
                 : "attachment-button"
             }
             aria-label="Anexar documento"
-            aria-disabled={!authenticated || !threadId || sending || uploading}
+            aria-disabled={!accountReady || !threadId || sending || uploading}
             title="Anexar PDF, DOCX, XLSX, PPTX, TXT, CSV ou JSON"
           >
             <span className="attachment-button__icon" aria-hidden="true">📎</span>
@@ -1755,7 +1790,7 @@ export default function AppConsole() {
               ref={fileRef}
               accept={ATTACHMENT_ACCEPT}
               onChange={handleFile}
-              disabled={!authenticated || !threadId || sending || uploading}
+              disabled={!accountReady || !threadId || sending || uploading}
             />
           </label>
           {me?.admin_access ? (
@@ -1763,7 +1798,7 @@ export default function AppConsole() {
               type="button"
               className="agent-trigger"
               onClick={() => setShowAgents(true)}
-              disabled={!authenticated || agentsBusy}
+              disabled={!accountReady || agentsBusy}
               aria-label={`Selecionar agente. Ativo: ${executionTargetName}`}
               title="Selecionar agente interno"
             >
@@ -1789,7 +1824,7 @@ export default function AppConsole() {
             aria-label="Mensagem"
             disabled={
               sending ||
-              !authenticated ||
+              !accountReady ||
               voiceState === "recording" ||
               voiceState === "transcribing"
             }
@@ -1843,7 +1878,7 @@ export default function AppConsole() {
             disabled={
               sending ||
               !message.trim() ||
-              !authenticated ||
+              !accountReady ||
               !configured ||
               voiceState === "recording" ||
               voiceState === "transcribing"
@@ -1941,8 +1976,16 @@ export default function AppConsole() {
                 type="button"
                 className={executionMode === "team" ? "agent-mode__active" : ""}
                 aria-pressed={executionMode === "team"}
-                disabled
-                title="Team permanece bloqueado neste patch até o gate específico de runtime."
+                disabled={!accountReady}
+                onClick={() => {
+                  setExecutionMode("team");
+                  void refreshTeams();
+                }}
+                title={
+                  accountReady
+                    ? "Selecionar formação Team governada"
+                    : "Ative sua conta PatroAI para usar Team"
+                }
               >
                 Team
               </button>
@@ -1954,7 +1997,7 @@ export default function AppConsole() {
                   <div>
                     <strong>Team governado</strong>
                     <small>
-                      ORKIO é o chair canônico · selecione de {teamMin} a {activeTeam?.participant_policy.max_contributors ?? 0} especialistas
+                      PatroAI é o chair canônico · selecione de {teamMin} a {activeTeam?.participant_policy.max_contributors ?? 0} especialistas
                     </small>
                   </div>
                   <span className="team-config__count">
@@ -2112,7 +2155,7 @@ export default function AppConsole() {
                 <span className="console-header__eyebrow">Capability status</span>
                 <h2 id="realtime-status-title">Realtime</h2>
                 <p>
-                  Sessão de voz canônica: microfone → transcrição → ORKIO → persistência → mesma voz do botão 🔊.
+                  Sessão de voz canônica: microfone → transcrição → PatroAI → persistência → mesma voz do botão 🔊.
                 </p>
               </div>
               <button
@@ -2133,7 +2176,7 @@ export default function AppConsole() {
                 </strong>
               </div>
               <div>
-                <span>Ponte ORKIO</span>
+                <span>Ponte de orquestração</span>
                 <strong>
                   {realtimeCapabilities?.orchestration_bridge?.eligible
                     ? "Elegível"
@@ -2226,7 +2269,7 @@ export default function AppConsole() {
                 type="button"
                 className="primary-button"
                 onClick={invite}
-                disabled={inviteBusy || !authenticated}
+                disabled={inviteBusy || !accountReady}
               >
                 {inviteBusy ? "Gerando." : "Gerar convite"}
               </button>

@@ -70,10 +70,12 @@ test("console always releases sending state in finally", () => {
   assert.match(block, /abortRef\.current = null/);
 });
 
-test("console blocks product actions before authentication", () => {
+test("console blocks product actions before authentication or provisioning", () => {
   assert.match(console_, /requireAuthenticated/);
-  assert.match(console_, /disabled=\{!authenticated \|\| !configured\}/);
+  assert.match(console_, /requireProvisioned/);
+  assert.match(console_, /disabled=\{!accountReady \|\| !configured\}/);
   assert.match(console_, /Autentique-se para usar conversas/);
+  assert.match(console_, /Conta autenticada; ativação pendente/);
 });
 
 test("landing routes unauthenticated private access through the governed access portal", () => {
@@ -87,8 +89,41 @@ test("invite preserves target through authentication", () => {
   assert.match(invite, /beginLogin\(`\/invite\/\$\{encodeURIComponent\(token\)\}`\)/);
 });
 
-test("auth storage uses sessionStorage and never localStorage", () => {
+test("OIDC transaction has a short-lived secure cookie fallback", () => {
+  assert.match(oidc, /patroai_oidc_transaction/);
+  assert.match(oidc, /Max-Age=/);
+  assert.match(oidc, /Path=\/auth\/callback/);
+  assert.match(oidc, /SameSite=Lax/);
+  assert.match(oidc, /Secure/);
+  assert.match(oidc, /getTransactionCookie/);
+});
+
+test("callback explains recoverable transaction failures", () => {
+  assert.match(callback, /OIDC_TRANSACTION_MISSING/);
+  assert.match(callback, /Tentar autenticação novamente/);
+  assert.match(callback, /mesma janela/);
+});
+
+test("auth tokens remain in sessionStorage and never localStorage", () => {
   assert.match(oidc, /sessionStorage/);
   assert.doesNotMatch(oidc, /localStorage/);
   assert.doesNotMatch(api, /localStorage/);
+});
+
+test("console exposes an actionable provisioned-account state", () => {
+  assert.match(console_, /provisioningBlocked/);
+  assert.match(console_, /accountReady/);
+  assert.match(console_, /Ativar acesso PatroAI/);
+  assert.match(console_, /PRINCIPAL_NOT_PROVISIONED/);
+});
+
+test("Team mode is conditionally selectable and uses the governed stream", () => {
+  assert.match(console_, /Selecionar formação Team governada/);
+  assert.match(console_, /streamTeamMessage/);
+  assert.doesNotMatch(console_, /Team permanece bloqueado neste patch/);
+});
+
+test("public console branding uses PatroAI", () => {
+  assert.match(console_, /PatroAI Command Center/);
+  assert.doesNotMatch(console_, /ORKIO Command Center/);
 });

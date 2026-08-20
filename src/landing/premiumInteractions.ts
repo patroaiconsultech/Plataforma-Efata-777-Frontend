@@ -371,12 +371,15 @@ export function mountPremiumLanding({
     densityMultiplier = 1,
     options: NeuralInputOptions = {},
   ) {
-    const canvas = query<HTMLCanvasElement>(selector);
-    const stage = canvas?.parentElement as HTMLElement | null;
-    const ctx = canvas?.getContext("2d");
+    const canvasNode = query<HTMLCanvasElement>(selector);
+    const stageNode = canvasNode?.parentElement as HTMLElement | null;
+    const context = canvasNode?.getContext("2d");
 
-    if (!canvas || !stage || !ctx) return;
+    if (!canvasNode || !stageNode || !context) return;
 
+    const canvas = canvasNode;
+    const stage = stageNode;
+    const ctx = context;
     const nodes: NeuralNode[] = [];
     const pointer = { x: 0.5, y: 0.5, active: false };
     const reducedMotion = window.matchMedia(

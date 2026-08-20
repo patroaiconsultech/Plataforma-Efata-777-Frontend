@@ -1931,3 +1931,44 @@ button.header-cta {
     display: none;
   }
 }
+
+/* Identidade PatroAI — ativação pendente de organização */
+.console-alert--provisioning {
+  align-items: flex-start;
+  padding: 14px 16px;
+  border: 1px solid rgba(55, 197, 255, 0.34);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(12, 31, 47, 0.94), rgba(10, 20, 31, 0.88));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.2);
+}
+
+.console-alert--provisioning > div {
+  display: grid;
+  gap: 4px;
+}
+
+.console-alert--provisioning strong {
+  color: #f7fbff;
+}
+
+.console-alert--provisioning span {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.console-alert--provisioning .primary-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .console-alert--provisioning {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .console-alert--provisioning .primary-button {
+    width: 100%;
+    text-align: center;
+  }
+}

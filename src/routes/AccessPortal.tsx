@@ -87,10 +87,10 @@ export default function AccessPortal() {
       <div className="access-portal__glow" aria-hidden="true" />
       <section className="access-card" aria-labelledby="access-title">
         <Link className="access-card__back" to="/">← Voltar à experiência</Link>
-        <p className="access-eyebrow">PLATAFORMA · ACESSO PRIVADO</p>
-        <h1 id="access-title">Entre na Plataforma.</h1>
+        <p className="access-eyebrow">PATROAI · ACESSO PRIVADO</p>
+        <h1 id="access-title">Entre na PatroAI.</h1>
         <p className="access-lead">
-          Um único Hyper Co-Criador para transformar ideias, decisões e desafios
+          Um único Hyper Co-Criador PatroAI para transformar ideias, decisões e desafios
           do seu negócio em caminhos concretos.
         </p>
 
@@ -107,7 +107,7 @@ export default function AccessPortal() {
           <div className="access-step">
             <span>LOGIN</span>
             <h2>Bem-vindo de volta.</h2>
-            <p>Seu login e sua senha são protegidos pelo provedor de identidade configurado.</p>
+            <p>Seu login e sua senha são protegidos pelo provedor de identidade da PatroAI.</p>
             <button className="access-primary" onClick={() => void startLogin("/app")}>
               Entrar com segurança
             </button>
@@ -142,7 +142,7 @@ export default function AccessPortal() {
             <button className="access-primary" disabled={!goal} onClick={() => void continueToIdentity()}>
               Criar conta e entrar
             </button>
-            <p className="access-note">A credencial da conta é criada no provedor de identidade; a Plataforma não armazena sua senha.</p>
+            <p className="access-note">A credencial é criada com segurança pelo provedor de identidade da PatroAI; a plataforma não armazena sua senha.</p>
           </div>
         ) : null}
 

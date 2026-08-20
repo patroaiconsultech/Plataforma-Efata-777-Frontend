@@ -99,7 +99,7 @@ export default function AdminPanel() {
                 <article className="admin-agent-card" key={agent.slug}>
                   <div className="admin-agent-card__top">
                     <strong>{agent.display_name}</strong>
-                    <span>{agent.availability?.status || "unknown"}</span>
+                    <span>{agent.availability?.state || agent.availability?.chat?.status || "unknown"}</span>
                   </div>
                   <p>{agent.role_label}</p>
                   <small>{agent.department} · {agent.slug}</small>
@@ -119,7 +119,7 @@ export default function AdminPanel() {
               {teams.map((team) => (
                 <article className="admin-agent-card" key={team.team_id}>
                   <strong>{team.display_name}</strong>
-                  <p>{team.description}</p>
+                  <p>Team governado · {team.participant_policy.min_contributors}–{team.participant_policy.max_contributors} especialistas por turno.</p>
                   <small>{team.candidate_contributor_agent_ids.length} especialistas elegíveis</small>
                 </article>
               ))}

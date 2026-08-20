@@ -6,10 +6,11 @@ const api = fs.readFileSync("src/api.ts", "utf8");
 const console_ = fs.readFileSync("src/routes/AppConsole.tsx", "utf8");
 const styles = fs.readFileSync("src/styles.css", "utf8");
 
-test("Team implementation remains present but its UI stays gated in F3", () => {
+test("Team implementation is selectable only when the account is ready", () => {
   assert.match(console_, /type ExecutionMode = "individual" \| "team"/);
   assert.match(console_, /listTeams/);
-  assert.match(console_, /Team permanece bloqueado neste patch/);
+  assert.match(console_, /Selecionar formação Team governada/);
+  assert.match(console_, /disabled=\{!accountReady\}/);
 });
 
 test("Team request uses the governed backend v1.1 contract", () => {
@@ -56,7 +57,7 @@ test("attachment UX is explicit and mirrors backend-supported document types", (
   }
   assert.match(console_, /Anexar documento/);
   assert.match(console_, /Enviando…/);
-  assert.match(console_, /disabled=\{!authenticated \|\| !threadId \|\| sending \|\| uploading\}/);
+  assert.match(console_, /disabled=\{!accountReady \|\| !threadId \|\| sending \|\| uploading\}/);
   assert.match(styles, /\.attachment-button/);
 });
 

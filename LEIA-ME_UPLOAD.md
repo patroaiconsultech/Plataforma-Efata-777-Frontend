@@ -1,5 +1,13 @@
 # Guia de upload manual — Plataforma Efatá 777
 
+> **Atualização do patch Efatá/PatroAI — 20/08/2026:** este guia contém histórico de pacotes anteriores. Para o pacote atual, use a cópia completa entregue junto com este documento e preserve todos os arquivos ocultos.
+>
+> O patch atual inclui OIDC/PKCE no frontend, fallback curto em cookie seguro para a transação do callback, mensagem acionável para `OIDC_TRANSACTION_MISSING`, portal de ativação PatroAI para identidades ainda não provisionadas, branding público PatroAI no console, Team condicional à conta provisionada e estados explícitos para Realtime.
+>
+> **Fluxo de ativação:** cadastro/login no provedor de identidade não cria automaticamente membership no backend. Para uma conta nova, use `/access` → código de acesso → onboarding → login OIDC → `/api/v2/onboarding/complete`. O console deve mostrar `Ativar acesso PatroAI` quando o backend responder `PRINCIPAL_NOT_PROVISIONED`.
+>
+> **Validação do patch atual:** 201 testes aprovados; `check:server`, `check:sw`, build Vite e `verify:dist` aprovados. O ambiente publicado ainda precisa ser atualizado manualmente e não deve ser considerado alinhado até o HTML público apontar para o novo bundle e os hashes serem conferidos.
+
 Este documento acompanha dois pacotes de arquivos prontos para upload direto nos repositórios. Cada pacote preserva a estrutura de pastas exata do repositório de destino, de modo que basta descompactar e enviar mantendo os caminhos.
 
 ## Advertência crítica sobre o método de upload
