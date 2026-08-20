@@ -36,6 +36,7 @@ import {
   updateThreadTitle,
 } from "../api";
 import ArtifactCard from "../components/ArtifactCard";
+import SafeMarkdown from "../components/SafeMarkdown";
 import PwaInstallButton from "../components/PwaInstallButton";
 import { beginLogin, isOidcConfigured, logout } from "../auth/oidc";
 import { ONBOARDING_DRAFT_KEY } from "./AccessPortal";
@@ -1808,7 +1809,7 @@ export default function AppConsole() {
                     {formatMessageTimestamp(item.created_at)}
                   </time>
                 </header>
-                <p>{item.content}</p>
+                <SafeMarkdown content={item.content} />
                 {item.author_type === "agent" ? (
                   <footer className="message__actions">
                     <button
@@ -1847,7 +1848,7 @@ export default function AppConsole() {
                   Gerando
                 </span>
               </header>
-              <p>{streamingText}</p>
+              <SafeMarkdown content={streamingText} />
             </article>
           ) : null}
         </section>
