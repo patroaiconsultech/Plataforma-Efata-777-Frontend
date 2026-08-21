@@ -4,7 +4,8 @@ type SafeMarkdownProps = {
   content: string;
 };
 
-function safeHref(value: string): string | null {
+function safeHref(value: unknown): string | null {
+  if (typeof value !== "string") return null;
   const href = value.trim();
   if (/^(https?:\/\/|mailto:)/i.test(href)) return href;
   return null;

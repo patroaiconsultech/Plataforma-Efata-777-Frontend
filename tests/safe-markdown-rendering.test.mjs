@@ -7,6 +7,8 @@ const consoleSource = fs.readFileSync("src/routes/AppConsole.tsx", "utf8");
 
 test("SafeMarkdown renders structured blocks and rejects unsafe links", () => {
   assert.match(component, /function safeHref/);
+  assert.match(component, /safeHref\(value: unknown\)/);
+  assert.match(component, /typeof value !== "string"/);
   assert.match(component, /https\?:/);
   assert.match(component, /mailto:/);
   assert.match(component, /<table>/);
