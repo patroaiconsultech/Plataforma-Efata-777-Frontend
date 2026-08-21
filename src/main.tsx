@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { registerServiceWorker } from "./pwa/registerServiceWorker";
+import RuntimeErrorBoundary from "./components/RuntimeErrorBoundary";
 
 const container = document.getElementById("root");
 if (!container) {
@@ -10,7 +11,9 @@ if (!container) {
 
 createRoot(container).render(
   <React.StrictMode>
-    <App />
+    <RuntimeErrorBoundary>
+      <App />
+    </RuntimeErrorBoundary>
   </React.StrictMode>,
 );
 
