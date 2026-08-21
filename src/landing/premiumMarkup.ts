@@ -286,6 +286,7 @@ export const premiumMarkup = String.raw`
           </span>
         </a>
         <div class="nav-links" id="navLinks">
+          <a href="#cocriacao" data-i18n="nav.cocreation">Cocriação</a>
           <a href="#ecossistema" data-i18n="nav.ecosystem">Ecossistema</a>
           <a href="#governanca" data-i18n="nav.governance">Governança</a>
           <a href="#metodo" data-i18n="nav.method">Método</a>
@@ -378,6 +379,24 @@ export const premiumMarkup = String.raw`
               <span data-i18n="level6.layer.impact">Impacto</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="section cocreation-section" id="cocriacao" aria-labelledby="cocreation-title">
+        <div class="section-inner">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="cocreation.eyebrow">Central de Cocriação</p>
+              <h2 id="cocreation-title" data-i18n="cocreation.title">Onde novos negócios, startups e tecnologias ganham forma.</h2>
+            </div>
+            <p data-i18n="cocreation.copy">A PatroAI conecta pessoas, repertórios, capital relacional e tecnologia própria para transformar oportunidades em negócios, produtos e ecossistemas com propósito.</p>
+          </div>
+          <div class="unit-grid">
+            <article class="unit-card reveal"><div class="unit-icon" aria-hidden="true"><span>01</span></div><h3 data-i18n="cocreation.business.title">Novos negócios</h3><p data-i18n="cocreation.business.copy">Cocriamos teses, modelos e caminhos de validação para oportunidades que precisam sair da intenção e encontrar mercado.</p></article>
+            <article class="unit-card reveal"><div class="unit-icon" aria-hidden="true"><span>02</span></div><h3 data-i18n="cocreation.startups.title">Startups e produtos</h3><p data-i18n="cocreation.startups.copy">Apoiamos fundadores e equipes na construção de produtos, operações e decisões orientadas por contexto, velocidade e governança.</p></article>
+            <article class="unit-card reveal"><div class="unit-icon" aria-hidden="true"><span>03</span></div><h3 data-i18n="cocreation.technology.title">Novas tecnologias</h3><p data-i18n="cocreation.technology.copy">Exploramos IA, agentes, automação e interfaces imersivas para criar capacidades que não existem prontas na prateleira.</p></article>
+          </div>
+          <div class="cocreation-manifesto reveal"><strong data-i18n="cocreation.manifesto.title">A boutique tailor-made é o nosso modo de entrega.</strong><span data-i18n="cocreation.manifesto.copy">A central de cocriação é o nosso campo de origem: um espaço para imaginar, estruturar, testar e lançar o próximo ciclo.</span></div>
         </div>
       </section>
 
