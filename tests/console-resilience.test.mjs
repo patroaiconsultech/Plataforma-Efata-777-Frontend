@@ -34,3 +34,21 @@ test("Realtime invalidates stale turns and protects message refreshes from races
   assert.match(consoleSource, /Realtime turn processing/);
   assert.match(consoleSource, /realtimeChannelRef\.current !== channel/);
 });
+
+test("Realtime starts voice before and in parallel with visual history refresh", () => {
+  const voiceIndex = consoleSource.indexOf("const voicePromise = playCanonicalMessageVoice");
+  const refreshIndex = consoleSource.indexOf("const messagesPromise = refreshMessages()", voiceIndex);
+  assert.ok(voiceIndex >= 0, "voice must start after the canonical commit");
+  assert.ok(refreshIndex > voiceIndex, "history refresh must be scheduled after voice");
+  assert.match(consoleSource, /await Promise\.all\(\[voicePromise, messagesPromise\]\)/);
+});
+
+test("Realtime segment stream has text events, audio queue, and cancellation guards", () => {
+  assert.match(api, /export async function streamRealtimeTurn/);
+  assert.match(api, /event === "audio_segment"/);
+  assert.match(api, /data\.data_base64/);
+  assert.match(consoleSource, /realtimeSegmentQueueRef/);
+  assert.match(consoleSource, /realtimeOutputAbortRef/);
+  assert.match(consoleSource, /stopRealtimeSegmentAudio/);
+  assert.match(consoleSource, /enqueueRealtimeAudioSegment/);
+});

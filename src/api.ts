@@ -271,6 +271,7 @@ export type RealtimeCapabilities = {
   realtime_session?: RealtimeCapabilityItem;
   voice_input?: RealtimeCapabilityItem;
   voice_output?: RealtimeCapabilityItem;
+  voice_segment_streaming?: RealtimeCapabilityItem;
   agent_voice_binding?: RealtimeCapabilityItem;
   interruption?: RealtimeCapabilityItem;
   turn_detection?: RealtimeCapabilityItem;
@@ -537,6 +538,146 @@ export function commitRealtimeTurn(
     `/api/v2/threads/${encodeURIComponent(threadId)}/realtime/turns`,
     { method: "POST", body: JSON.stringify(payload) },
   );
+}
+
+export type RealtimeStreamAudioSegment = {
+  segmentId: string;
+  segmentNumber: number;
+  codec: string;
+  blob: Blob;
+};
+
+export type RealtimeStreamHandlers = {
+  onTurnStarted?: (data: Record<string, unknown>) => void;
+  onTextDelta?: (text: string) => void;
+  onSegmentStarted?: (data: Record<string, unknown>) => void;
+  onAudioSegment?: (segment: RealtimeStreamAudioSegment) => void;
+  onSegmentDone?: (data: Record<string, unknown>) => void;
+  onError?: (code: string) => void;
+  onDone?: (data: Record<string, unknown>) => void;
+};
+
+export type RealtimeStreamResult = {
+  status: "completed" | "failed" | "aborted" | "closed";
+  errorCode?: string;
+};
+
+function decodeRealtimeAudioSegment(
+  encoded: string,
+  codec: string,
+): Blob {
+  if (typeof atob !== "function") throw new ApiError(0, "AUDIO_DECODER_UNAVAILABLE");
+  const binary = atob(encoded);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return new Blob([bytes], { type: codec || "audio/mpeg" });
+}
+
+/**
+ * Consome a ponte canônica incremental do Realtime. O texto chega por deltas
+ * e cada frase chega como um segmento de áudio independente. O endpoint antigo
+ * continua disponível como fallback quando esta rota ainda não foi publicada.
+ */
+export async function streamRealtimeTurn(
+  threadId: string,
+  payload: {
+    session_id: string;
+    provider_item_id: string;
+    transcript_final_id: string;
+    transcript: string;
+    locale?: "pt-BR" | "en-US" | "es-419";
+  },
+  handlers: RealtimeStreamHandlers = {},
+  signal?: AbortSignal,
+): Promise<RealtimeStreamResult> {
+  try {
+    ensureConfigured();
+    const headers = authHeaders();
+    headers.set("Content-Type", "application/json");
+    headers.set("Accept", "text/event-stream");
+    const response = await fetch(
+      `${BASE}/api/v2/threads/${encodeURIComponent(threadId)}/realtime/turns/stream`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ locale: "pt-BR", ...payload }),
+        signal,
+      },
+    );
+    if (!response.ok) throw await readError(response);
+    if (!response.body) throw new ApiError(0, "STREAM_BODY_UNAVAILABLE");
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let terminal: RealtimeStreamResult = { status: "closed" };
+
+    const consume = (block: string) => {
+      let event = "message";
+      const dataLines: string[] = [];
+      for (const line of block.split("\n")) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) dataLines.push(line.slice(5).trim());
+      }
+      if (!dataLines.length) return;
+      let data: Record<string, unknown> = {};
+      try {
+        data = JSON.parse(dataLines.join("\n")) as Record<string, unknown>;
+      } catch {
+        data = { raw: dataLines.join("\n") };
+      }
+
+      if (event === "turn_started") handlers.onTurnStarted?.(data);
+      else if (event === "text_delta") handlers.onTextDelta?.(String(data.text ?? ""));
+      else if (event === "segment_started") handlers.onSegmentStarted?.(data);
+      else if (event === "audio_segment") {
+        const encoded = String(data.data_base64 ?? "");
+        if (!encoded) return;
+        handlers.onAudioSegment?.({
+          segmentId: String(data.segment_id ?? ""),
+          segmentNumber: Number(data.segment_number ?? 0),
+          codec: String(data.codec ?? "audio/mpeg"),
+          blob: decodeRealtimeAudioSegment(
+            encoded,
+            String(data.codec ?? "audio/mpeg"),
+          ),
+        });
+      } else if (event === "segment_done") handlers.onSegmentDone?.(data);
+      else if (event === "error") {
+        const code = String(data.code ?? "REALTIME_STREAM_FAILED");
+        terminal = { status: "failed", errorCode: code };
+        handlers.onError?.(code);
+      } else if (event === "done") {
+        handlers.onDone?.(data);
+        terminal = {
+          status: data.status === "failed" ? "failed" : "completed",
+          errorCode: data.status === "failed" ? String(data.code ?? "") : undefined,
+        };
+      }
+    };
+
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let separator = buffer.indexOf("\n\n");
+      while (separator !== -1) {
+        const block = buffer.slice(0, separator);
+        buffer = buffer.slice(separator + 2);
+        separator = buffer.indexOf("\n\n");
+        consume(block);
+      }
+    }
+    if (buffer.trim()) consume(buffer);
+    return terminal;
+  } catch (error) {
+    if ((error as Error)?.name === "AbortError") {
+      return { status: "aborted" };
+    }
+    throw error;
+  }
 }
 
 export type VoiceTranscript = {

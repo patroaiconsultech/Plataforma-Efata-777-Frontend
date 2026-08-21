@@ -27,6 +27,7 @@ import {
   parseArtifactMetadata,
   RealtimeCapabilities,
   streamMessage,
+  streamRealtimeTurn,
   streamTeamMessage,
   TeamDefinition,
   technicalAgentTarget,
@@ -186,6 +187,13 @@ function describe(error: unknown): string {
   return code ? `Não foi possível concluir a ação (${code}).` : "Erro inesperado.";
 }
 
+function isRealtimeStreamUnavailable(error: unknown): boolean {
+  return (
+    error instanceof ApiError &&
+    (error.status === 404 || error.status === 405 || error.status === 501)
+  );
+}
+
 function isAbortLike(error: unknown): boolean {
   if (typeof DOMException !== "undefined" && error instanceof DOMException) {
     return error.name === "AbortError";
@@ -289,6 +297,13 @@ export default function AppConsole() {
   const messageAudioRef = useRef<HTMLAudioElement | null>(null);
   const messageAudioUrlRef = useRef("");
   const messageVoiceAbortRef = useRef<AbortController | null>(null);
+  const realtimeSegmentQueueRef = useRef<
+    Array<{ blob: Blob; codec: string; segmentNumber: number }>
+  >([]);
+  const realtimeSegmentPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const realtimeSegmentUrlRef = useRef("");
+  const realtimeAudioLifecycleRef = useRef(0);
+  const realtimeOutputAbortRef = useRef<AbortController | null>(null);
   const configured = isApiBaseConfigured();
   const authConfigured = isOidcConfigured();
   const accountReady = authenticated && Boolean(me) && !provisioningBlocked;
@@ -552,6 +567,9 @@ export default function AppConsole() {
       realtimePeerRef.current = null;
       realtimeStreamRef.current?.getTracks().forEach((track) => track.stop());
       realtimeStreamRef.current = null;
+      realtimeOutputAbortRef.current?.abort();
+      realtimeOutputAbortRef.current = null;
+      stopRealtimeSegmentAudio();
       messageVoiceAbortRef.current?.abort();
       messageVoiceAbortRef.current = null;
       const activeAudio = messageAudioRef.current;
@@ -815,6 +833,81 @@ export default function AppConsole() {
     setSpeakingMessageId("");
   }
 
+  function stopRealtimeSegmentAudio() {
+    realtimeAudioLifecycleRef.current += 1;
+    realtimeSegmentQueueRef.current = [];
+    const audio = realtimeSegmentPlayerRef.current;
+    if (audio) {
+      audio.onended = null;
+      audio.onerror = null;
+      audio.pause();
+      audio.src = "";
+    }
+    realtimeSegmentPlayerRef.current = null;
+    if (realtimeSegmentUrlRef.current) {
+      URL.revokeObjectURL(realtimeSegmentUrlRef.current);
+      realtimeSegmentUrlRef.current = "";
+    }
+  }
+
+  function enqueueRealtimeAudioSegment(
+    segment: { blob: Blob; codec: string; segmentNumber: number },
+    lifecycleId: number,
+  ) {
+    if (lifecycleId !== realtimeLifecycleRef.current) return;
+    realtimeSegmentQueueRef.current.push(segment);
+    realtimeSegmentQueueRef.current.sort(
+      (left, right) => left.segmentNumber - right.segmentNumber,
+    );
+    void playNextRealtimeAudioSegment(lifecycleId);
+  }
+
+  async function playNextRealtimeAudioSegment(lifecycleId: number): Promise<void> {
+    if (lifecycleId !== realtimeLifecycleRef.current) return;
+    if (realtimeSegmentPlayerRef.current) return;
+    const next = realtimeSegmentQueueRef.current.shift();
+    if (!next) {
+      if (realtimeSessionIdRef.current) setRealtimeState("listening");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(next.blob);
+    const audio = new Audio(objectUrl);
+    audio.preload = "auto";
+    realtimeSegmentUrlRef.current = objectUrl;
+    realtimeSegmentPlayerRef.current = audio;
+    setRealtimeState("speaking");
+
+    const cleanup = () => {
+      if (realtimeSegmentPlayerRef.current === audio) {
+        realtimeSegmentPlayerRef.current = null;
+      }
+      if (realtimeSegmentUrlRef.current === objectUrl) {
+        realtimeSegmentUrlRef.current = "";
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    audio.onended = () => {
+      cleanup();
+      void playNextRealtimeAudioSegment(lifecycleId);
+    };
+    audio.onerror = () => {
+      cleanup();
+      if (lifecycleId === realtimeLifecycleRef.current) {
+        setNotice("Um trecho de áudio não pôde ser reproduzido; continuando a conversa.");
+        void playNextRealtimeAudioSegment(lifecycleId);
+      }
+    };
+    try {
+      await audio.play();
+    } catch (err) {
+      cleanup();
+      if (lifecycleId !== realtimeLifecycleRef.current) return;
+      setNotice("O navegador bloqueou a reprodução automática. Interaja com a página para ouvir a resposta.");
+      void playNextRealtimeAudioSegment(lifecycleId);
+    }
+  }
+
   async function playCanonicalMessageVoice(
     messageId: string,
     fromRealtime = false,
@@ -884,6 +977,9 @@ export default function AppConsole() {
 
   function stopRealtimeSession() {
     realtimeLifecycleRef.current += 1;
+    realtimeOutputAbortRef.current?.abort();
+    realtimeOutputAbortRef.current = null;
+    stopRealtimeSegmentAudio();
     const channel = realtimeChannelRef.current;
     const peer = realtimePeerRef.current;
     const stream = realtimeStreamRef.current;
@@ -958,17 +1054,64 @@ export default function AppConsole() {
       return;
     }
     setRealtimeState("orkio_processing");
+    const outputController = new AbortController();
+    realtimeOutputAbortRef.current = outputController;
     try {
-      const result = await commitRealtimeTurn(sessionThreadId, {
-        session_id: sessionId,
-        provider_item_id: itemId,
-        transcript_final_id: eventId,
-        transcript,
-      });
-      if (!isCurrentSession()) return;
-      await refreshMessages();
-      if (!isCurrentSession()) return;
-      await playCanonicalMessageVoice(result.message_id, true);
+      try {
+        const output = await streamRealtimeTurn(
+          sessionThreadId,
+          {
+            session_id: sessionId,
+            provider_item_id: itemId,
+            transcript_final_id: eventId,
+            transcript,
+            locale: "pt-BR",
+          },
+          {
+            onTextDelta: (text) => {
+              if (isCurrentSession()) setStreamingText((current) => current + text);
+            },
+            onAudioSegment: (segment) => {
+              if (!isCurrentSession()) return;
+              enqueueRealtimeAudioSegment(
+                {
+                  blob: segment.blob,
+                  codec: segment.codec,
+                  segmentNumber: segment.segmentNumber,
+                },
+                lifecycleId,
+              );
+            },
+          },
+          outputController.signal,
+        );
+        if (!isCurrentSession() || output.status === "aborted") return;
+        if (output.status !== "completed") {
+          throw new ApiError(0, output.errorCode || "REALTIME_STREAM_TERMINATED");
+        }
+        setStreamingText("");
+        await refreshMessages();
+        if (!isCurrentSession()) return;
+      } catch (err) {
+        if (!isRealtimeStreamUnavailable(err)) throw err;
+
+        // The backend may be one release behind the frontend. Fall back to the
+        // proven full-turn contract without starting a second turn after a
+        // partially accepted stream response.
+        stopRealtimeSegmentAudio();
+        setStreamingText("");
+        const result = await commitRealtimeTurn(sessionThreadId, {
+          session_id: sessionId,
+          provider_item_id: itemId,
+          transcript_final_id: eventId,
+          transcript,
+        });
+        if (!isCurrentSession()) return;
+        const voicePromise = playCanonicalMessageVoice(result.message_id, true);
+        const messagesPromise = refreshMessages();
+        await Promise.all([voicePromise, messagesPromise]);
+        if (!isCurrentSession()) return;
+      }
     } catch (err) {
       if (!isCurrentSession() || isAbortLike(err)) return;
       setRealtimeState("error");
@@ -976,16 +1119,22 @@ export default function AppConsole() {
       if (!(err instanceof ApiError)) {
         reportUnexpectedRuntimeError(err, "Realtime turn processing");
       }
+    } finally {
+      if (realtimeOutputAbortRef.current === outputController) {
+        realtimeOutputAbortRef.current = null;
+      }
     }
   }
 
   function handleRealtimeProviderEvent(raw: unknown) {
     if (!raw || typeof raw !== "object") return;
     const event = raw as Record<string, unknown>;
-    if (
-      String(event.type || "") !==
-      "conversation.item.input_audio_transcription.completed"
-    ) {
+    const eventType = String(event.type || "");
+    if (eventType === "input_audio_buffer.speech_started") {
+      stopRealtimeSegmentAudio();
+      return;
+    }
+    if (eventType !== "conversation.item.input_audio_transcription.completed") {
       return;
     }
     const eventId = String(event.event_id || "");
@@ -2468,6 +2617,14 @@ export default function AppConsole() {
                 <span>Saída de voz</span>
                 <strong>
                   {realtimeCapabilities?.voice_output?.eligible ? "Elegível" : "Pendente"}
+                </strong>
+              </div>
+              <div>
+                <span>Voz por segmentos</span>
+                <strong>
+                  {realtimeCapabilities?.voice_segment_streaming?.eligible
+                    ? "Disponível"
+                    : "Fallback completo"}
                 </strong>
               </div>
               <div>
