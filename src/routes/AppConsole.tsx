@@ -186,6 +186,27 @@ function describe(error: unknown): string {
   return code ? `Não foi possível concluir a ação (${code}).` : "Erro inesperado.";
 }
 
+function isAbortLike(error: unknown): boolean {
+  if (typeof DOMException !== "undefined" && error instanceof DOMException) {
+    return error.name === "AbortError";
+  }
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "name" in error &&
+    String((error as { name?: unknown }).name || "") === "AbortError"
+  );
+}
+
+function reportUnexpectedRuntimeError(error: unknown, source: string): void {
+  if (isAbortLike(error) || typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent("patroai:runtime-error", {
+      detail: { source, error },
+    }),
+  );
+}
+
 export default function AppConsole() {
   const [message, setMessage] = useState("");
   const [showInvite, setShowInvite] = useState(false);
@@ -263,6 +284,8 @@ export default function AppConsole() {
   const realtimeSessionThreadRef = useRef("");
   const realtimeSeenFinalIdsRef = useRef<Set<string>>(new Set());
   const realtimeTurnChainRef = useRef<Promise<void>>(Promise.resolve());
+  const realtimeLifecycleRef = useRef(0);
+  const messagesRequestRef = useRef(0);
   const messageAudioRef = useRef<HTMLAudioElement | null>(null);
   const messageAudioUrlRef = useRef("");
   const messageVoiceAbortRef = useRef<AbortController | null>(null);
@@ -289,6 +312,8 @@ export default function AppConsole() {
 
   const selectThread = useCallback((id: string) => {
     if (id !== activeThreadRef.current) {
+      realtimeLifecycleRef.current += 1;
+      messagesRequestRef.current += 1;
       cancelVoiceCapture(true);
       stopRealtimeSession();
       stopMessageAudio();
@@ -296,6 +321,7 @@ export default function AppConsole() {
     activeThreadRef.current = id;
     setThreadId(id);
     setMessages([]);
+    setLoading(false);
     setStreamingText("");
     setRecentAttachment("");
     setDocumentProvenanceLabel("");
@@ -323,13 +349,34 @@ export default function AppConsole() {
 
   const refreshMessages = useCallback(async () => {
     if (!configured || !authenticated || !threadId) return;
+    const requestedThreadId = threadId;
+    const requestId = messagesRequestRef.current + 1;
+    messagesRequestRef.current = requestId;
     setLoading(true);
     try {
-      setMessages(await listMessages(threadId));
+      const nextMessages = await listMessages(requestedThreadId);
+      if (
+        requestId !== messagesRequestRef.current ||
+        requestedThreadId !== activeThreadRef.current
+      ) {
+        return;
+      }
+      setMessages(nextMessages);
     } catch (err) {
-      setError(describe(err));
+      if (
+        requestId === messagesRequestRef.current &&
+        requestedThreadId === activeThreadRef.current &&
+        !isAbortLike(err)
+      ) {
+        setError(describe(err));
+      }
     } finally {
-      setLoading(false);
+      if (
+        requestId === messagesRequestRef.current &&
+        requestedThreadId === activeThreadRef.current
+      ) {
+        setLoading(false);
+      }
     }
   }, [authenticated, configured, threadId]);
 
@@ -836,17 +883,37 @@ export default function AppConsole() {
   }
 
   function stopRealtimeSession() {
-    realtimeChannelRef.current?.close();
+    realtimeLifecycleRef.current += 1;
+    const channel = realtimeChannelRef.current;
+    const peer = realtimePeerRef.current;
+    const stream = realtimeStreamRef.current;
+
+    // Invalidate refs before closing resources: close() may synchronously invoke
+    // onclose/onconnectionstatechange and must not re-enter a half-cleaned session.
     realtimeChannelRef.current = null;
-    realtimePeerRef.current?.close();
     realtimePeerRef.current = null;
-    realtimeStreamRef.current?.getTracks().forEach((track) => track.stop());
     realtimeStreamRef.current = null;
     realtimeSessionIdRef.current = "";
     realtimeSessionThreadRef.current = "";
     realtimeSeenFinalIdsRef.current.clear();
     realtimeTurnChainRef.current = Promise.resolve();
     setRealtimeState("idle");
+
+    try {
+      channel?.close();
+    } catch (err) {
+      console.warn("PatroAI Realtime channel cleanup failed", err);
+    }
+    try {
+      peer?.close();
+    } catch (err) {
+      console.warn("PatroAI Realtime peer cleanup failed", err);
+    }
+    try {
+      stream?.getTracks().forEach((track) => track.stop());
+    } catch (err) {
+      console.warn("PatroAI Realtime media cleanup failed", err);
+    }
   }
 
   function waitForIceGatheringComplete(
@@ -874,14 +941,19 @@ export default function AppConsole() {
     transcript: string,
     sessionId: string,
     sessionThreadId: string,
+    lifecycleId: number,
   ) {
+    const isCurrentSession = () =>
+      lifecycleId === realtimeLifecycleRef.current &&
+      sessionId === realtimeSessionIdRef.current &&
+      sessionThreadId === activeThreadRef.current;
+
     if (
       !sessionId ||
       !eventId ||
       !itemId ||
       !transcript.trim() ||
-      sessionId !== realtimeSessionIdRef.current ||
-      sessionThreadId !== activeThreadRef.current
+      !isCurrentSession()
     ) {
       return;
     }
@@ -893,21 +965,16 @@ export default function AppConsole() {
         transcript_final_id: eventId,
         transcript,
       });
-      if (
-        sessionId !== realtimeSessionIdRef.current ||
-        sessionThreadId !== activeThreadRef.current
-      ) {
-        return;
-      }
+      if (!isCurrentSession()) return;
       await refreshMessages();
+      if (!isCurrentSession()) return;
       await playCanonicalMessageVoice(result.message_id, true);
     } catch (err) {
-      if (
-        sessionId === realtimeSessionIdRef.current &&
-        sessionThreadId === activeThreadRef.current
-      ) {
-        setRealtimeState("error");
-        setError(describe(err));
+      if (!isCurrentSession() || isAbortLike(err)) return;
+      setRealtimeState("error");
+      setError(describe(err));
+      if (!(err instanceof ApiError)) {
+        reportUnexpectedRuntimeError(err, "Realtime turn processing");
       }
     }
   }
@@ -932,6 +999,7 @@ export default function AppConsole() {
 
     const sessionId = realtimeSessionIdRef.current;
     const sessionThreadId = realtimeSessionThreadRef.current;
+    const lifecycleId = realtimeLifecycleRef.current;
     setRealtimeState("transcribing");
     realtimeTurnChainRef.current = realtimeTurnChainRef.current
       .then(() =>
@@ -941,9 +1009,14 @@ export default function AppConsole() {
           transcript,
           sessionId,
           sessionThreadId,
+          lifecycleId,
         ),
       )
-      .catch(() => undefined);
+      .catch((err) => {
+        if (!isAbortLike(err)) {
+          reportUnexpectedRuntimeError(err, "Realtime turn queue");
+        }
+      });
   }
 
   async function startRealtimeSession() {
@@ -971,34 +1044,41 @@ export default function AppConsole() {
       return;
     }
 
+    const sessionThreadId = threadId;
     cancelVoiceCapture(true);
     stopMessageAudio();
     stopRealtimeSession();
+    const lifecycleId = realtimeLifecycleRef.current;
+    const isCurrentAttempt = () =>
+      lifecycleId === realtimeLifecycleRef.current &&
+      sessionThreadId === activeThreadRef.current;
     setError("");
     setNotice("");
     setRealtimeState("connecting");
 
-    const sessionThreadId = threadId;
     const peer = new RTCPeerConnection();
     realtimePeerRef.current = peer;
     const channel = peer.createDataChannel("oai-events");
     realtimeChannelRef.current = channel;
 
     channel.onmessage = (event) => {
+      if (!isCurrentAttempt() || realtimeChannelRef.current !== channel) return;
       try {
         handleRealtimeProviderEvent(JSON.parse(String(event.data || "{}")));
-      } catch {
+      } catch (err) {
         // Eventos não JSON ou desconhecidos não ganham autoridade no runtime.
+        reportUnexpectedRuntimeError(err, "Realtime provider event");
       }
     };
     channel.onopen = () => {
-      if (sessionThreadId === activeThreadRef.current) {
+      if (isCurrentAttempt() && realtimeChannelRef.current === channel) {
         setRealtimeState("listening");
       }
     };
     channel.onclose = () => {
       if (
-        sessionThreadId === activeThreadRef.current &&
+        isCurrentAttempt() &&
+        realtimeChannelRef.current === channel &&
         realtimeSessionIdRef.current
       ) {
         stopRealtimeSession();
@@ -1006,18 +1086,24 @@ export default function AppConsole() {
     };
 
     peer.onconnectionstatechange = () => {
-      if (["failed", "closed"].includes(peer.connectionState)) {
-        if (sessionThreadId === activeThreadRef.current) {
-          stopRealtimeSession();
-        }
+      if (
+        isCurrentAttempt() &&
+        realtimePeerRef.current === peer &&
+        ["failed", "closed"].includes(peer.connectionState)
+      ) {
+        stopRealtimeSession();
       }
     };
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (sessionThreadId !== activeThreadRef.current) {
+      if (!isCurrentAttempt()) {
         stream.getTracks().forEach((track) => track.stop());
-        peer.close();
+        try {
+          peer.close();
+        } catch {
+          // A stale peer is already being torn down; no user-facing error is needed.
+        }
         return;
       }
       realtimeStreamRef.current = stream;
@@ -1036,27 +1122,36 @@ export default function AppConsole() {
         locale: "pt-BR",
       });
 
-      if (sessionThreadId !== activeThreadRef.current) {
-        stopRealtimeSession();
+      if (!isCurrentAttempt()) {
+        try {
+          peer.close();
+        } catch {
+          // The attempt was invalidated while the offer was in flight.
+        }
         return;
       }
       realtimeSessionIdRef.current = call.session_id;
       realtimeSessionThreadRef.current = sessionThreadId;
       await peer.setRemoteDescription({ type: "answer", sdp: call.sdp });
+      if (!isCurrentAttempt()) return;
       setRealtimeState("listening");
       setNotice(`Realtime ativo com ${call.agent_name}.`);
     } catch (err) {
-      stopRealtimeSession();
       const name =
         err && typeof err === "object" && "name" in err
           ? String((err as { name?: unknown }).name || "")
           : "";
+      if (!isCurrentAttempt() || isAbortLike(err)) return;
+      stopRealtimeSession();
       setRealtimeState("error");
       setError(
         name === "NotAllowedError"
           ? "Permissão do microfone negada para o Realtime."
           : describe(err),
       );
+      if (name !== "NotAllowedError" && !(err instanceof ApiError)) {
+        reportUnexpectedRuntimeError(err, "Realtime session start");
+      }
     }
   }
 

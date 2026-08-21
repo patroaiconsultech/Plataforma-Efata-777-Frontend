@@ -26,3 +26,11 @@ test("AppConsole keeps runtime recovery around the message surface", () => {
   assert.match(consoleSource, /<SafeMarkdown content=\{item\.content\} \/>/);
   assert.match(consoleSource, /<SafeMarkdown content=\{streamingText\} \/>/);
 });
+
+test("Realtime invalidates stale turns and protects message refreshes from races", () => {
+  assert.match(consoleSource, /realtimeLifecycleRef/);
+  assert.match(consoleSource, /messagesRequestRef/);
+  assert.match(consoleSource, /isCurrentAttempt/);
+  assert.match(consoleSource, /Realtime turn processing/);
+  assert.match(consoleSource, /realtimeChannelRef\.current !== channel/);
+});
