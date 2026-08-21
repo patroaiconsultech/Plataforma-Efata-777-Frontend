@@ -6,7 +6,7 @@ const api = readFileSync(new URL("../src/api.ts", import.meta.url), "utf8");
 const consoleSource = readFileSync(new URL("../src/routes/AppConsole.tsx", import.meta.url), "utf8");
 
 test("agent catalog is backend-driven", () => {
-  assert.match(api, /apiJson<AgentDefinition\[]>\("\/api\/v2\/agents"\)/);
+  assert.match(api, /apiJson<unknown>\("\/api\/v2\/agents"\)/);
   assert.match(consoleSource, /await listAgents\(\)/);
   assert.doesNotMatch(consoleSource, /\["Orkio",\s*"Auditor"/);
 });

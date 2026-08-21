@@ -1,0 +1,28 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const api = fs.readFileSync("src/api.ts", "utf8");
+const markdown = fs.readFileSync("src/components/SafeMarkdown.tsx", "utf8");
+const consoleSource = fs.readFileSync("src/routes/AppConsole.tsx", "utf8");
+
+test("API normalizes raw agent, thread and message payloads before the console consumes them", () => {
+  assert.match(api, /function asRecord\(value: unknown\)/);
+  assert.match(api, /function normalizeAgent\(value: unknown, index: number\)/);
+  assert.match(api, /function normalizeThread\(value: unknown, index: number\)/);
+  assert.match(api, /function normalizeMessage\(value: unknown, index: number\)/);
+  assert.match(api, /apiJson<unknown>\("\/api\/v2\/agents"\)/);
+  assert.match(api, /apiJson<unknown>\(`\/api\/v2\/threads\?limit=/);
+  assert.match(api, /apiJson<unknown>\(/);
+});
+
+test("SafeMarkdown coerces nullish and non-string content instead of throwing", () => {
+  assert.match(markdown, /content === null \|\| content === undefined/);
+  assert.match(markdown, /String\(content\)/);
+  assert.match(markdown, /renderBlocks\(normalized\)/);
+});
+
+test("AppConsole keeps runtime recovery around the message surface", () => {
+  assert.match(consoleSource, /<SafeMarkdown content=\{item\.content\} \/>/);
+  assert.match(consoleSource, /<SafeMarkdown content=\{streamingText\} \/>/);
+});

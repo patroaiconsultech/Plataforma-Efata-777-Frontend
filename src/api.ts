@@ -176,8 +176,64 @@ export type CapabilityAvailability = {
   source?: string;
 };
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function asText(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value;
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return fallback;
+  }
+}
+
+function asBoolean(value: unknown, fallback = false): boolean {
+  return typeof value === "boolean" ? value : fallback;
+}
+
+function normalizeAgent(value: unknown, index: number): AgentDefinition | null {
+  const record = asRecord(value);
+  if (!record) return null;
+  const slug = asText(record.slug, `agent-${index}`).trim();
+  if (!slug) return null;
+  const availability = asRecord(record.availability);
+  return {
+    slug,
+    display_name: asText(record.display_name, slug),
+    target_kind: asText(record.target_kind, "agent"),
+    canonical_name: asText(record.canonical_name) || undefined,
+    role_code: asText(record.role_code) || undefined,
+    role_label: asText(record.role_label) || undefined,
+    organizational_level: asText(record.organizational_level) || undefined,
+    department: asText(record.department) || undefined,
+    founder_direct_access: asBoolean(record.founder_direct_access),
+    localized_names: asRecord(record.localized_names) as Record<string, string> | undefined,
+    localized_role_labels: asRecord(record.localized_role_labels) as Record<string, string> | undefined,
+    availability: availability
+      ? {
+          registered: asBoolean(availability.registered),
+          configured: asBoolean(availability.configured),
+          ready: asBoolean(availability.ready),
+          state: asText(availability.state) || undefined,
+          reason: typeof availability.reason === "string" ? availability.reason : null,
+        }
+      : undefined,
+  };
+}
+
 export function listAgents(): Promise<AgentDefinition[]> {
-  return apiJson<AgentDefinition[]>("/api/v2/agents");
+  return apiJson<unknown>("/api/v2/agents").then((payload) => {
+    const rows = Array.isArray(payload)
+      ? payload
+      : (asRecord(payload)?.items as unknown[] | undefined) || [];
+    return rows.map(normalizeAgent).filter((agent): agent is AgentDefinition => Boolean(agent));
+  });
 }
 
 export type TeamParticipantPolicy = {
@@ -249,8 +305,35 @@ export type ChatMessage = {
   created_at: string;
 };
 
+function normalizeThread(value: unknown, index: number): Thread | null {
+  const record = asRecord(value);
+  if (!record) return null;
+  const id = asText(record.id, `thread-${index}`).trim();
+  if (!id) return null;
+  return {
+    id,
+    title: asText(record.title, "Nova conversa"),
+    created_at: asText(record.created_at, new Date(0).toISOString()),
+    thread_role: asText(record.thread_role, "owner"),
+  };
+}
+
 export function listThreads(limit = 50, offset = 0): Promise<ThreadList> {
-  return apiJson<ThreadList>(`/api/v2/threads?limit=${limit}&offset=${offset}`);
+  return apiJson<unknown>(`/api/v2/threads?limit=${limit}&offset=${offset}`).then((payload) => {
+    const record = asRecord(payload);
+    const rows = Array.isArray(payload)
+      ? payload
+      : (record?.items as unknown[] | undefined) || [];
+    const items = rows
+      .map(normalizeThread)
+      .filter((thread): thread is Thread => Boolean(thread));
+    return {
+      items,
+      total: typeof record?.total === "number" ? record.total : items.length,
+      limit: typeof record?.limit === "number" ? record.limit : limit,
+      offset: typeof record?.offset === "number" ? record.offset : offset,
+    };
+  });
 }
 
 export function createThread(title?: string): Promise<{ id: string; title: string }> {
@@ -270,10 +353,32 @@ export function updateThreadTitle(
   });
 }
 
+function normalizeMessage(value: unknown, index: number): ChatMessage | null {
+  const record = asRecord(value);
+  if (!record) return null;
+  const id = asText(record.id, `message-${index}`).trim();
+  if (!id) return null;
+  return {
+    id,
+    author_type: record.author_type === "agent" ? "agent" : "user",
+    agent_id: typeof record.agent_id === "string" ? record.agent_id : null,
+    agent_name: typeof record.agent_name === "string" ? record.agent_name : null,
+    content: asText(record.content),
+    created_at: asText(record.created_at, new Date(0).toISOString()),
+  };
+}
+
 export function listMessages(threadId: string): Promise<ChatMessage[]> {
-  return apiJson<ChatMessage[]>(
+  return apiJson<unknown>(
     `/api/v2/threads/${encodeURIComponent(threadId)}/messages`,
-  );
+  ).then((payload) => {
+    const rows = Array.isArray(payload)
+      ? payload
+      : (asRecord(payload)?.items as unknown[] | undefined) || [];
+    return rows
+      .map(normalizeMessage)
+      .filter((message): message is ChatMessage => Boolean(message));
+  });
 }
 
 export function createInvite(threadId: string, payload: object) {

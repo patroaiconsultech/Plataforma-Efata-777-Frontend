@@ -168,5 +168,11 @@ function renderBlocks(content: string): ReactNode[] {
 }
 
 export default function SafeMarkdown({ content }: SafeMarkdownProps) {
-  return <div className="message-markdown">{renderBlocks(content || "")}</div>;
+  const normalized =
+    typeof content === "string"
+      ? content
+      : content === null || content === undefined
+        ? ""
+        : String(content);
+  return <div className="message-markdown">{renderBlocks(normalized)}</div>;
 }
