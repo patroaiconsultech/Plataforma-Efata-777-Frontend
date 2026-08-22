@@ -1453,6 +1453,13 @@ export default function AppConsole() {
               artifact,
             ]);
           }
+          const artifactErrorCode =
+            typeof data.artifact_error === "string" ? data.artifact_error : "";
+          if (artifactErrorCode) {
+            setNotice(
+              `Resposta concluída, mas o arquivo não ficou disponível (${artifactErrorCode}).`,
+            );
+          }
           setTeamRunStatus("");
           setStreamingText("");
           void refreshMessages();
@@ -1551,25 +1558,37 @@ export default function AppConsole() {
       const uploaded = await uploadAttachment(threadId, file);
       setRecentAttachment(uploaded.filename);
       setNotice(`Anexo enviado: ${uploaded.filename} · processando contexto…`);
-      const provenance = await getDocumentContextProvenance(threadId);
-      const uploadedSource = provenance.source_provenance.find(
-        (source) => source.attachment_id === uploaded.id,
-      );
-      if (uploadedSource?.extraction_status === "ready") {
-        const detail = uploadedSource.truncated
-          ? `${uploadedSource.provided_chars.toLocaleString("pt-BR")} de ${uploadedSource.source_chars.toLocaleString("pt-BR")} caracteres fornecidos`
-          : `${uploadedSource.provided_chars.toLocaleString("pt-BR")} caracteres processados`;
-        setDocumentProvenanceLabel(`✓ Documento lido · ${detail}`);
-        setNotice(`Documento lido: ${uploaded.filename}`);
-      } else if (provenance.source_ids.includes(uploaded.id)) {
-        setDocumentProvenanceLabel("Documento processado · provenance individual indisponível.");
-        setNotice(`Anexo processado: ${uploaded.filename}`);
-      } else if (provenance.extraction_status === "failed" && provenance.sources === 0) {
-        setDocumentProvenanceLabel("Falha de extração do documento.");
-        setNotice(`Anexo armazenado, mas o conteúdo não pôde ser extraído.`);
-      } else {
-        setDocumentProvenanceLabel("Documento armazenado · este arquivo ainda não está disponível no contexto.");
-        setNotice(`Anexo armazenado: ${uploaded.filename} · contexto deste arquivo não confirmado.`);
+      try {
+        const provenance = await getDocumentContextProvenance(threadId);
+        const uploadedSource = provenance.source_provenance.find(
+          (source) => source.attachment_id === uploaded.id,
+        );
+        if (uploadedSource?.extraction_status === "ready") {
+          const detail = uploadedSource.truncated
+            ? `${uploadedSource.provided_chars.toLocaleString("pt-BR")} de ${uploadedSource.source_chars.toLocaleString("pt-BR")} caracteres fornecidos`
+            : `${uploadedSource.provided_chars.toLocaleString("pt-BR")} caracteres processados`;
+          setDocumentProvenanceLabel(`✓ Documento lido · ${detail}`);
+          setNotice(`Documento lido: ${uploaded.filename}`);
+        } else if (provenance.source_ids.includes(uploaded.id)) {
+          setDocumentProvenanceLabel("Documento processado · provenance individual indisponível.");
+          setNotice(`Anexo processado: ${uploaded.filename}`);
+        } else if (provenance.extraction_status === "failed" && provenance.sources === 0) {
+          setDocumentProvenanceLabel("Falha de extração do documento.");
+          setNotice(`Anexo armazenado, mas o conteúdo não pôde ser extraído.`);
+        } else {
+          setDocumentProvenanceLabel("Documento armazenado · este arquivo ainda não está disponível no contexto.");
+          setNotice(`Anexo armazenado: ${uploaded.filename} · contexto deste arquivo não confirmado.`);
+        }
+      } catch (provenanceError) {
+        // The upload is already committed. Do not present a secondary context
+        // lookup failure as if the user lost the file.
+        console.warn("DOCUMENT_CONTEXT_STATUS_UNAVAILABLE", {
+          code: describe(provenanceError),
+          threadId,
+          attachmentId: uploaded.id,
+        });
+        setDocumentProvenanceLabel("Anexo armazenado · leitura do contexto pendente.");
+        setNotice(`Anexo armazenado: ${uploaded.filename} · contexto será atualizado depois.`);
       }
     } catch (err) {
       setError(describe(err));

@@ -33,6 +33,8 @@ test("document upload success is attachment-specific, never thread-aggregate fal
   );
   assert.doesNotMatch(uploadBlock, /if \(provenance\.available\)/);
   assert.match(uploadBlock, /Documento lido/);
+  assert.match(uploadBlock, /Anexo armazenado · leitura do contexto pendente/);
+  assert.match(uploadBlock, /DOCUMENT_CONTEXT_STATUS_UNAVAILABLE/);
 });
 
 test("persisted agent messages expose canonical speaker playback", () => {
@@ -66,4 +68,13 @@ test("premium controls have explicit visual variants", () => {
   }
   assert.match(styles, /--electric/);
   assert.match(styles, /--gold/);
+});
+
+
+test("Realtime microphone capture requests browser noise suppression and avoids automatic gain amplification", () => {
+  assert.match(console_, /const VOICE_INPUT_CONSTRAINTS: MediaStreamConstraints/);
+  assert.match(console_, /echoCancellation: true/);
+  assert.match(console_, /noiseSuppression: true/);
+  assert.match(console_, /autoGainControl: false/);
+  assert.match(console_, /getUserMedia\(VOICE_INPUT_CONSTRAINTS\)/);
 });

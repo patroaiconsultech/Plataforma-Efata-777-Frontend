@@ -4604,7 +4604,8 @@ html[data-motion-override="on"] .patroai-premium .neural-lobby__network::after {
   .aurora-particle-field > span,
   .patroai-premium .aurora-particle-field > span:nth-child(n) {
     animation-name: auroraRadialCoreEmissionDesktop !important;
-    animation-duration: calc(4.8s + (var(--i) * .11s)) !important;
+    animation-duration: calc(var(--music-motion-duration, 4.8s) + (var(--i) * .11s)) !important;
+    animation-delay: calc(var(--i) * -0.17s) !important;
   }
 }
 
@@ -4614,20 +4615,24 @@ html[data-motion-override="on"] .patroai-premium .neural-lobby__network::after {
     opacity: 0;
   }
   18% {
-    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(24px) scale(.42);
-    opacity: .7;
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(24px) scale(calc(.38 + (var(--desktop-neural-pulse, 0) * .18)));
+    opacity: calc(.5 + (var(--desktop-neural-energy, 0) * .26));
+    filter: brightness(calc(1.05 + (var(--desktop-neural-energy, 0) * .7))) blur(.2px);
   }
   48% {
-    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(24px + (min(50vw, 520px) * .46))) scale(calc(.86 + (var(--music-pulse, 0) * .28)));
-    opacity: 1;
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(24px + (min(50vw, 520px) * (.43 + (var(--desktop-neural-energy, 0) * .08))))) scale(calc(.78 + (var(--music-pulse, 0) * .34) + (var(--desktop-neural-pulse, 0) * .18)));
+    opacity: calc(.82 + (var(--desktop-neural-energy, 0) * .18));
+    filter: brightness(calc(1.35 + (var(--desktop-neural-energy, 0) * 1.05))) blur(0);
   }
   72% {
-    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(24px + (min(50vw, 520px) * .72))) scale(.55);
-    opacity: .62;
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(24px + (min(50vw, 520px) * (.68 + (var(--desktop-neural-energy, 0) * .1))))) scale(calc(.5 + (var(--desktop-neural-pulse, 0) * .2)));
+    opacity: calc(.42 + (var(--desktop-neural-energy, 0) * .3));
+    filter: brightness(calc(1.05 + (var(--desktop-neural-energy, 0) * .65))) blur(.1px);
   }
   100% {
-    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(24px + (min(50vw, 520px) * .98))) scale(.04);
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 30deg)) translateX(calc(24px + (min(50vw, 520px) * (.94 + (var(--desktop-neural-energy, 0) * .06))))) scale(.04);
     opacity: 0;
+    filter: brightness(.8) blur(1px);
   }
 }
 

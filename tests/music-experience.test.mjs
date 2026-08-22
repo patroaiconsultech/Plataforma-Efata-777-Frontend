@@ -135,3 +135,15 @@ test("audio queue advances to the current immersive track after the remix", () =
   assert.match(interactions, /audioTrackIndex < audioPlaylist\.length - 1/);
   assert.match(interactions, /immersiveAudio\.addEventListener\("ended", onEnded\)/);
 });
+
+
+test("desktop neural motion shares the analyser energy and accelerates radial emission", () => {
+  assert.match(interactions, /const renderDesktopNeuralMotion/);
+  assert.match(interactions, /musicReactiveActive \? musicEnergy : 0/);
+  assert.match(interactions, /--desktop-neural-energy/);
+  assert.match(interactions, /--desktop-neural-pulse/);
+  assert.match(interactions, /--music-motion-duration/);
+  assert.match(css, /var\(--music-motion-duration, 4\.8s\)/);
+  assert.match(css, /auroraRadialCoreEmissionDesktop/);
+});
+

@@ -1144,6 +1144,7 @@ export function mountPremiumLanding({
       root.style.removeProperty("--music-dock-energy");
       root.style.removeProperty("--music-energy");
       root.style.removeProperty("--music-pulse");
+      root.style.removeProperty("--music-motion-duration");
     };
 
     const renderAudioReactiveLogo = () => {
@@ -1305,22 +1306,32 @@ export function mountPremiumLanding({
       const reduced = reducedMotionPreference.matches && document.documentElement.dataset.motionOverride !== 'on';
       if (isDesktop && !reduced && document.visibilityState === 'visible') {
         const phase = timestamp * 0.001;
-        const fieldX = Math.sin(phase * 0.38) * 1.8;
-        const fieldY = Math.cos(phase * 0.29) * 1.25;
-        const fieldScale = 1.018 + ((Math.sin(phase * 0.23) + 1) * 0.008);
-        const beamX = Math.sin(phase * 0.52) * 58;
-        const coreScale = 0.92 + ((Math.sin(phase * 0.76) + 1) * 0.16);
+        const energy = musicReactiveActive ? musicEnergy : 0;
+        const pulse = musicReactiveActive ? Math.min(1, Math.max(0, musicEnergy * 0.72 + audioReactiveLevel * 0.82)) : 0;
+        const musicalBreath = Math.sin(phase * 0.9) * 0.5 + 0.5;
+        const fieldX = Math.sin(phase * 0.38) * (1.8 + energy * 3.8) + Math.sin(phase * 3.6) * pulse * 0.7;
+        const fieldY = Math.cos(phase * 0.29) * (1.25 + energy * 2.4) + Math.cos(phase * 2.8) * pulse * 0.45;
+        const fieldScale = 1.018 + ((Math.sin(phase * 0.23) + 1) * 0.008) + energy * 0.025 + pulse * 0.012;
+        const beamX = Math.sin(phase * 0.52) * (58 + energy * 22) + Math.sin(phase * 4.2) * pulse * 6;
+        const coreScale = 0.92 + ((Math.sin(phase * 0.76) + 1) * 0.16) + energy * 0.2 + pulse * 0.12 + musicalBreath * energy * 0.04;
+        const motionDuration = Math.max(3.1, 5.7 - energy * 1.65 - pulse * 0.55);
         root.style.setProperty('--desktop-field-x', `${fieldX.toFixed(3)}%`);
         root.style.setProperty('--desktop-field-y', `${fieldY.toFixed(3)}%`);
         root.style.setProperty('--desktop-field-scale', fieldScale.toFixed(4));
         root.style.setProperty('--desktop-beam-x', `${beamX.toFixed(2)}%`);
         root.style.setProperty('--desktop-core-scale', coreScale.toFixed(4));
+        root.style.setProperty('--desktop-neural-energy', energy.toFixed(3));
+        root.style.setProperty('--desktop-neural-pulse', pulse.toFixed(3));
+        root.style.setProperty('--music-motion-duration', `${motionDuration.toFixed(2)}s`);
       } else if (!isDesktop || reduced) {
         root.style.removeProperty('--desktop-field-x');
         root.style.removeProperty('--desktop-field-y');
         root.style.removeProperty('--desktop-field-scale');
         root.style.removeProperty('--desktop-beam-x');
         root.style.removeProperty('--desktop-core-scale');
+        root.style.removeProperty('--desktop-neural-energy');
+        root.style.removeProperty('--desktop-neural-pulse');
+        root.style.removeProperty('--music-motion-duration');
       }
       desktopNeuralMotionFrame = window.requestAnimationFrame(renderDesktopNeuralMotion);
     };
@@ -1334,6 +1345,9 @@ export function mountPremiumLanding({
       root.style.removeProperty('--desktop-field-scale');
       root.style.removeProperty('--desktop-beam-x');
       root.style.removeProperty('--desktop-core-scale');
+      root.style.removeProperty('--desktop-neural-energy');
+      root.style.removeProperty('--desktop-neural-pulse');
+      root.style.removeProperty('--music-motion-duration');
     });
 
     const startAudioReactiveLogo = () => {
