@@ -89,13 +89,12 @@ test("invite preserves target through authentication", () => {
   assert.match(invite, /beginLogin\(`\/invite\/\$\{encodeURIComponent\(token\)\}`\)/);
 });
 
-test("OIDC transaction has a short-lived secure cookie fallback", () => {
-  assert.match(oidc, /patroai_oidc_transaction/);
-  assert.match(oidc, /Max-Age=/);
-  assert.match(oidc, /Path=\/auth\/callback/);
-  assert.match(oidc, /SameSite=Lax/);
-  assert.match(oidc, /Secure/);
-  assert.match(oidc, /getTransactionCookie/);
+test("OIDC transaction fails closed without a JavaScript-readable cookie", () => {
+  assert.match(oidc, /sessionStorage\.setItem/);
+  assert.match(oidc, /OIDC_TRANSACTION_STORAGE_UNAVAILABLE/);
+  assert.doesNotMatch(oidc, /document\.cookie/);
+  assert.doesNotMatch(oidc, /getTransactionCookie/);
+  assert.doesNotMatch(oidc, /patroai_oidc_transaction/);
 });
 
 test("callback explains recoverable transaction failures", () => {

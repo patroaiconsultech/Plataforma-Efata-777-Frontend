@@ -63,6 +63,15 @@ const VOICE_MAX_RECORDING_SECONDS = 90;
 const ATTACHMENT_ACCEPT =
   ".pdf,.txt,.csv,.md,.markdown,.json,.docx,.xlsx,.pptx";
 
+const VOICE_INPUT_CONSTRAINTS: MediaStreamConstraints = {
+  audio: {
+    channelCount: 1,
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: false,
+  },
+};
+
 function formatVoiceElapsed(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   const remainder = seconds % 60;
@@ -725,7 +734,7 @@ export default function AppConsole() {
     const recordThreadId = threadId;
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia(VOICE_INPUT_CONSTRAINTS);
       if (sessionId !== voiceSessionRef.current) {
         stream.getTracks().forEach((track) => track.stop());
         return;
@@ -1245,7 +1254,7 @@ export default function AppConsole() {
     };
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia(VOICE_INPUT_CONSTRAINTS);
       if (!isCurrentAttempt()) {
         stream.getTracks().forEach((track) => track.stop());
         try {

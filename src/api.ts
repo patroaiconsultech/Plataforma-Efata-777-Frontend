@@ -29,7 +29,6 @@ export function getToken(): string | null {
       sessionStorage.getItem(TOKEN_EXPIRY_STORAGE_KEY) || "0",
     );
     if (token && expiresAt > 0 && Date.now() >= expiresAt) {
-      clearToken();
       return null;
     }
     return token;
@@ -90,7 +89,6 @@ async function readError(response: Response): Promise<ApiError> {
   } catch {
     /* corpo não é JSON: mantém o texto */
   }
-  if (response.status === 401) clearToken();
   return new ApiError(response.status, String(code).slice(0, 200));
 }
 
@@ -113,7 +111,11 @@ export async function apiJson<T = unknown>(
   if (init.body !== undefined && init.body !== null)
     headers.set("Content-Type", "application/json");
   const response = await fetch(`${BASE}${path}`, { ...init, headers });
-  if (!response.ok) throw await readError(response);
+  if (!response.ok) {
+    const error = await readError(response);
+    if (response.status === 401) clearToken();
+    throw error;
+  }
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }
@@ -136,7 +138,11 @@ export async function apiForm<T = unknown>(
     body: form,
     headers,
   });
-  if (!response.ok) throw await readError(response);
+  if (!response.ok) {
+    const error = await readError(response);
+    if (response.status === 401) clearToken();
+    throw error;
+  }
   return (await response.json()) as T;
 }
 
@@ -155,6 +161,7 @@ export type AgentDefinition = {
   localized_names?: Record<string, string>;
   localized_role_labels?: Record<string, string>;
   availability?: {
+    status?: string;
     registered?: boolean;
     configured?: boolean;
     ready?: boolean;
@@ -246,6 +253,7 @@ export type TeamParticipantPolicy = {
 export type TeamDefinition = {
   team_id: string;
   display_name: string;
+  description?: string;
   orchestrator_agent_id: string;
   candidate_contributor_agent_ids: string[];
   participant_policy: TeamParticipantPolicy;

@@ -7,8 +7,6 @@ import {
 import { publicEnv } from "../config/runtime";
 
 const TRANSACTION_STORAGE_KEY = "orkio_oidc_transaction";
-const TRANSACTION_COOKIE_NAME = "patroai_oidc_transaction";
-const TRANSACTION_COOKIE_MAX_AGE_SECONDS = 10 * 60;
 const ID_TOKEN_STORAGE_KEY = "orkio_oidc_id_token";
 
 export class OidcError extends Error {
@@ -142,46 +140,11 @@ function safeReturnTo(value: string): string {
   }
 }
 
-function setTransactionCookie(raw: string): void {
-  if (typeof document === "undefined") return;
-  document.cookie = [
-    `${TRANSACTION_COOKIE_NAME}=${encodeURIComponent(raw)}`,
-    `Max-Age=${TRANSACTION_COOKIE_MAX_AGE_SECONDS}`,
-    "Path=/auth/callback",
-    "SameSite=Lax",
-    "Secure",
-  ].join("; ");
-}
-
-function getTransactionCookie(): string | null {
-  if (typeof document === "undefined") return null;
-  const prefix = `${TRANSACTION_COOKIE_NAME}=`;
-  const match = document.cookie
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(prefix));
-  if (!match) return null;
-  try {
-    return decodeURIComponent(match.slice(prefix.length));
-  } catch {
-    return null;
-  }
-}
-
 function clearTransaction(): void {
   try {
     sessionStorage.removeItem(TRANSACTION_STORAGE_KEY);
   } catch {
-    /* armazenamento indisponível: o cookie ainda pode ser removido */
-  }
-  if (typeof document !== "undefined") {
-    document.cookie = [
-      `${TRANSACTION_COOKIE_NAME}=`,
-      "Max-Age=0",
-      "Path=/auth/callback",
-      "SameSite=Lax",
-      "Secure",
-    ].join("; ");
+    /* armazenamento indisponível: não há estado local seguro a remover */
   }
 }
 
@@ -190,19 +153,23 @@ function saveTransaction(transaction: OidcTransaction): void {
   try {
     sessionStorage.setItem(TRANSACTION_STORAGE_KEY, raw);
   } catch {
-    /* fallback para o cookie de transação */
+    throw new OidcError(
+      "OIDC_TRANSACTION_STORAGE_UNAVAILABLE",
+      "O armazenamento seguro da transação OIDC está indisponível nesta janela.",
+    );
   }
-  setTransactionCookie(raw);
 }
 
 function loadTransaction(): OidcTransaction {
-  let raw: string | null = null;
+  let raw: string | null;
   try {
     raw = sessionStorage.getItem(TRANSACTION_STORAGE_KEY);
   } catch {
-    /* fallback para o cookie de transação */
+    throw new OidcError(
+      "OIDC_TRANSACTION_STORAGE_UNAVAILABLE",
+      "O armazenamento seguro da transação OIDC está indisponível nesta janela.",
+    );
   }
-  raw ||= getTransactionCookie();
   if (!raw) throw new OidcError("OIDC_TRANSACTION_MISSING");
   let transaction: OidcTransaction;
   try {
