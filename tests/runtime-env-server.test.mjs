@@ -79,3 +79,32 @@ test("GET /env.js exposes only allowlisted public keys under contaminated enviro
     assert.doesNotMatch(body, new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
 });
+
+test("missing immutable assets return 404 instead of SPA fallback HTML", async (t) => {
+  const port = await freePort();
+  const child = spawn(process.execPath, ["server.mjs"], {
+    cwd: process.cwd(),
+    env: {
+      PATH: process.env.PATH || "",
+      HOME: process.env.HOME || "",
+      NODE_ENV: "test",
+      PORT: String(port),
+      VITE_API_BASE_URL: "https://api.example.test",
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  t.after(() => {
+    if (!child.killed) child.kill("SIGTERM");
+  });
+
+  await waitFor(`http://127.0.0.1:${port}/`);
+  const response = await fetch(
+    `http://127.0.0.1:${port}/assets/__missing_asset_probe_777__.js`,
+    { headers: { Accept: "text/javascript,*/*" } },
+  );
+
+  assert.equal(response.status, 404);
+  assert.match(response.headers.get("content-type") || "", /^text\/plain/);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.equal(await response.text(), "Not found");
+});

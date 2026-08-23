@@ -29,6 +29,12 @@ test("server keeps SPA fallback and blocks path traversal", () => {
   assert.match(server, /decodeURIComponent/);
 });
 
+test("server does not cache missing static assets as SPA HTML", () => {
+  assert.match(server, /function isStaticAssetRequest/);
+  assert.match(server, /pathname\.startsWith\("\/assets\/"\)/);
+  assert.match(server, /response\.writeHead\(404\)/);
+  assert.match(server, /Cache-Control", "no-store"/);
+});
 
 test("server CSP allows blob audio playback without relaxing default-src", () => {
   assert.match(server, /"media-src 'self' blob:"/);

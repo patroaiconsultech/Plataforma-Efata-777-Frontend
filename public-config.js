@@ -1,25 +1,12 @@
 export const PUBLIC_CONFIG_KEYS = Object.freeze([
   "VITE_API_BASE_URL",
   "VITE_STREAM_TIMEOUT_MS",
-  "VITE_OIDC_AUTHORIZATION_ENDPOINT",
-  "VITE_OIDC_TOKEN_ENDPOINT",
-  "VITE_OIDC_END_SESSION_ENDPOINT",
-  "VITE_OIDC_CLIENT_ID",
-  "VITE_OIDC_REDIRECT_URI",
-  "VITE_OIDC_POST_LOGOUT_REDIRECT_URI",
-  "VITE_OIDC_SCOPE",
-  "VITE_OIDC_AUDIENCE",
 ]);
 
 const PUBLIC_CONFIG_KEY_SET = new Set(PUBLIC_CONFIG_KEYS);
 
 const URL_KEYS = new Set([
   "VITE_API_BASE_URL",
-  "VITE_OIDC_AUTHORIZATION_ENDPOINT",
-  "VITE_OIDC_TOKEN_ENDPOINT",
-  "VITE_OIDC_END_SESSION_ENDPOINT",
-  "VITE_OIDC_REDIRECT_URI",
-  "VITE_OIDC_POST_LOGOUT_REDIRECT_URI",
 ]);
 
 function own(object, key) {
@@ -61,26 +48,6 @@ function validTimeout(value) {
   return { ok: true, value: String(parsed) };
 }
 
-function validOpaque(value, maxLength = 2048) {
-  if (!value) return { ok: true, value: "" };
-  if (value.length > maxLength) return { ok: false, value: "", reason: "VALUE_TOO_LONG" };
-  if (/[\u0000-\u001F\u007F]/.test(value)) {
-    return { ok: false, value: "", reason: "CONTROL_CHARACTER_FORBIDDEN" };
-  }
-  return { ok: true, value };
-}
-
-function validScope(value) {
-  if (!value) return { ok: true, value: "" };
-  const opaque = validOpaque(value, 4096);
-  if (!opaque.ok) return opaque;
-  const scopes = value.split(/\s+/).filter(Boolean);
-  if (!scopes.includes("openid")) {
-    return { ok: false, value: "", reason: "OIDC_SCOPE_REQUIRES_OPENID" };
-  }
-  return { ok: true, value: scopes.join(" ") };
-}
-
 export function validatePublicConfigValue(key, raw) {
   if (!PUBLIC_CONFIG_KEY_SET.has(key)) {
     return { ok: false, value: "", reason: "KEY_NOT_ALLOWLISTED" };
@@ -88,9 +55,6 @@ export function validatePublicConfigValue(key, raw) {
   const value = clean(raw);
   if (URL_KEYS.has(key)) return validWebUrl(value);
   if (key === "VITE_STREAM_TIMEOUT_MS") return validTimeout(value);
-  if (key === "VITE_OIDC_SCOPE") return validScope(value);
-  if (key === "VITE_OIDC_CLIENT_ID") return validOpaque(value, 512);
-  if (key === "VITE_OIDC_AUDIENCE") return validOpaque(value, 2048);
   return { ok: false, value: "", reason: "VALIDATOR_MISSING" };
 }
 

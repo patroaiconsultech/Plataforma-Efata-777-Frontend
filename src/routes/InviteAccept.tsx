@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ApiError, acceptInvite, getToken, isApiBaseConfigured } from "../api";
-import { beginLogin, isOidcConfigured } from "../auth/oidc";
+import { ApiError, acceptInvite, getNativeSession, isApiBaseConfigured } from "../api";
 
 type State = "idle" | "working" | "accepted" | "failed";
 
@@ -14,13 +13,34 @@ export default function InviteAccept() {
   const navigate = useNavigate();
   const [state, setState] = useState<State>("idle");
   const [detail, setDetail] = useState("");
+  const [authenticated, setAuthenticated] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   const configured = isApiBaseConfigured();
-  const authenticated = Boolean(getToken());
-  const authConfigured = isOidcConfigured();
 
   useEffect(() => {
-    if (!configured || !authenticated || !token || state !== "idle") return;
+    if (!configured) {
+      setCheckingSession(false);
+      return;
+    }
+    let active = true;
+    getNativeSession()
+      .then((session) => {
+        if (active) setAuthenticated(Boolean(session.authenticated));
+      })
+      .catch(() => {
+        if (active) setAuthenticated(false);
+      })
+      .finally(() => {
+        if (active) setCheckingSession(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [configured]);
+
+  useEffect(() => {
+    if (!configured || checkingSession || !authenticated || !token || state !== "idle") return;
     let active = true;
     setState("working");
     acceptInvite(token)
@@ -49,33 +69,25 @@ export default function InviteAccept() {
     return () => {
       active = false;
     };
-  }, [authenticated, configured, navigate, state, token]);
+  }, [authenticated, checkingSession, configured, navigate, state, token]);
 
   return (
     <main id="main-content" className="invite-shell">
       <h1>Convite para conversa</h1>
       {!configured ? (
         <p role="alert">A URL da API não está configurada nesta implantação.</p>
+      ) : checkingSession ? (
+        <p role="status">Verificando sua sessão.</p>
       ) : !token ? (
         <p role="alert">Link de convite incompleto.</p>
       ) : !authenticated ? (
         <div role="alert">
           <p>
-            {authConfigured
-              ? "Autentique-se para aceitar este convite. O link permanece válido até a data de expiração."
-              : "A autenticação OIDC ainda não está configurada nesta implantação."}
+            Autentique-se para aceitar este convite. O link permanece válido até a data de expiração.
           </p>
-          {authConfigured ? (
-            <button
-              type="button"
-              className="primary-button"
-              onClick={() =>
-                void beginLogin(`/invite/${encodeURIComponent(token)}`)
-              }
-            >
-              Entrar para aceitar
-            </button>
-          ) : null}
+          <Link className="primary-button" to="/access">
+            Entrar para aceitar
+          </Link>
         </div>
       ) : state === "working" ? (
         <p role="status">Validando o convite.</p>

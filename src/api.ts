@@ -23,38 +23,12 @@ export function isApiBaseConfigured(): boolean {
 }
 
 export function getToken(): string | null {
-  try {
-    const token = sessionStorage.getItem(TOKEN_STORAGE_KEY);
-    const expiresAt = Number(
-      sessionStorage.getItem(TOKEN_EXPIRY_STORAGE_KEY) || "0",
-    );
-    if (token && expiresAt > 0 && Date.now() >= expiresAt) {
-      return null;
-    }
-    return token;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 export function setToken(token: string, expiresInSeconds?: number): void {
-  try {
-    sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
-    if (
-      typeof expiresInSeconds === "number" &&
-      Number.isFinite(expiresInSeconds) &&
-      expiresInSeconds > 0
-    ) {
-      sessionStorage.setItem(
-        TOKEN_EXPIRY_STORAGE_KEY,
-        String(Date.now() + expiresInSeconds * 1000),
-      );
-    } else {
-      sessionStorage.removeItem(TOKEN_EXPIRY_STORAGE_KEY);
-    }
-  } catch {
-    /* armazenamento indisponível: a sessão apenas não persiste */
-  }
+  void token;
+  void expiresInSeconds;
 }
 
 export function clearToken(): void {
@@ -71,8 +45,6 @@ export function clearToken(): void {
 
 function authHeaders(extra?: HeadersInit): Headers {
   const headers = new Headers(extra);
-  const token = getToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
   return headers;
 }
 
@@ -110,7 +82,11 @@ export async function apiJson<T = unknown>(
   const headers = authHeaders(init.headers);
   if (init.body !== undefined && init.body !== null)
     headers.set("Content-Type", "application/json");
-  const response = await fetch(`${BASE}${path}`, { ...init, headers });
+  const response = await fetch(`${BASE}${path}`, {
+    ...init,
+    headers,
+    credentials: "include",
+  });
   if (!response.ok) {
     const error = await readError(response);
     if (response.status === 401) clearToken();
@@ -137,6 +113,7 @@ export async function apiForm<T = unknown>(
     method: init.method || "POST",
     body: form,
     headers,
+    credentials: "include",
   });
   if (!response.ok) {
     const error = await readError(response);
@@ -476,6 +453,7 @@ export async function messageVoice(
       body: JSON.stringify({ locale }),
       signal,
       cache: "no-store",
+      credentials: "include",
     },
   );
   if (!response.ok) throw await readError(response);
@@ -612,6 +590,7 @@ export async function streamRealtimeTurn(
         headers,
         body: JSON.stringify({ locale: "pt-BR", ...payload }),
         signal,
+        credentials: "include",
       },
     );
     if (!response.ok) throw await readError(response);
@@ -806,7 +785,7 @@ export function parseArtifactMetadata(
 }
 
 /**
- * Download autenticado: token somente no cabeçalho Authorization.
+ * Download autenticado por cookie HttpOnly.
  * O caminho vem de metadata terminal validada e nunca aceita URL externa.
  */
 export async function downloadArtifact(artifact: ArtifactMetadata): Promise<void> {
@@ -822,6 +801,7 @@ export async function downloadArtifact(artifact: ArtifactMetadata): Promise<void
     method: "GET",
     headers,
     cache: "no-store",
+    credentials: "include",
   });
   if (!response.ok) throw await readError(response);
 
@@ -860,7 +840,7 @@ export type StreamHandlers = {
 
 /**
  * Consome SSE por fetch, em vez de EventSource, porque o endpoint é POST
- * e exige cabeçalho Authorization.
+ * e usa a sessão HttpOnly criada pelo backend.
  *
  * Garante terminal: onDone é sempre invocado, inclusive em falha de rede
  * ou quando o servidor encerra sem enviar done, para que a interface nunca
@@ -887,7 +867,13 @@ export async function streamMessage(
     headers.set("Accept", "text/event-stream");
     const response = await fetch(
       `${BASE}/api/v2/threads/${encodeURIComponent(threadId)}/stream`,
-      { method: "POST", headers, body: JSON.stringify({ content, agent }), signal },
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ content, agent }),
+        signal,
+        credentials: "include",
+      },
     );
     if (!response.ok) {
       const error = await readError(response);
@@ -985,6 +971,7 @@ export async function streamTeamMessage(
         headers,
         body: JSON.stringify({ content, ...team }),
         signal,
+        credentials: "include",
       },
     );
     if (!response.ok) {
@@ -1052,6 +1039,84 @@ export async function streamTeamMessage(
 
 /** Compatibilidade com o consumo anterior. */
 export const api = apiJson;
+
+export type NativeSession = {
+  authenticated: boolean;
+  user_id?: string | null;
+  tenant_id?: string | null;
+  email?: string | null;
+  roles: string[];
+};
+
+export async function nativeLogin(input: {
+  email: string;
+  password: string;
+}): Promise<NativeSession> {
+  return apiJson<NativeSession>("/api/v2/auth/login", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function nativeBootstrapOwner(input: {
+  bootstrap_secret: string;
+  tenant_id: string;
+  tenant_name: string;
+  email: string;
+  display_name: string;
+  password: string;
+}): Promise<NativeSession> {
+  return apiJson<NativeSession>("/api/v2/auth/bootstrap-owner", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function nativeRegister(input: {
+  grant: string;
+  email: string;
+  display_name: string;
+  password: string;
+  co_creator_name: string;
+  onboarding_goal?: string | null;
+}): Promise<NativeSession> {
+  return apiJson<NativeSession>("/api/v2/auth/register", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function nativeForgotPassword(input: {
+  email: string;
+}): Promise<{ status: string; reset_token?: string | null }> {
+  return apiJson("/api/v2/auth/password/forgot", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function nativeResetPassword(input: {
+  token: string;
+  password: string;
+  password_confirm: string;
+}): Promise<NativeSession> {
+  return apiJson("/api/v2/auth/password/reset", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function nativeLogout(): Promise<NativeSession> {
+  const response = await apiJson<NativeSession>("/api/v2/auth/logout", {
+    method: "POST",
+  });
+  clearToken();
+  return response;
+}
+
+export async function getNativeSession(): Promise<NativeSession> {
+  return apiJson<NativeSession>("/api/v2/auth/session");
+}
 
 
 export type HyperCocreatorMe = {

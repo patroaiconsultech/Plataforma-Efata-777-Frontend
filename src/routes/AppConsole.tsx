@@ -12,10 +12,10 @@ import {
   createThread,
   commitRealtimeTurn,
   downloadArtifact,
-  getToken,
   isApiBaseConfigured,
   getDocumentContextProvenance,
   getMe,
+  nativeLogout,
   completeHyperCocreatorOnboarding,
   HyperCocreatorMe,
   getRealtimeCapabilities,
@@ -39,7 +39,6 @@ import {
 import ArtifactCard from "../components/ArtifactCard";
 import SafeMarkdown from "../components/SafeMarkdown";
 import PwaInstallButton from "../components/PwaInstallButton";
-import { beginLogin, isOidcConfigured, logout } from "../auth/oidc";
 import { ONBOARDING_DRAFT_KEY } from "./AccessPortal";
 import {
   formatConversationTimestamp,
@@ -89,12 +88,13 @@ function describe(error: unknown): string {
     LLM_UPSTREAM_ERROR: "O provedor de linguagem falhou. Tente novamente.",
     LLM_EMPTY_RESPONSE: "O provedor devolveu resposta vazia.",
     AUTH_PROVIDER_REQUIRED: "É necessário autenticar-se para continuar.",
+    NATIVE_SESSION_REQUIRED: "Sessão ausente ou expirada.",
     BEARER_TOKEN_REQUIRED: "Sessão ausente ou expirada.",
     TOKEN_INACTIVE: "Sessão expirada. Autentique-se novamente.",
     TOKEN_ISSUER_INVALID: "O emissor da sessão não é reconhecido.",
     TOKEN_AUDIENCE_INVALID: "A sessão não foi emitida para esta plataforma.",
     IDENTITY_PROVIDER_UNAVAILABLE:
-      "O provedor de identidade está temporariamente indisponível.",
+      "A autenticação da PatroAI está temporariamente indisponível.",
     PRINCIPAL_NOT_PROVISIONED:
       "Sua identidade ainda não está provisionada nesta organização.",
     THREAD_NOT_FOUND: "Conversa não encontrada.",
@@ -245,7 +245,7 @@ export default function AppConsole() {
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
-  const [authenticated, setAuthenticated] = useState(() => Boolean(getToken()));
+  const [authenticated, setAuthenticated] = useState(true);
   const [me, setMe] = useState<HyperCocreatorMe | null>(null);
   const [provisioningBlocked, setProvisioningBlocked] = useState(false);
   const [agents, setAgents] = useState<AgentDefinition[]>([]);
@@ -314,7 +314,7 @@ export default function AppConsole() {
   const realtimeAudioLifecycleRef = useRef(0);
   const realtimeOutputAbortRef = useRef<AbortController | null>(null);
   const configured = isApiBaseConfigured();
-  const authConfigured = isOidcConfigured();
+  const authConfigured = configured;
   const accountReady = authenticated && Boolean(me) && !provisioningBlocked;
 
   function deriveThreadTitle(content: string): string {
@@ -513,10 +513,16 @@ export default function AppConsole() {
         }
       } catch (err) {
         if (active) {
-          setProvisioningBlocked(
-            err instanceof ApiError && err.code === "PRINCIPAL_NOT_PROVISIONED",
-          );
-          setError(describe(err));
+          if (err instanceof ApiError && err.status === 401) {
+            setAuthenticated(false);
+            setMe(null);
+            setProvisioningBlocked(false);
+          } else {
+            setProvisioningBlocked(
+              err instanceof ApiError && err.code === "PRINCIPAL_NOT_PROVISIONED",
+            );
+            setError(describe(err));
+          }
         }
       }
     };
@@ -593,7 +599,7 @@ export default function AppConsole() {
   }, []);
 
   useEffect(() => {
-    const handleAuthRequired = () => setAuthenticated(Boolean(getToken()));
+    const handleAuthRequired = () => setAuthenticated(false);
     window.addEventListener(AUTH_REQUIRED_EVENT, handleAuthRequired);
     return () =>
       window.removeEventListener(AUTH_REQUIRED_EVENT, handleAuthRequired);
@@ -604,7 +610,7 @@ export default function AppConsole() {
     setError(
       authConfigured
         ? "Autentique-se para continuar."
-        : "A autenticação OIDC ainda não está configurada nesta implantação.",
+        : "A API ainda não está configurada nesta implantação.",
     );
     return false;
   }
@@ -1973,24 +1979,19 @@ export default function AppConsole() {
                   <button
                     type="button"
                     onClick={() => {
-                      logout();
+                      void nativeLogout().finally(() => {
                       setAuthenticated(false);
+                        setMe(null);
+                      });
                     }}
                   >
                     Sair
                   </button>
                 </>
               ) : (
-                <button
-                  type="button"
-                  onClick={() =>
-                    void beginLogin(
-                      `${window.location.pathname}${window.location.search}`,
-                    )
-                  }
-                >
+                <Link className="ghost-link" to="/access">
                   Entrar
-                </button>
+                </Link>
               )
             ) : null}
             <button
@@ -2008,12 +2009,12 @@ export default function AppConsole() {
             <span>
               {authConfigured
                 ? "Autentique-se para usar conversas, anexos e convites."
-                : "A autenticação OIDC ainda não está configurada nesta implantação."}
+                : "A API ainda não está configurada nesta implantação."}
             </span>
             {authConfigured ? (
-              <button type="button" onClick={() => void beginLogin("/app")}>
+              <Link className="primary-button" to="/access">
                 Entrar
-              </button>
+              </Link>
             ) : null}
           </div>
         ) : null}

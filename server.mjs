@@ -99,6 +99,23 @@ function safePathname(rawUrl) {
   }
 }
 
+function isStaticAssetRequest(pathname) {
+  return (
+    pathname.startsWith("/assets/") ||
+    pathname.startsWith("/icons/") ||
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
+    pathname === "/sw.js" ||
+    Boolean(path.extname(pathname))
+  );
+}
+
+function acceptsHtml(request) {
+  const accept = String(request.headers.accept || "");
+  return !accept || accept.includes("text/html") || accept.includes("*/*");
+}
+
 http
   .createServer((request, response) => {
     securityHeaders(response);
@@ -125,6 +142,13 @@ http
     }
 
     if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+      if (isStaticAssetRequest(pathname) || !acceptsHtml(request)) {
+        response.setHeader("Content-Type", "text/plain; charset=utf-8");
+        response.setHeader("Cache-Control", "no-store");
+        response.writeHead(404);
+        response.end("Not found");
+        return;
+      }
       file = path.join(root, "index.html");
       requested = "/index.html";
     }

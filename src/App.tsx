@@ -8,7 +8,6 @@ import {
 import Landing from "./routes/Landing";
 import AppConsole from "./routes/AppConsole";
 import InviteAccept from "./routes/InviteAccept";
-import AuthCallback from "./routes/AuthCallback";
 import AccessPortal from "./routes/AccessPortal";
 import AdminPanel from "./routes/AdminPanel";
 import PwaUpdateBanner from "./components/PwaUpdateBanner";
@@ -27,7 +26,6 @@ export default function App() {
         <Route path="/access" element={<AccessPortal />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

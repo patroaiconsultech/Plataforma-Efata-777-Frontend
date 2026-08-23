@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import PwaInstallButton from "../components/PwaInstallButton";
-import { getToken } from "../api";
 import { premiumMarkup } from "../landing/premiumMarkup";
 import { mountPremiumLanding } from "../landing/premiumInteractions";
 import "../landing/premium.css";
@@ -20,11 +19,7 @@ export default function Landing() {
       root,
       onPwaSlot: setPwaSlot,
       onPrivateAccess: async () => {
-        if (getToken()) {
-          navigate("/app");
-          return;
-        }
-        navigate("/access");
+        navigate("/app");
       },
     });
   }, [navigate]);
