@@ -23,11 +23,11 @@ test("valid HTTPS URL passes and insecure remote HTTP fails", () => {
 
 test("URL credentials and malformed URLs fail closed", () => {
   assert.equal(
-    validatePublicConfigValue("VITE_OIDC_TOKEN_ENDPOINT", "https://user:pass@example.test/token").ok,
+    validatePublicConfigValue("VITE_API_BASE_URL", "https://user:pass@example.test/api").ok,
     false,
   );
   assert.equal(
-    validatePublicConfigValue("VITE_OIDC_TOKEN_ENDPOINT", "not-a-url").ok,
+    validatePublicConfigValue("VITE_API_BASE_URL", "not-a-url").ok,
     false,
   );
 });
@@ -41,14 +41,10 @@ test("timeout must be a positive safe integer", () => {
   assert.equal(validatePublicConfigValue("VITE_STREAM_TIMEOUT_MS", "abc").ok, false);
 });
 
-test("OIDC scope must contain openid when non-empty", () => {
-  assert.equal(
-    validatePublicConfigValue("VITE_OIDC_SCOPE", "openid profile email").ok,
-    true,
-  );
-  assert.equal(
-    validatePublicConfigValue("VITE_OIDC_SCOPE", "profile email").ok,
-    false,
+test("unknown public keys fail closed", () => {
+  assert.deepEqual(
+    validatePublicConfigValue("VITE_OIDC_SCOPE", "openid profile email"),
+    { ok: false, value: "", reason: "KEY_NOT_ALLOWLISTED" },
   );
 });
 
@@ -83,11 +79,11 @@ test("invalid runtime value fails closed and never revives stale valid build fal
   assert.equal(resolved.value, "");
 });
 
-test("explicit empty optional runtime value overrides build fallback", () => {
+test("explicit empty optional runtime timeout overrides build fallback", () => {
   const resolved = resolvePublicConfigValue(
-    "VITE_OIDC_AUDIENCE",
-    { VITE_OIDC_AUDIENCE: "" },
-    { VITE_OIDC_AUDIENCE: "old-audience" },
+    "VITE_STREAM_TIMEOUT_MS",
+    { VITE_STREAM_TIMEOUT_MS: "" },
+    { VITE_STREAM_TIMEOUT_MS: "300000" },
   );
   assert.equal(resolved.source, "runtime");
   assert.equal(resolved.ok, true);
@@ -97,12 +93,13 @@ test("explicit empty optional runtime value overrides build fallback", () => {
 test("runtime collector serializes only allowlisted keys and neutralizes invalid public values", () => {
   const { config, errors } = collectPublicRuntimeConfig({
     VITE_API_BASE_URL: "http://remote.example.test",
+    VITE_STREAM_TIMEOUT_MS: "300000",
     VITE_OIDC_CLIENT_ID: "client-123",
     OPENAI_API_KEY: "must-not-leak",
   });
-  assert.deepEqual(Object.keys(config).sort(), ["VITE_API_BASE_URL", "VITE_OIDC_CLIENT_ID"].sort());
+  assert.deepEqual(Object.keys(config).sort(), ["VITE_API_BASE_URL", "VITE_STREAM_TIMEOUT_MS"].sort());
   assert.equal(config.VITE_API_BASE_URL, "");
-  assert.equal(config.VITE_OIDC_CLIENT_ID, "client-123");
+  assert.equal(config.VITE_STREAM_TIMEOUT_MS, "300000");
   assert.equal(errors.length, 1);
   assert.equal(errors[0].key, "VITE_API_BASE_URL");
 });

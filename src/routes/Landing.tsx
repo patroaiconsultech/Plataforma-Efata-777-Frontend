@@ -19,7 +19,7 @@ export default function Landing() {
       root,
       onPwaSlot: setPwaSlot,
       onPrivateAccess: async () => {
-        navigate("/app");
+        navigate("/access");
       },
     });
   }, [navigate]);

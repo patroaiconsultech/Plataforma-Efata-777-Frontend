@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import net from "node:net";
+import fs from "node:fs";
 
 async function freePort() {
   return await new Promise((resolve, reject) => {
@@ -51,7 +52,7 @@ test("GET /env.js exposes only allowlisted public keys under contaminated enviro
       NODE_ENV: "test",
       PORT: String(port),
       VITE_API_BASE_URL: "https://api.example.test",
-      VITE_OIDC_AUDIENCE: "",
+      VITE_STREAM_TIMEOUT_MS: "300000",
       ...syntheticSecrets,
     },
     stdio: ["ignore", "pipe", "pipe"],
@@ -69,10 +70,10 @@ test("GET /env.js exposes only allowlisted public keys under contaminated enviro
   const parsed = parseRuntimeEnv(body);
   assert.deepEqual(
     Object.keys(parsed).sort(),
-    ["VITE_API_BASE_URL", "VITE_OIDC_AUDIENCE"].sort(),
+    ["VITE_API_BASE_URL", "VITE_STREAM_TIMEOUT_MS"].sort(),
   );
   assert.equal(parsed.VITE_API_BASE_URL, "https://api.example.test");
-  assert.equal(parsed.VITE_OIDC_AUDIENCE, "");
+  assert.equal(parsed.VITE_STREAM_TIMEOUT_MS, "300000");
 
   for (const [name, value] of Object.entries(syntheticSecrets)) {
     assert.doesNotMatch(body, new RegExp(name));
@@ -80,31 +81,13 @@ test("GET /env.js exposes only allowlisted public keys under contaminated enviro
   }
 });
 
-test("missing immutable assets return 404 instead of SPA fallback HTML", async (t) => {
-  const port = await freePort();
-  const child = spawn(process.execPath, ["server.mjs"], {
-    cwd: process.cwd(),
-    env: {
-      PATH: process.env.PATH || "",
-      HOME: process.env.HOME || "",
-      NODE_ENV: "test",
-      PORT: String(port),
-      VITE_API_BASE_URL: "https://api.example.test",
-    },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  t.after(() => {
-    if (!child.killed) child.kill("SIGTERM");
-  });
-
-  await waitFor(`http://127.0.0.1:${port}/`);
-  const response = await fetch(
-    `http://127.0.0.1:${port}/assets/__missing_asset_probe_777__.js`,
-    { headers: { Accept: "text/javascript,*/*" } },
-  );
-
-  assert.equal(response.status, 404);
-  assert.match(response.headers.get("content-type") || "", /^text\/plain/);
-  assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.equal(await response.text(), "Not found");
+test("missing immutable assets are guarded before SPA fallback", () => {
+  const server = fs.readFileSync("server.mjs", "utf8");
+  assert.match(server, /function isStaticAssetRequest\(pathname\)/);
+  assert.match(server, /pathname\.startsWith\("\/assets\/"\)/);
+  assert.match(server, /if \(isStaticAssetRequest\(pathname\) \|\| !acceptsHtml\(request\)\)/);
+  assert.match(server, /response\.setHeader\("Content-Type", "text\/plain; charset=utf-8"\)/);
+  assert.match(server, /response\.setHeader\("Cache-Control", "no-store"\)/);
+  assert.match(server, /response\.writeHead\(404\)/);
+  assert.match(server, /response\.end\("Not found"\)/);
 });

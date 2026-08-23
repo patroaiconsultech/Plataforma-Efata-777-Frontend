@@ -37,15 +37,17 @@ test("api errors carry status and code", () => {
   assert.match(api, /readonly code: string/);
 });
 
-test("401 clears the stored token", () => {
+test("401 invalidates the native session signal", () => {
   assert.match(api, /if \(response\.status === 401\) clearToken\(\)/);
 });
 
-test("token can be written, read and cleared", () => {
+test("session token helpers are inert under HttpOnly cookie auth", () => {
   assert.match(api, /export function setToken/);
   assert.match(api, /export function getToken/);
   assert.match(api, /export function clearToken/);
-  assert.match(api, /sessionStorage\.setItem\(TOKEN_STORAGE_KEY/);
+  assert.match(api, /getToken\(\): string \| null \{\s*return null;/);
+  assert.doesNotMatch(api, /sessionStorage\.setItem\(TOKEN_STORAGE_KEY/);
+  assert.match(api, /credentials: "include"/);
 });
 
 test("missing api base url is reported explicitly", () => {
@@ -74,10 +76,11 @@ test("stream target uses explicit technical namespace", () => {
   assert.match(console_, /technicalAgentTarget\("orkio"\)/);
 });
 
-test("stream uses fetch with Authorization instead of EventSource", () => {
+test("stream uses fetch with HttpOnly cookie credentials instead of EventSource", () => {
   assert.doesNotMatch(api, /new EventSource/);
   assert.match(api, /getReader\(\)/);
   assert.match(api, /Accept", "text\/event-stream/);
+  assert.match(api, /credentials: "include"/);
 });
 
 test("path parameters are encoded", () => {
@@ -156,7 +159,7 @@ test("invite route exists", () => {
 });
 
 test("invite route requires authentication before accepting", () => {
-  assert.match(invite, /getToken\(\)/);
+  assert.match(invite, /getNativeSession/);
   assert.match(invite, /Autentique-se para aceitar este convite/);
 });
 

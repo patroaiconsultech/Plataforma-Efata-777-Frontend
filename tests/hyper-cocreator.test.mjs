@@ -19,10 +19,14 @@ test("access codes are validated by backend and are not embedded in frontend", (
   assert.doesNotMatch(access, /efata777|amchamrs/i);
 });
 
-test("account credentials remain owned by OIDC", () => {
-  assert.match(access, /beginLogin/);
-  assert.doesNotMatch(access, /type="password"/);
-  assert.match(access, /não armazena sua senha/);
+test("account credentials are handled by native HttpOnly session auth", () => {
+  assert.match(access, /nativeLogin/);
+  assert.match(access, /nativeRegister/);
+  assert.match(access, /nativeForgotPassword/);
+  assert.match(access, /nativeResetPassword/);
+  assert.match(access, /type=\{showPassword \? "text" : "password"\}/);
+  assert.match(access, /cookie HttpOnly/);
+  assert.doesNotMatch(access, /beginLogin/);
 });
 
 test("co-creator naming occurs in onboarding draft and is completed after auth", () => {

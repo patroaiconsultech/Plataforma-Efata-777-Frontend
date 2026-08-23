@@ -1,2 +1,3 @@
 src/auth/oidc.ts
 src/routes/AuthCallback.tsx
+tests/oidc-and-terminal.test.mjs

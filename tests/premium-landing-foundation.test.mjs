@@ -64,16 +64,17 @@ test("critical router surfaces remain canonical", () => {
   assert.match(app, /path="\/" element={<Landing/);
   assert.match(app, /path="\/app" element={<AppConsole/);
   assert.match(app, /path="\/invite\/:token"/);
-  assert.match(app, /path="\/auth\/callback"/);
+  assert.match(app, /path="\/access"/);
+  assert.doesNotMatch(app, /path="\/auth\/callback"/);
 });
 
-test("private access routes through code gate before the existing OIDC contract", () => {
+test("private access routes through native access portal and code gate", () => {
   assert.match(markup, /data-private-entry="true"/);
-  assert.match(landing, /getToken/);
   assert.match(landing, /navigate\("\/access"\)/);
   assert.match(accessPortal, /validateAccessCode/);
-  assert.match(accessPortal, /isOidcConfigured/);
-  assert.match(accessPortal, /beginLogin/);
+  assert.match(accessPortal, /nativeLogin/);
+  assert.match(accessPortal, /nativeRegister/);
+  assert.match(accessPortal, /nativeForgotPassword/);
 });
 
 test("neural animation is governed and cleans up browser resources", () => {
