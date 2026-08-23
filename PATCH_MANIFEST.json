@@ -1,40 +1,15 @@
 {
-  "package": "EFATA_FRONTEND_PATCH_DOMAIN_PATROAI_COM_V1",
-  "generated_at_utc": "2026-08-23T13:23:26.055416+00:00",
-  "repository": "https://github.com/patroaiconsultech/Plataforma-Efata-777-Frontend",
-  "source_artifact": "Plataforma-Efata-777-Frontend-main (14).zip",
-  "scope": "SEO canonical domain only",
-  "canonical_origin": "https://patroai.com",
+  "package": "EFATA_FRONTEND_STAGING_CANONICAL_RAILWAY_RESTORE_V1",
+  "generated_at_utc": "2026-08-23T17:27:26.564081+00:00",
+  "purpose": "Keep staging canonical URLs on Railway until patroai.com is officially linked at final release.",
+  "canonical_origin": "https://plataforma-efata-777-frontend-production.up.railway.app",
   "files": [
-    {
-      "path": "index.html",
-      "source_sha256": "44fe2c770216995f67486c293bd12707c3e2d675b3bd8d921807476183ea1dd8",
-      "patched_sha256": "d44904c8e9cba6be6a28b556f905925e11fe592f5ff0f36aa81fe311bcc2516b",
-      "replacement": {
-        "from": "https://plataforma-efata-777-frontend-production.up.railway.app",
-        "to": "https://patroai.com"
-      }
-    },
-    {
-      "path": "public/robots.txt",
-      "source_sha256": "9b8e2053ac746b377b6494f149454407bb5cb9cdaf9a430619494ec473bc4b59",
-      "patched_sha256": "74c9f8af6adc4d7a89dcb9131a97f9ee8ad7fe068bd54ad6ad7236a8a8e6c40b",
-      "replacement": {
-        "from": "https://plataforma-efata-777-frontend-production.up.railway.app",
-        "to": "https://patroai.com"
-      }
-    },
-    {
-      "path": "public/sitemap.xml",
-      "source_sha256": "8fb77fd85eceef534159d653106caf70342e80d98d31f11ec3f2e314551af2d1",
-      "patched_sha256": "e8e00a0daa4859e451b6df6ca65c27913c268477c9f628d8a3d022485c0aae41",
-      "replacement": {
-        "from": "https://plataforma-efata-777-frontend-production.up.railway.app",
-        "to": "https://patroai.com"
-      }
-    }
+    "index.html",
+    "public/robots.txt",
+    "public/sitemap.xml"
   ],
-  "runtime_behavior_change": false,
   "backend_change": false,
-  "production_deploy_authorized": false
+  "migration_required": false,
+  "production_domain_cutover": false,
+  "note": "Do not apply the previous PATROAI_DOMAIN_TEST_ALIGNMENT hotfix while staging canonical remains Railway."
 }

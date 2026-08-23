@@ -1,67 +1,31 @@
-# EFATA Frontend — Patch de domínio canônico PatroAI
+# Frontend staging canonical restore
 
-## Objetivo
+Use this package while the official domain `patroai.com` is NOT yet linked.
 
-Substituir somente as referências SEO da URL técnica do Railway pelo domínio oficial:
-
-`https://patroai.com`
-
-## Arquivos
+## Apply only
 
 - `index.html`
 - `public/robots.txt`
 - `public/sitemap.xml`
 
-## Aplicação
+These files restore the technical Railway origin as the current canonical/staging URL.
 
-Aplicar estes três arquivos na raiz do repositório:
+## Important
 
-`https://github.com/patroaiconsultech/Plataforma-Efata-777-Frontend`
+Do NOT apply:
+`EFATA_FRONTEND_HOTFIX_PATROAI_DOMAIN_TEST_ALIGNMENT_V1`
 
-preservando os caminhos relativos.
+The existing test already expects the Railway origin, so after restoring these three files
+the runtime and tests are aligned again.
 
-Este pacote foi gerado sobre o `Plataforma-Efata-777-Frontend-main (14).zip`.
+## Final release
 
-## O que muda
+When the new version is formally ready and `patroai.com` is connected as the custom domain,
+perform a separate final-domain cutover that changes, in the same commit:
 
-- canonical
-- hreflang
-- Open Graph URL/image
-- Twitter image
-- JSON-LD organization URL/logo
-- robots sitemap URL
-- sitemap canonical location
+- `index.html`
+- `public/robots.txt`
+- `public/sitemap.xml`
+- `tests/premium-landing-foundation.test.mjs`
 
-## O que não muda
-
-- landing
-- música
-- Aurora
-- AppConsole
-- documentos
-- autenticação
-- API
-- backend
-- Realtime
-- Team
-- service worker
-
-## Infraestrutura externa necessária
-
-Antes do go-live definitivo, `patroai.com` deve estar configurado como custom domain do serviço frontend e o DNS deve apontar para o serviço correto.
-
-Idealmente, padronizar o host canônico como `patroai.com` e redirecionar variantes/host técnico quando a infraestrutura permitir.
-
-## Validação pós-deploy
-
-Verificar:
-
-- `https://patroai.com/`
-- `https://patroai.com/robots.txt`
-- `https://patroai.com/sitemap.xml`
-- HTML `<link rel="canonical">`
-- `og:url`
-- `og:image`
-- `twitter:image`
-- JSON-LD `url` e `logo`
-- hreflang PT/ES/EN
+Then validate DNS, HTTPS, canonical, sitemap and social-preview URLs together.
