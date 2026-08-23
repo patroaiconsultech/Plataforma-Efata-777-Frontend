@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "checks": {
+    "index.html": {
+      "contains_patroai_com": true,
+      "contains_old_railway_origin": false
+    },
+    "public/robots.txt": {
+      "contains_patroai_com": true,
+      "contains_old_railway_origin": false
+    },
+    "public/sitemap.xml": {
+      "contains_patroai_com": true,
+      "contains_old_railway_origin": false
+    }
+  },
+  "canonical_origin": "https://patroai.com"
+}
