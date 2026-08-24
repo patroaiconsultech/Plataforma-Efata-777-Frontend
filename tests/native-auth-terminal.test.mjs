@@ -21,6 +21,7 @@ test("native auth endpoints are the only active credential flow", () => {
     "/api/v2/auth/bootstrap-owner",
     "/api/v2/auth/password/forgot",
     "/api/v2/auth/password/reset",
+    "/api/v2/auth/account/recover",
     "/api/v2/auth/session",
     "/api/v2/auth/logout",
   ]) {
@@ -71,9 +72,12 @@ test("landing routes unauthenticated private access through the native access po
   assert.match(accessPortal, /validateAccessCode/);
 });
 
-test("invite preserves target after native session authentication", () => {
+test("invite preserves target through login, MFA, and recovery", () => {
   assert.match(invite, /getNativeSession/);
-  assert.match(invite, /to="\/access"/);
+  assert.match(invite, /next=\$\{encodeURIComponent\(`\/invite\/\$\{token\}`\)\}/);
+  assert.match(accessPortal, /safeReturnPath/);
+  assert.match(accessPortal, /return_path: returnPath !== "\/app" \? returnPath : null/);
+  assert.match(accessPortal, /navigate\(returnPath, \{ replace: true \}\)/);
 });
 
 test("auth tokens are not stored in browser storage", () => {
@@ -98,4 +102,14 @@ test("Team mode is conditionally selectable and uses the governed stream", () =>
 test("public console branding uses PatroAI", () => {
   assert.match(console_, /PatroAI Command Center/);
   assert.doesNotMatch(console_, /ORKIO Command Center/);
+});
+
+
+test("legacy identities without native credentials have a dedicated secure recovery flow", () => {
+  assert.match(api, /nativeRecoverAccount/);
+  assert.match(api, /\/api\/v2\/auth\/account\/recover/);
+  assert.match(accessPortal, /requestedMode === "activate"/);
+  assert.match(accessPortal, /submitAccountRecovery/);
+  assert.match(accessPortal, /ATIVAÇÃO SEGURA/);
+  assert.match(accessPortal, /Nenhum tenant ou permissão será criado ou reativado/);
 });

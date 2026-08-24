@@ -48,6 +48,13 @@ function authHeaders(extra?: HeadersInit): Headers {
   return headers;
 }
 
+function applyCsrfHeader(headers: Headers, method: string): void {
+  const normalized = method.toUpperCase();
+  if (!["GET", "HEAD", "OPTIONS"].includes(normalized)) {
+    headers.set("X-ORKIO-CSRF", "1");
+  }
+}
+
 /** Extrai o código de erro do corpo, aceitando JSON ou texto. */
 async function readError(response: Response): Promise<ApiError> {
   const raw = await response.text();
@@ -80,6 +87,8 @@ export async function apiJson<T = unknown>(
 ): Promise<T> {
   ensureConfigured();
   const headers = authHeaders(init.headers);
+  const method = (init.method || "GET").toUpperCase();
+  applyCsrfHeader(headers, method);
   if (init.body !== undefined && init.body !== null)
     headers.set("Content-Type", "application/json");
   const response = await fetch(`${BASE}${path}`, {
@@ -107,10 +116,12 @@ export async function apiForm<T = unknown>(
 ): Promise<T> {
   ensureConfigured();
   const headers = authHeaders(init.headers);
+  const method = (init.method || "POST").toUpperCase();
+  applyCsrfHeader(headers, method);
   headers.delete("Content-Type");
   const response = await fetch(`${BASE}${path}`, {
     ...init,
-    method: init.method || "POST",
+    method,
     body: form,
     headers,
     credentials: "include",
@@ -368,7 +379,12 @@ export function listMessages(threadId: string): Promise<ChatMessage[]> {
 }
 
 export function createInvite(threadId: string, payload: object) {
-  return apiJson<{ invitation_id: string; invitation_url: string; expires_at: string }>(
+  return apiJson<{
+    invitation_id: string;
+    invitation_url: string;
+    expires_at: string;
+    delivery_status: "sent" | "failed" | "skipped";
+  }>(
     `/api/v2/threads/${encodeURIComponent(threadId)}/invitations`,
     { method: "POST", body: JSON.stringify(payload) },
   );
@@ -438,6 +454,7 @@ export async function messageVoice(
 ): Promise<MessageVoiceResult> {
   ensureConfigured();
   const headers = authHeaders();
+  applyCsrfHeader(headers, "POST");
   headers.set("Content-Type", "application/json");
   headers.set(
     "X-Request-Id",
@@ -581,6 +598,7 @@ export async function streamRealtimeTurn(
   try {
     ensureConfigured();
     const headers = authHeaders();
+    applyCsrfHeader(headers, "POST");
     headers.set("Content-Type", "application/json");
     headers.set("Accept", "text/event-stream");
     const response = await fetch(
@@ -863,6 +881,7 @@ export async function streamMessage(
   try {
     ensureConfigured();
     const headers = authHeaders();
+    applyCsrfHeader(headers, "POST");
     headers.set("Content-Type", "application/json");
     headers.set("Accept", "text/event-stream");
     const response = await fetch(
@@ -962,6 +981,7 @@ export async function streamTeamMessage(
   try {
     ensureConfigured();
     const headers = authHeaders();
+    applyCsrfHeader(headers, "POST");
     headers.set("Content-Type", "application/json");
     headers.set("Accept", "text/event-stream");
     const response = await fetch(
@@ -1040,22 +1060,66 @@ export async function streamTeamMessage(
 /** Compatibilidade com o consumo anterior. */
 export const api = apiJson;
 
+export type NativeAuthStatus =
+  | "AUTHENTICATED"
+  | "EMAIL_VERIFICATION_REQUIRED"
+  | "MFA_REQUIRED"
+  | "MFA_ENROLLMENT_REQUIRED"
+  | "PASSWORD_RESET_COMPLETE"
+  | "LOGGED_OUT"
+  | "REAUTHENTICATED"
+  | "SESSION_REVOKED"
+  | "CURRENT_SESSION_REVOKED"
+  | "OTHER_SESSIONS_REVOKED"
+  | string;
+
 export type NativeSession = {
   authenticated: boolean;
+  status?: NativeAuthStatus;
   user_id?: string | null;
   tenant_id?: string | null;
   email?: string | null;
   roles: string[];
+  challenge_token?: string | null;
+  recovery_codes?: string[];
+};
+
+export type NativeRegistration = {
+  status: string;
+  verification_token?: string | null;
+  claim_token?: string | null;
+};
+
+export type NativeSessionRecord = {
+  id: string;
+  current: boolean;
+  created_at: string;
+  last_seen_at: string;
+  expires_at: string;
+  user_agent: string;
+  ip_prefix: string;
+  mfa_verified: boolean;
+};
+
+export type NativeBootstrapStatus = {
+  enabled: boolean;
+  completed: boolean;
 };
 
 export async function nativeLogin(input: {
   email: string;
   password: string;
+  tenant_id?: string | null;
+  return_path?: string | null;
 }): Promise<NativeSession> {
   return apiJson<NativeSession>("/api/v2/auth/login", {
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+export async function nativeBootstrapStatus(): Promise<NativeBootstrapStatus> {
+  return apiJson<NativeBootstrapStatus>("/api/v2/auth/bootstrap-status");
 }
 
 export async function nativeBootstrapOwner(input: {
@@ -1065,8 +1129,8 @@ export async function nativeBootstrapOwner(input: {
   email: string;
   display_name: string;
   password: string;
-}): Promise<NativeSession> {
-  return apiJson<NativeSession>("/api/v2/auth/bootstrap-owner", {
+}): Promise<NativeRegistration> {
+  return apiJson<NativeRegistration>("/api/v2/auth/bootstrap-owner", {
     method: "POST",
     body: JSON.stringify(input),
   });
@@ -1079,8 +1143,71 @@ export async function nativeRegister(input: {
   password: string;
   co_creator_name: string;
   onboarding_goal?: string | null;
+}): Promise<NativeRegistration> {
+  return apiJson<NativeRegistration>("/api/v2/auth/register", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function nativeVerifyEmail(token: string): Promise<NativeRegistration> {
+  return apiJson<NativeRegistration>("/api/v2/auth/email/verify", {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function nativeClaimAccount(token: string): Promise<NativeRegistration> {
+  return apiJson<NativeRegistration>("/api/v2/auth/account/claim", {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function nativeRecoverAccount(input: {
+  token: string;
+  password: string;
+  password_confirm: string;
+}): Promise<NativeRegistration> {
+  return apiJson<NativeRegistration>("/api/v2/auth/account/recover", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function nativeResendVerification(email: string): Promise<NativeRegistration> {
+  return apiJson<NativeRegistration>("/api/v2/auth/email/verification/resend", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function nativeMfaEnrollStart(challengeToken: string): Promise<{
+  secret: string;
+  otpauth_uri: string;
+}> {
+  return apiJson("/api/v2/auth/mfa/enroll/start", {
+    method: "POST",
+    body: JSON.stringify({ challenge_token: challengeToken }),
+  });
+}
+
+export async function nativeMfaEnrollConfirm(input: {
+  challenge_token: string;
+  code: string;
 }): Promise<NativeSession> {
-  return apiJson<NativeSession>("/api/v2/auth/register", {
+  return apiJson("/api/v2/auth/mfa/enroll/confirm", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function nativeMfaVerify(input: {
+  challenge_token: string;
+  code?: string | null;
+  recovery_code?: string | null;
+}): Promise<NativeSession> {
+  return apiJson("/api/v2/auth/mfa/verify", {
     method: "POST",
     body: JSON.stringify(input),
   });
@@ -1088,6 +1215,7 @@ export async function nativeRegister(input: {
 
 export async function nativeForgotPassword(input: {
   email: string;
+  return_path?: string | null;
 }): Promise<{ status: string; reset_token?: string | null }> {
   return apiJson("/api/v2/auth/password/forgot", {
     method: "POST",
@@ -1106,6 +1234,17 @@ export async function nativeResetPassword(input: {
   });
 }
 
+export async function nativeReauthenticate(input: {
+  password: string;
+  code?: string | null;
+  recovery_code?: string | null;
+}): Promise<NativeSession> {
+  return apiJson("/api/v2/auth/reauthenticate", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 export async function nativeLogout(): Promise<NativeSession> {
   const response = await apiJson<NativeSession>("/api/v2/auth/logout", {
     method: "POST",
@@ -1116,6 +1255,22 @@ export async function nativeLogout(): Promise<NativeSession> {
 
 export async function getNativeSession(): Promise<NativeSession> {
   return apiJson<NativeSession>("/api/v2/auth/session");
+}
+
+export async function getNativeSessions(): Promise<{ sessions: NativeSessionRecord[] }> {
+  return apiJson("/api/v2/auth/sessions");
+}
+
+export async function revokeNativeSession(sessionId: string): Promise<NativeSession> {
+  return apiJson(`/api/v2/auth/sessions/${encodeURIComponent(sessionId)}`, {
+    method: "DELETE",
+  });
+}
+
+export async function revokeOtherNativeSessions(): Promise<NativeSession> {
+  return apiJson("/api/v2/auth/sessions/revoke-all", {
+    method: "POST",
+  });
 }
 
 

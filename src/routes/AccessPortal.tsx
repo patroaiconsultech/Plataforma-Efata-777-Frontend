@@ -2,17 +2,36 @@ import React, { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ApiError,
+  nativeBootstrapOwner,
+  nativeBootstrapStatus,
+  nativeClaimAccount,
   nativeForgotPassword,
   nativeLogin,
+  nativeMfaEnrollConfirm,
+  nativeMfaEnrollStart,
+  nativeMfaVerify,
   nativeRegister,
+  nativeRecoverAccount,
   nativeResetPassword,
+  nativeVerifyEmail,
   validateAccessCode,
 } from "../api";
 import "../access.css";
 
 export const ONBOARDING_DRAFT_KEY = "patroai_hyper_cocreator_onboarding";
 
-type Mode = "login" | "register" | "forgot" | "reset";
+type Mode =
+  | "login"
+  | "register"
+  | "bootstrap"
+  | "forgot"
+  | "reset"
+  | "activate"
+  | "verify"
+  | "claim"
+  | "mfa-enroll"
+  | "mfa-verify"
+  | "recovery-codes";
 type RegisterStep = "code" | "cocreator" | "objective" | "credentials";
 
 const GOALS = [
@@ -34,13 +53,31 @@ function friendlyAuthError(error: unknown): string {
   const code = error instanceof ApiError ? error.code : "NETWORK_ERROR";
   const messages: Record<string, string> = {
     INVALID_CREDENTIALS:
-      "E-mail ou senha não conferem. Revise os dados e tente novamente.",
-    ACCOUNT_TEMPORARILY_LOCKED:
-      "Por segurança, esse acesso foi pausado por alguns minutos.",
+      "Não foi possível autenticar com esses dados.",
+    AUTH_RATE_LIMITED:
+      "Muitas tentativas foram detectadas. Aguarde um pouco antes de tentar novamente.",
+    TENANT_SELECTION_REQUIRED:
+      "Esta conta pertence a mais de um espaço. Informe o Tenant ID correto.",
     NATIVE_AUTH_DISABLED:
       "O acesso próprio da PatroAI ainda não está ativo nesta implantação.",
+    NATIVE_BOOTSTRAP_FORBIDDEN:
+      "A configuração inicial não pôde ser concluída.",
+    NATIVE_BOOTSTRAP_ALREADY_COMPLETED:
+      "A primeira conta segura da PatroAI já foi configurada.",
     PASSWORD_TOO_SHORT:
-      "Use uma senha mais longa. A configuração atual exige pelo menos 12 caracteres.",
+      "Use uma senha com pelo menos 15 caracteres.",
+    PASSWORD_BLOCKLISTED:
+      "Escolha uma senha menos previsível.",
+    AUTH_CHALLENGE_INVALID:
+      "Este link ou desafio expirou ou já foi utilizado.",
+    ACCOUNT_RECOVERY_NOT_ALLOWED:
+      "Este acesso não pode ser ativado neste momento. Entre em contato com o administrador do seu espaço.",
+    ACCOUNT_RECOVERY_ALREADY_COMPLETED:
+      "Esta conta já possui uma credencial ativa. Use o login ou a recuperação de senha.",
+    MFA_CODE_INVALID:
+      "O código de autenticação não foi aceito.",
+    MFA_EXACTLY_ONE_FACTOR_REQUIRED:
+      "Informe o código do autenticador ou um código de recuperação.",
     NETWORK_ERROR:
       "Não foi possível alcançar a plataforma agora. Verifique a conexão e tente novamente.",
   };
@@ -61,8 +98,20 @@ function friendlyAccessCodeError(error: unknown): string {
   return messages[code] || `Não foi possível validar o código (${code}).`;
 }
 
+function safeReturnPath(value: string | null): string {
+  if (!value) return "/app";
+  const clean = value.trim();
+  if (clean.startsWith("//") || clean.includes("\\") || clean.includes("://")) return "/app";
+  if (/^\/invite\/[A-Za-z0-9_-]{32,}$/.test(clean)) return clean;
+  if (/^\/app(?:\?.*)?$/.test(clean)) return clean;
+  return "/app";
+}
+
 export default function AccessPortal() {
   const navigate = useNavigate();
+  const [returnPath] = useState(() =>
+    safeReturnPath(new URLSearchParams(window.location.search).get("next")),
+  );
   const [mode, setMode] = useState<Mode>("login");
   const [step, setStep] = useState<RegisterStep>("code");
   const [grant, setGrant] = useState("");
@@ -76,17 +125,42 @@ export default function AccessPortal() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resetToken, setResetToken] = useState("");
   const [issuedResetToken, setIssuedResetToken] = useState("");
+  const [bootstrapSecret, setBootstrapSecret] = useState("");
+  const [bootstrapAvailable, setBootstrapAvailable] = useState(false);
+  const [tenantId, setTenantId] = useState("patroai");
+  const [tenantName, setTenantName] = useState("Grupo PatroAI");
   const [displayName, setDisplayName] = useState("");
+  const [challengeToken, setChallengeToken] = useState("");
+  const [mfaSecret, setMfaSecret] = useState("");
+  const [mfaUri, setMfaUri] = useState("");
+  const [mfaCode, setMfaCode] = useState("");
+  const [useRecoveryCode, setUseRecoveryCode] = useState(false);
+  const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
+  const [actionToken, setActionToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("mode") === "reset") {
+    const requestedMode = params.get("mode");
+    const token = params.get("token") || "";
+    if (requestedMode === "reset") {
       setMode("reset");
-      const token = params.get("token");
-      if (token) setResetToken(token);
+      setResetToken(token);
+    } else if (requestedMode === "activate" && token) {
+      setMode("activate");
+      setActionToken(token);
+    } else if (requestedMode === "verify" && token) {
+      setMode("verify");
+      setActionToken(token);
+    } else if (requestedMode === "claim" && token) {
+      setMode("claim");
+      setActionToken(token);
     }
+
+    nativeBootstrapStatus()
+      .then((status) => setBootstrapAvailable(Boolean(status.enabled && !status.completed)))
+      .catch(() => setBootstrapAvailable(false));
   }, []);
 
   function switchMode(next: Mode) {
@@ -95,14 +169,46 @@ export default function AccessPortal() {
     if (next === "register") setStep("code");
   }
 
+  async function beginMfaEnrollment(token: string) {
+    const enrollment = await nativeMfaEnrollStart(token);
+    setChallengeToken(token);
+    setMfaSecret(enrollment.secret);
+    setMfaUri(enrollment.otpauth_uri);
+    setMfaCode("");
+    setMode("mfa-enroll");
+  }
+
   async function submitLogin(event: FormEvent) {
     event.preventDefault();
     if (!email.trim() || !password || busy) return;
     setBusy(true);
     setError("");
     try {
-      await nativeLogin({ email: email.trim(), password });
-      navigate("/app", { replace: true });
+      const result = await nativeLogin({
+        email: email.trim(),
+        password,
+        tenant_id: tenantId.trim() || null,
+        return_path: returnPath !== "/app" ? returnPath : null,
+      });
+      if (result.authenticated) {
+        navigate(returnPath, { replace: true });
+        return;
+      }
+      if (result.status === "MFA_ENROLLMENT_REQUIRED" && result.challenge_token) {
+        await beginMfaEnrollment(result.challenge_token);
+        return;
+      }
+      if (result.status === "MFA_REQUIRED" && result.challenge_token) {
+        setChallengeToken(result.challenge_token);
+        setMfaCode("");
+        setMode("mfa-verify");
+        return;
+      }
+      if (result.status === "EMAIL_VERIFICATION_REQUIRED") {
+        setError("Verifique seu e-mail antes de concluir o login.");
+        return;
+      }
+      setError("O acesso requer uma etapa adicional de segurança.");
     } catch (err) {
       setError(friendlyAuthError(err));
     } finally {
@@ -115,7 +221,37 @@ export default function AccessPortal() {
       setError("As senhas não conferem.");
       return false;
     }
+    if (password.length < 15) {
+      setError("Use uma senha com pelo menos 15 caracteres.");
+      return false;
+    }
     return true;
+  }
+
+  async function submitBootstrap(event: FormEvent) {
+    event.preventDefault();
+    if (!email.trim() || !password || !bootstrapSecret.trim() || busy) return;
+    if (!passwordsMatch()) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await nativeBootstrapOwner({
+        bootstrap_secret: bootstrapSecret.trim(),
+        tenant_id: tenantId.trim() || "patroai",
+        tenant_name: tenantName.trim() || "Grupo PatroAI",
+        email: email.trim(),
+        display_name: displayName.trim() || email.trim(),
+        password,
+      });
+      setBootstrapAvailable(false);
+      setActionToken(result.verification_token || "");
+      setMode(result.verification_token ? "verify" : "login");
+      setError("Conta criada. Confirme o endereço de e-mail antes do primeiro login.");
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function submitCode(event: FormEvent) {
@@ -156,7 +292,7 @@ export default function AccessPortal() {
     setBusy(true);
     setError("");
     try {
-      await nativeRegister({
+      const result = await nativeRegister({
         grant,
         email: email.trim(),
         display_name: displayName.trim() || email.trim(),
@@ -165,7 +301,73 @@ export default function AccessPortal() {
         onboarding_goal: goal,
       });
       sessionStorage.removeItem(ONBOARDING_DRAFT_KEY);
-      navigate("/app?onboarding=1", { replace: true });
+      const token = result.verification_token || result.claim_token || "";
+      setActionToken(token);
+      if (result.status === "ACCOUNT_CLAIM_VERIFICATION_REQUIRED" && token) {
+        setMode("claim");
+      } else if (token) {
+        setMode("verify");
+      } else {
+        setMode("login");
+      }
+      setError("Se o cadastro for elegível, enviaremos a próxima etapa para o e-mail informado.");
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitEmailAction(event: FormEvent) {
+    event.preventDefault();
+    if (!actionToken || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      if (mode === "claim") await nativeClaimAccount(actionToken);
+      else await nativeVerifyEmail(actionToken);
+      setMode("login");
+      setActionToken("");
+      setError("E-mail confirmado. Entre com sua credencial.");
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitMfaEnrollment(event: FormEvent) {
+    event.preventDefault();
+    if (!challengeToken || !mfaCode.trim() || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await nativeMfaEnrollConfirm({
+        challenge_token: challengeToken,
+        code: mfaCode.trim(),
+      });
+      setRecoveryCodes(result.recovery_codes || []);
+      setMode("recovery-codes");
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitMfaVerify(event: FormEvent) {
+    event.preventDefault();
+    if (!challengeToken || !mfaCode.trim() || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await nativeMfaVerify({
+        challenge_token: challengeToken,
+        code: useRecoveryCode ? null : mfaCode.trim(),
+        recovery_code: useRecoveryCode ? mfaCode.trim() : null,
+      });
+      if (!result.authenticated) throw new Error("MFA_SESSION_NOT_CREATED");
+      navigate(returnPath, { replace: true });
     } catch (err) {
       setError(friendlyAuthError(err));
     } finally {
@@ -180,12 +382,39 @@ export default function AccessPortal() {
     setError("");
     setIssuedResetToken("");
     try {
-      const response = await nativeForgotPassword({ email: email.trim() });
+      const response = await nativeForgotPassword({
+        email: email.trim(),
+        return_path: returnPath !== "/app" ? returnPath : null,
+      });
       if (response.reset_token) {
         setIssuedResetToken(response.reset_token);
         setResetToken(response.reset_token);
       }
-      setError("Se houver uma conta para este e-mail, enviaremos as instruções de redefinição.");
+      setError("Se houver uma conta elegível para este e-mail, enviaremos as instruções.");
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitAccountRecovery(event: FormEvent) {
+    event.preventDefault();
+    if (!actionToken.trim() || !password || busy) return;
+    if (!passwordsMatch()) return;
+    setBusy(true);
+    setError("");
+    try {
+      await nativeRecoverAccount({
+        token: actionToken.trim(),
+        password,
+        password_confirm: confirmPassword,
+      });
+      setMode("login");
+      setActionToken("");
+      setPassword("");
+      setConfirmPassword("");
+      setError("Acesso ativado com segurança. Entre com sua nova credencial.");
     } catch (err) {
       setError(friendlyAuthError(err));
     } finally {
@@ -208,7 +437,7 @@ export default function AccessPortal() {
       setMode("login");
       setPassword("");
       setConfirmPassword("");
-      setError("Senha redefinida. Entre novamente com sua nova credencial.");
+      setError("Senha redefinida. Todas as sessões anteriores foram revogadas.");
     } catch (err) {
       setError(friendlyAuthError(err));
     } finally {
@@ -224,190 +453,170 @@ export default function AccessPortal() {
         <p className="access-eyebrow">PATROAI · ACESSO PROTEGIDO</p>
         <h1 id="access-title">Entre no núcleo PatroAI.</h1>
         <p className="access-lead">
-          Acesse sua conta PatroAI para continuar em um ambiente protegido.
+          Sessão por cookie HttpOnly, identidade confirmada e controles adicionais para contas privilegiadas.
         </p>
 
-        <div className="access-tabs" role="tablist" aria-label="Modo de acesso">
-          <button
-            type="button"
-            className={mode === "login" ? "active" : ""}
-            onClick={() => switchMode("login")}
-          >
-            Entrar
-          </button>
-          <button
-            type="button"
-            className={mode === "register" ? "active" : ""}
-            onClick={() => switchMode("register")}
-          >
-            Código
-          </button>
-        </div>
+        {!["verify", "claim", "activate", "mfa-enroll", "mfa-verify", "recovery-codes"].includes(mode) ? (
+          <div className="access-tabs" role="tablist" aria-label="Modo de acesso">
+            <button type="button" className={mode === "login" ? "active" : ""} onClick={() => switchMode("login")}>Entrar</button>
+            <button type="button" className={mode === "register" ? "active" : ""} onClick={() => switchMode("register")}>Código</button>
+            {bootstrapAvailable ? (
+              <button type="button" className={mode === "bootstrap" ? "active" : ""} onClick={() => switchMode("bootstrap")}>Primeira conta</button>
+            ) : null}
+          </div>
+        ) : null}
 
         {mode === "login" ? (
           <form className="access-step" onSubmit={submitLogin}>
             <span>SESSÃO PATROAI</span>
             <h2>Bem-vindo de volta.</h2>
-            <p>
-              Use seu e-mail e sua senha para acessar sua área segura.
-            </p>
-            <label>
-              <span>E-mail</span>
-              <input
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                autoComplete="email"
-                inputMode="email"
-                placeholder="voce@empresa.com"
-              />
-            </label>
-            <label>
-              <span>Senha</span>
-              <input
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                autoComplete="current-password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Sua senha"
-              />
-            </label>
-            <button className="access-text-button" type="button" onClick={() => setShowPassword((value) => !value)}>
-              {showPassword ? "Ocultar senha" : "Mostrar senha"}
-            </button>
-            <button className="access-primary" disabled={busy}>
-              {busy ? "Abrindo sessão..." : "Entrar com segurança"}
-            </button>
-            <button className="access-text-button" type="button" onClick={() => switchMode("forgot")}>
-              Esqueci minha senha
-            </button>
+            <p>Use sua credencial PatroAI. Contas administrativas exigem segundo fator.</p>
+            <label><span>E-mail</span><input value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" inputMode="email" placeholder="voce@empresa.com" /></label>
+            <label><span>Senha</span><input value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" type={showPassword ? "text" : "password"} placeholder="Sua senha" /></label>
+            <label><span>Tenant ID <small>(somente se sua conta usa mais de um espaço)</small></span><input value={tenantId} onChange={(e) => setTenantId(e.target.value)} autoComplete="off" /></label>
+            <button className="access-text-button" type="button" onClick={() => setShowPassword((v) => !v)}>{showPassword ? "Ocultar senha" : "Mostrar senha"}</button>
+            <button className="access-primary" disabled={busy}>{busy ? "Abrindo sessão..." : "Entrar com segurança"}</button>
+            <button className="access-text-button" type="button" onClick={() => switchMode("forgot")}>Esqueci minha senha</button>
           </form>
+        ) : null}
+
+        {mode === "verify" || mode === "claim" ? (
+          <form className="access-step" onSubmit={submitEmailAction}>
+            <span>{mode === "claim" ? "VÍNCULO DE CONTA" : "CONFIRMAÇÃO DE E-MAIL"}</span>
+            <h2>{mode === "claim" ? "Confirme que esta conta é sua." : "Confirme seu endereço de e-mail."}</h2>
+            <p>Por segurança, o link não é consumido automaticamente. Confirme abaixo para concluir esta etapa.</p>
+            {!actionToken ? <label><span>Token</span><input value={actionToken} onChange={(e) => setActionToken(e.target.value)} autoComplete="off" /></label> : null}
+            <button className="access-primary" disabled={busy || !actionToken}>{busy ? "Confirmando..." : "Confirmar"}</button>
+          </form>
+        ) : null}
+
+        {mode === "mfa-enroll" ? (
+          <form className="access-step" onSubmit={submitMfaEnrollment}>
+            <span>SEGUNDO FATOR OBRIGATÓRIO</span>
+            <h2>Proteja sua conta administrativa.</h2>
+            <p>Adicione a chave abaixo ao seu aplicativo autenticador e informe o código de 6 dígitos.</p>
+            <div className="access-security-secret"><strong>Chave TOTP</strong><code>{mfaSecret}</code></div>
+            <details><summary>URI técnica</summary><code className="access-break">{mfaUri}</code></details>
+            <label><span>Código do autenticador</span><input value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" maxLength={8} /></label>
+            <button className="access-primary" disabled={busy}>{busy ? "Validando..." : "Ativar segundo fator"}</button>
+          </form>
+        ) : null}
+
+        {mode === "mfa-verify" ? (
+          <form className="access-step" onSubmit={submitMfaVerify}>
+            <span>SEGUNDO FATOR</span>
+            <h2>Confirme sua identidade.</h2>
+            <label><span>{useRecoveryCode ? "Código de recuperação" : "Código do autenticador"}</span><input value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} autoComplete="one-time-code" /></label>
+            <button className="access-text-button" type="button" onClick={() => { setUseRecoveryCode((v) => !v); setMfaCode(""); }}>{useRecoveryCode ? "Usar autenticador" : "Usar código de recuperação"}</button>
+            <button className="access-primary" disabled={busy}>{busy ? "Validando..." : "Concluir login"}</button>
+          </form>
+        ) : null}
+
+        {mode === "recovery-codes" ? (
+          <div className="access-step">
+            <span>RECUPERAÇÃO MFA</span>
+            <h2>Guarde estes códigos em local seguro.</h2>
+            <p>Eles aparecem uma única vez. Cada código pode ser usado apenas uma vez.</p>
+            <div className="access-recovery-codes">{recoveryCodes.map((item) => <code key={item}>{item}</code>)}</div>
+            <button className="access-primary" type="button" onClick={() => navigate(returnPath, { replace: true })}>Já guardei os códigos</button>
+          </div>
         ) : null}
 
         {mode === "forgot" ? (
           <form className="access-step" onSubmit={submitForgot}>
-            <span>RECUPERAÇÃO</span>
-            <h2>Vamos recuperar seu acesso.</h2>
-            <p>Informe o e-mail da conta. Se ela existir, a plataforma emitirá uma instrução segura de redefinição.</p>
-            <label>
-              <span>E-mail</span>
-              <input value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" inputMode="email" />
-            </label>
+            <span>RECUPERAÇÃO</span><h2>Vamos recuperar seu acesso.</h2>
+            <p>Informe o e-mail. A resposta permanece uniforme, exista ou não uma conta elegível.</p>
+            <label><span>E-mail</span><input value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" inputMode="email" /></label>
             <button className="access-primary" disabled={busy}>{busy ? "Preparando..." : "Solicitar redefinição"}</button>
-            {issuedResetToken ? (
-              <p className="access-note">Token de teste/staging: {issuedResetToken}</p>
-            ) : null}
+            {issuedResetToken ? <p className="access-note">Token disponível somente em ambiente de teste: {issuedResetToken}</p> : null}
             <button className="access-text-button" type="button" onClick={() => switchMode("reset")}>Já tenho um token</button>
+          </form>
+        ) : null}
+
+        {mode === "activate" ? (
+          <form className="access-step" onSubmit={submitAccountRecovery}>
+            <span>ATIVAÇÃO SEGURA</span><h2>Defina sua primeira senha PatroAI.</h2>
+            <p>Este link prova a posse do seu e-mail. Nenhum tenant ou permissão será criado ou reativado por esta etapa.</p>
+            {!actionToken ? <label><span>Token</span><input value={actionToken} onChange={(e) => setActionToken(e.target.value)} autoComplete="off" /></label> : null}
+            <label><span>Nova senha</span><input value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" type={showPassword ? "text" : "password"} placeholder="Mínimo de 15 caracteres" /></label>
+            <label><span>Repetir nova senha</span><input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" type={showConfirmPassword ? "text" : "password"} /></label>
+            <div className="access-inline-actions">
+              <button className="access-text-button" type="button" onClick={() => setShowPassword((v) => !v)}>{showPassword ? "Ocultar senha" : "Mostrar senha"}</button>
+              <button className="access-text-button" type="button" onClick={() => setShowConfirmPassword((v) => !v)}>{showConfirmPassword ? "Ocultar repetição" : "Mostrar repetição"}</button>
+            </div>
+            <button className="access-primary" disabled={busy || !actionToken}>{busy ? "Ativando..." : "Ativar acesso"}</button>
           </form>
         ) : null}
 
         {mode === "reset" ? (
           <form className="access-step" onSubmit={submitReset}>
-            <span>NOVA SENHA</span>
-            <h2>Defina uma nova senha.</h2>
-            <label>
-              <span>Token</span>
-              <input value={resetToken} onChange={(event) => setResetToken(event.target.value)} autoComplete="off" />
-            </label>
-            <label>
-              <span>Nova senha</span>
-              <input value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" type={showPassword ? "text" : "password"} />
-            </label>
-            <label>
-              <span>Repetir nova senha</span>
-              <input value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} autoComplete="new-password" type={showConfirmPassword ? "text" : "password"} />
-            </label>
+            <span>NOVA SENHA</span><h2>Defina uma nova senha.</h2>
+            <label><span>Token</span><input value={resetToken} onChange={(e) => setResetToken(e.target.value)} autoComplete="off" /></label>
+            <label><span>Nova senha</span><input value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" type={showPassword ? "text" : "password"} placeholder="Mínimo de 15 caracteres" /></label>
+            <label><span>Repetir nova senha</span><input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" type={showConfirmPassword ? "text" : "password"} /></label>
             <div className="access-inline-actions">
-              <button className="access-text-button" type="button" onClick={() => setShowPassword((value) => !value)}>{showPassword ? "Ocultar senha" : "Mostrar senha"}</button>
-              <button className="access-text-button" type="button" onClick={() => setShowConfirmPassword((value) => !value)}>{showConfirmPassword ? "Ocultar repetição" : "Mostrar repetição"}</button>
+              <button className="access-text-button" type="button" onClick={() => setShowPassword((v) => !v)}>{showPassword ? "Ocultar senha" : "Mostrar senha"}</button>
+              <button className="access-text-button" type="button" onClick={() => setShowConfirmPassword((v) => !v)}>{showConfirmPassword ? "Ocultar repetição" : "Mostrar repetição"}</button>
             </div>
             <button className="access-primary" disabled={busy}>{busy ? "Redefinindo..." : "Redefinir senha"}</button>
           </form>
         ) : null}
 
+        {mode === "bootstrap" && bootstrapAvailable ? (
+          <form className="access-step" onSubmit={submitBootstrap}>
+            <span>CONFIGURAÇÃO INICIAL</span><h2>Crie a primeira conta segura.</h2>
+            <p>Use apenas durante o bootstrap governado. O backend também exige que nenhuma credencial nativa exista.</p>
+            <div className="access-grid">
+              <label><span>Chave inicial</span><input value={bootstrapSecret} onChange={(e) => setBootstrapSecret(e.target.value)} autoComplete="off" type="password" /></label>
+              <label><span>Nome</span><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} autoComplete="name" /></label>
+              <label><span>E-mail</span><input value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" inputMode="email" /></label>
+              <label><span>Senha</span><input value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" type={showPassword ? "text" : "password"} placeholder="Mínimo de 15 caracteres" /></label>
+              <label><span>Repetir senha</span><input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" type={showConfirmPassword ? "text" : "password"} /></label>
+              <label><span>Tenant ID</span><input value={tenantId} onChange={(e) => setTenantId(e.target.value)} /></label>
+              <label><span>Tenant</span><input value={tenantName} onChange={(e) => setTenantName(e.target.value)} /></label>
+            </div>
+            <button className="access-primary" disabled={busy}>{busy ? "Configurando..." : "Criar primeira conta"}</button>
+          </form>
+        ) : null}
 
         {mode === "register" && step === "code" ? (
           <form className="access-step" onSubmit={submitCode}>
-            <span>ETAPA 1 DE 3</span>
-            <h2>Informe seu código de acesso.</h2>
-            <input
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              autoComplete="off"
-              placeholder="Código de acesso"
-            />
-            <button className="access-primary" disabled={busy}>
-              {busy ? "Validando..." : "Validar código"}
-            </button>
+            <span>ETAPA 1 DE 3</span><h2>Informe seu código de acesso.</h2>
+            <input value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" placeholder="Código de acesso" />
+            <button className="access-primary" disabled={busy}>{busy ? "Validando..." : "Validar código"}</button>
           </form>
         ) : null}
 
         {mode === "register" && step === "cocreator" ? (
           <form className="access-step" onSubmit={submitName}>
-            <span>ETAPA 2 DE 3</span>
-            <h2>Dê um nome ao seu Co-Criador.</h2>
-            <p>Esse nome acompanha a experiência e pode ser ajustado depois.</p>
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              maxLength={64}
-              placeholder="Ex.: Atlas, Sophia, Nexo..."
-            />
+            <span>ETAPA 2 DE 3</span><h2>Dê um nome ao seu Co-Criador.</h2>
+            <input value={name} onChange={(e) => setName(e.target.value)} maxLength={64} placeholder="Ex.: Atlas, Sophia, Nexo..." />
             <button className="access-primary">Continuar</button>
           </form>
         ) : null}
 
         {mode === "register" && step === "objective" ? (
           <div className="access-step">
-            <span>ETAPA 3 DE 3</span>
-            <h2>O que vocês vão cocriar primeiro?</h2>
-            <div className="access-goals">
-              {GOALS.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={goal === item ? "selected" : ""}
-                  onClick={() => setGoal(item)}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              className="access-primary"
-              disabled={!goal}
-              onClick={continueToIdentity}
-            >
-              Continuar para credencial
-            </button>
+            <span>ETAPA 3 DE 3</span><h2>O que vocês vão cocriar primeiro?</h2>
+            <div className="access-goals">{GOALS.map((item) => (
+              <button key={item} type="button" className={goal === item ? "selected" : ""} onClick={() => setGoal(item)}>{item}</button>
+            ))}</div>
+            <button type="button" className="access-primary" disabled={!goal} onClick={continueToIdentity}>Continuar para credencial</button>
           </div>
         ) : null}
 
         {mode === "register" && step === "credentials" ? (
           <form className="access-step" onSubmit={submitRegister}>
-            <span>CREDENCIAL PATROAI</span>
-            <h2>Crie sua credencial segura.</h2>
-            <label>
-              <span>Nome</span>
-              <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} autoComplete="name" placeholder="Seu nome" />
-            </label>
-            <label>
-              <span>E-mail</span>
-              <input value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" inputMode="email" placeholder="voce@empresa.com" />
-            </label>
-            <label>
-              <span>Senha</span>
-              <input value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" type={showPassword ? "text" : "password"} placeholder="Mínimo de 12 caracteres" />
-            </label>
-            <label>
-              <span>Repetir senha</span>
-              <input value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} autoComplete="new-password" type={showConfirmPassword ? "text" : "password"} placeholder="Repita a senha" />
-            </label>
+            <span>CREDENCIAL PATROAI</span><h2>Crie sua credencial segura.</h2>
+            <label><span>Nome</span><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} autoComplete="name" /></label>
+            <label><span>E-mail</span><input value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" inputMode="email" /></label>
+            <label><span>Senha</span><input value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" type={showPassword ? "text" : "password"} placeholder="Mínimo de 15 caracteres" /></label>
+            <label><span>Repetir senha</span><input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" type={showConfirmPassword ? "text" : "password"} /></label>
             <div className="access-inline-actions">
-              <button className="access-text-button" type="button" onClick={() => setShowPassword((value) => !value)}>{showPassword ? "Ocultar senha" : "Mostrar senha"}</button>
-              <button className="access-text-button" type="button" onClick={() => setShowConfirmPassword((value) => !value)}>{showConfirmPassword ? "Ocultar repetição" : "Mostrar repetição"}</button>
+              <button className="access-text-button" type="button" onClick={() => setShowPassword((v) => !v)}>{showPassword ? "Ocultar senha" : "Mostrar senha"}</button>
+              <button className="access-text-button" type="button" onClick={() => setShowConfirmPassword((v) => !v)}>{showConfirmPassword ? "Ocultar repetição" : "Mostrar repetição"}</button>
             </div>
-            <button className="access-primary" disabled={busy}>{busy ? "Criando conta..." : "Criar conta e entrar"}</button>
+            <button className="access-primary" disabled={busy}>{busy ? "Criando conta..." : "Criar conta"}</button>
           </form>
         ) : null}
 

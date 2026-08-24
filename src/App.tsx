@@ -10,6 +10,7 @@ import AppConsole from "./routes/AppConsole";
 import InviteAccept from "./routes/InviteAccept";
 import AccessPortal from "./routes/AccessPortal";
 import AdminPanel from "./routes/AdminPanel";
+import SecuritySettings from "./routes/SecuritySettings";
 import PwaUpdateBanner from "./components/PwaUpdateBanner";
 import "./styles.css";
 
@@ -17,7 +18,7 @@ import "./styles.css";
 function AppEntry() {
   const source = new URLSearchParams(window.location.search).get("source") || "";
   if (source.startsWith("pwa")) {
-    return <Navigate to="/?source=pwa&experience=immersive&v=12" replace />;
+    return <Navigate to="/?source=pwa" replace />;
   }
   return <AppConsole />;
 }
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/app" element={<AppEntry />} />
         <Route path="/access" element={<AccessPortal />} />
         <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/security" element={<SecuritySettings />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -229,6 +229,7 @@ export default function AppConsole() {
   const [showInvite, setShowInvite] = useState(false);
   const [email, setEmail] = useState("");
   const [inviteUrl, setInviteUrl] = useState("");
+  const [inviteDeliveryStatus, setInviteDeliveryStatus] = useState<"sent" | "failed" | "skipped" | "">("");
   const [inviteError, setInviteError] = useState("");
   const [inviteBusy, setInviteBusy] = useState(false);
 
@@ -1618,6 +1619,7 @@ export default function AppConsole() {
     }
     setInviteError("");
     setInviteUrl("");
+    setInviteDeliveryStatus("");
     setInviteBusy(true);
     try {
       const out = await createInvite(threadId, {
@@ -1626,6 +1628,7 @@ export default function AppConsole() {
         history_access: "from_join",
       });
       setInviteUrl(out.invitation_url);
+      setInviteDeliveryStatus(out.delivery_status);
     } catch (err) {
       setInviteError(describe(err));
     } finally {
@@ -2721,7 +2724,20 @@ export default function AppConsole() {
                 {inviteError}
               </p>
             ) : null}
-            {inviteUrl ? <output>{inviteUrl}</output> : null}
+            {inviteUrl ? (
+              <>
+                <output>{inviteUrl}</output>
+                {inviteDeliveryStatus === "sent" ? (
+                  <p role="status">Convite enviado por e-mail. O link acima também pode ser compartilhado manualmente.</p>
+                ) : inviteDeliveryStatus === "failed" ? (
+                  <p className="console-alert" role="alert">
+                    Convite gerado, mas o e-mail não pôde ser enviado. Compartilhe o link acima manualmente.
+                  </p>
+                ) : inviteDeliveryStatus === "skipped" ? (
+                  <p role="status">Convite gerado. Compartilhe o link acima.</p>
+                ) : null}
+              </>
+            ) : null}
             <div className="modal-card__actions">
               <button type="button" onClick={() => setShowInvite(false)}>
                 Cancelar

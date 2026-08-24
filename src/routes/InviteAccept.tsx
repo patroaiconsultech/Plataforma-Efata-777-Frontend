@@ -58,6 +58,7 @@ export default function InviteAccept() {
           INVITATION_NOT_FOUND: "Convite inválido ou inexistente.",
           INVITATION_EXPIRED: "Este convite expirou.",
           INVITATION_ALREADY_USED: "Este convite já foi utilizado.",
+          INVITATION_NOT_AVAILABLE: "Este convite já foi utilizado ou revogado.",
           INVITATION_EMAIL_MISMATCH:
             "Este convite foi emitido para outro endereço de e-mail.",
           PRINCIPAL_NOT_PROVISIONED:
@@ -85,7 +86,10 @@ export default function InviteAccept() {
           <p>
             Autentique-se para aceitar este convite. O link permanece válido até a data de expiração.
           </p>
-          <Link className="primary-button" to="/access">
+          <Link
+            className="primary-button"
+            to={`/access?next=${encodeURIComponent(`/invite/${token}`)}`}
+          >
             Entrar para aceitar
           </Link>
         </div>
@@ -97,7 +101,7 @@ export default function InviteAccept() {
         <p role="status">Convite aceito. Redirecionando.</p>
       )}
       <Link className="ghost-link" to="/">
-        Voltar à experiência imersiva
+        Voltar ao início
       </Link>
     </main>
   );

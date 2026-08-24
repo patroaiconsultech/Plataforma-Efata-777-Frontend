@@ -16,3 +16,11 @@
 .access-text-button{border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.035);color:#d8e6df;padding:9px 12px;font:inherit;font-size:13px;cursor:pointer}
 .access-text-button:hover{border-color:rgba(224,189,107,.38);color:#fff3ca;background:rgba(224,189,107,.07)}
 @media(max-width:620px){.access-grid,.access-tabs{grid-template-columns:1fr}}
+
+.access-security-secret,.access-recovery-codes{display:grid;gap:8px;border:1px solid rgba(43,236,187,.18);border-radius:14px;background:rgba(43,236,187,.035);padding:14px}
+.access-security-secret code,.access-recovery-codes code,.access-break{overflow-wrap:anywhere;color:#fff3ca;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.access-recovery-codes{grid-template-columns:repeat(2,minmax(0,1fr))}
+.security-session-list{display:grid;gap:10px}
+.security-session{border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;background:rgba(255,255,255,.025);display:grid;gap:8px}
+.security-session__meta{display:flex;flex-wrap:wrap;gap:8px 14px;color:#9fb0a9;font-size:12px}
+@media(max-width:620px){.access-recovery-codes{grid-template-columns:1fr}}
