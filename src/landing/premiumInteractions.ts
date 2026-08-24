@@ -8,7 +8,7 @@ type PremiumLandingOptions = {
 
 const translations: Record<string, Record<string, string>> = {
         pt: {
-          "nav.cocreation": "Cocriação", "nav.ecosystem": "Ecossistema", "nav.governance": "Governança", "nav.method": "Método", "nav.contact": "Contato", "nav.careers": "Carreiras", "nav.cocreator": "Co-Criador", "nav.private": "Acesso privado", "immersive.eyebrow": "PATROAI · EXPERIÊNCIA IMERSIVA", "immersive.title": "Este é um ambiente imersivo.", "immersive.copy": "Escolha como deseja iniciar sua experiência PatroAI.", "immersive.sound.cta": "Entrar com experiência sonora", "immersive.sound.copy": "Iniciar a obra dentro da experiência PatroAI", "immersive.silent": "Explorar sem som", "immersive.direct": "Ir direto para a apresentação", "immersive.headphones": "Recomendamos o uso de fones de ouvido para uma experiência mais imersiva.", "lobby.eyebrow": "PATROAI · NÚCLEO IMERSIVO", "lobby.title": "Escolha por onde deseja entrar.", "lobby.copy": "Navegue pelo ecossistema enquanto a experiência sonora permanece ativa.", "lobby.node.about": "Conheça a PatroAI", "lobby.node.ecosystem": "Ecossistema", "lobby.node.governance": "Governança", "lobby.node.method": "Método", "lobby.node.careers": "Carreiras & Talentos", "lobby.node.contact": "Contato Estratégico", "lobby.node.platform": "Acessar Plataforma", "lobby.hint": "Selecione um núcleo para entrar", "lobby.dragHint": "Toque e conduza o núcleo",
+          "nav.cocreation": "Cocriação", "nav.ecosystem": "Ecossistema", "nav.governance": "Governança", "nav.method": "Método", "nav.contact": "Contato", "nav.careers": "Carreiras", "nav.cocreator": "Co-Criador", "nav.private": "Acesso privado", "immersive.eyebrow": "PATROAI · EXPERIÊNCIA IMERSIVA", "immersive.title": "Este é um ambiente imersivo.", "immersive.copy": "Escolha entrar com som para viver a experiência completa ou continuar sem áudio.", "immersive.sound.cta": "Entrar com som", "immersive.sound.copy": "Ativar a trilha e entrar no núcleo imersivo", "immersive.silent": "Entrar sem som", "immersive.direct": "Ir direto para a apresentação", "immersive.headphones": "Recomendamos o uso de fones de ouvido para uma experiência mais imersiva.", "lobby.eyebrow": "PATROAI · NÚCLEO IMERSIVO", "lobby.title": "Escolha por onde deseja entrar.", "lobby.copy": "Navegue pelo ecossistema enquanto a experiência sonora permanece ativa.", "lobby.node.about": "Conheça a PatroAI", "lobby.node.ecosystem": "Ecossistema", "lobby.node.governance": "Governança", "lobby.node.method": "Método", "lobby.node.careers": "Carreiras & Talentos", "lobby.node.contact": "Contato Estratégico", "lobby.node.platform": "Acessar Plataforma", "lobby.hint": "Selecione um núcleo para entrar", "lobby.dragHint": "Toque e conduza o núcleo",
           "level6.eyebrow": "Núcleo de Inteligência Artificial Imersiva", "level6.title": "Nível 6: uma inteligência que estamos cocriando.", "level6.copy": "A PatroAI pesquisa e desenvolve uma nova camada de inteligência: sistemas que conectam agentes, contexto, presença, música, interface espacial, governança e impacto humano em uma experiência viva.", "level6.status": "Fronteira em cocriação · conceito em desenvolvimento", "level6.cta": "Cocriar essa fronteira", "level6.layer.context": "Contexto", "level6.layer.agents": "Agentes", "level6.layer.presence": "Presença", "level6.layer.governance": "Governança", "level6.layer.impact": "Impacto", "hero.eyebrow": "Boutique de IA sob medida · Acesso privado", "hero.title": "Inteligência <span>tailor-made</span> para contextos que exigem mais.", "hero.copy": "A PatroAI é uma boutique de inteligência artificial: combinamos tecnologia própria, estratégia, governança e especialistas internos para desenhar soluções sob medida — da primeira hipótese à operação com valor.", "hero.primary": "Falar com um especialista", "hero.secondary": "Conhecer atuação", "hero.kpi1": "frentes integradas para estratégia, capital relacional e tecnologia.", "hero.kpi2": "por cento orientado a governança, rastreabilidade e decisão.", "hero.kpi3": "ambiente privado para relacionamento qualificado e seguro.",
           "screen.title": "Governança antes da automação.", "screen.copy": "Uma camada executiva para organizar dados, agentes, documentos, risco e decisão com trilhas claras de responsabilidade.", "screen.signal1": "Estratégia aplicada", "screen.signal2": "Teses e parcerias", "screen.signal3": "Sistemas sob medida", "screen.signal4": "Perpetuação responsável", "phone.title": "Sistemas governados de <span class=\"accent\">IA</span>", "phone.copy": "Clareza estratégica, tecnologia e governança para decisão executiva.",
           "cocreation.eyebrow": "Central de Cocriação", "cocreation.title": "Onde novos negócios, startups e tecnologias ganham forma.", "cocreation.copy": "A PatroAI conecta pessoas, repertórios, capital relacional e tecnologia própria para transformar oportunidades em negócios, produtos e ecossistemas com propósito.", "cocreation.business.title": "Novos negócios", "cocreation.business.copy": "Cocriamos teses, modelos e caminhos de validação para oportunidades que precisam sair da intenção e encontrar mercado.", "cocreation.startups.title": "Startups e produtos", "cocreation.startups.copy": "Apoiamos fundadores e equipes na construção de produtos, operações e decisões orientadas por contexto, velocidade e governança.", "cocreation.technology.title": "Novas tecnologias", "cocreation.technology.copy": "Exploramos IA, agentes, automação e interfaces imersivas para criar capacidades que não existem prontas na prateleira.", "cocreation.manifesto.title": "A boutique tailor-made é o nosso modo de entrega.", "cocreation.manifesto.copy": "A central de cocriação é o nosso campo de origem: um espaço para imaginar, estruturar, testar e lançar o próximo ciclo.", "ecosystem.eyebrow": "Ecossistema PatroAI", "ecosystem.title": "Uma boutique de inteligência para desafios que não aceitam prateleira.", "ecosystem.copy": "Unimos visão executiva, tecnologia própria, especialistas internos e engenharia aplicada para transformar desafios singulares em sistemas sob medida, com governança e capacidade de operação.", "pillars.eyebrow": "Pilares de atuação", "pillars.title": "Crescer com consciência, cocriação e impacto.", "pillars.copy": "A PatroAI conecta inteligência, pessoas e responsabilidade para transformar projetos em valor compartilhado.", "pillar.cocreation.title": "Cocriação", "pillar.cocreation.copy": "Construímos com empreendedores, especialistas, comunidades e parceiros, convertendo repertório coletivo em soluções vivas.", "pillar.esg.title": "ESG", "pillar.esg.copy": "Integramos governança, responsabilidade ambiental e valor social ao desenho das decisões, operações e tecnologias.", "pillar.impact.title": "Impacto Social", "pillar.impact.copy": "Orientamos inovação para ampliar oportunidades, fortalecer culturas e gerar prosperidade com inclusão e continuidade.",
@@ -185,6 +185,7 @@ export function mountPremiumLanding({
   const immersiveSoundEntry = query<HTMLButtonElement>("#immersiveSoundEntry");
   const immersiveSilent = query<HTMLButtonElement>("[data-immersive-silent]");
   const immersiveDirect = query<HTMLAnchorElement>("[data-immersive-direct]");
+  const immersiveReturnButtons = queryAll<HTMLButtonElement>("[data-return-immersive]");
   const copyrightToggle = query<HTMLButtonElement>("[data-copyright-toggle]");
   const copyrightPanel = query<HTMLElement>("#immersiveCopyright");
   const neuralLobby = query<HTMLElement>("#neuralLobby");
@@ -1015,6 +1016,11 @@ export function mountPremiumLanding({
   applyLanguage(currentLang);
 
   if (immersiveGate) {
+    immersiveGate.hidden = false;
+    immersiveGate.classList.remove("is-leaving");
+    neuralLobby?.classList.remove("is-active", "is-exiting", "is-transitioning");
+    neuralLobby?.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("neural-lobby-open");
     document.body.classList.add("immersive-gate-open");
 
     const openNeuralLobby = () => {
@@ -1030,6 +1036,20 @@ export function mountPremiumLanding({
       document.documentElement.dataset.motionOverride = "on";
       document.body.dataset.motionOverride = "on";
     };
+
+    const returnToImmersiveLobby = (event?: Event) => {
+      event?.preventDefault();
+      navLinks?.classList.remove("open");
+      menuButton?.setAttribute("aria-expanded", "false");
+      window.scrollTo({ top: 0, behavior: "auto" });
+      openNeuralLobby();
+    };
+
+    immersiveReturnButtons.forEach((button) => {
+      const onReturnToImmersive = (event: Event) => returnToImmersiveLobby(event);
+      button.addEventListener("click", onReturnToImmersive);
+      cleanups.push(() => button.removeEventListener("click", onReturnToImmersive));
+    });
 
     const closeImmersiveGate = () => {
       immersiveGate.classList.add("is-leaving");

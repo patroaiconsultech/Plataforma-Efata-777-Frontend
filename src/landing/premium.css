@@ -5382,3 +5382,228 @@ html[data-motion-override="on"] .patroai-premium .neural-lobby__network::after {
     animation: none !important;
   }
 }
+
+
+/* === EFATA777 IMMERSIVE ENERGY V4 ===
+   Continuous energy rails + immersive entry gate + return control. */
+
+.patroai-premium .immersive-gate__network-nodes,
+.patroai-premium .aurora-particle-field--gate,
+.patroai-premium .neural-lobby__network-nodes,
+.patroai-premium .aurora-particle-field--lobby {
+  display: none !important;
+}
+
+/* Base network is continuous: no dotted rails. */
+.patroai-premium .immersive-gate__network-lines path,
+.patroai-premium .neural-lobby__network-lines path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: none !important;
+  stroke-dashoffset: 0 !important;
+  animation: none !important;
+  opacity: .42;
+}
+
+.patroai-premium .immersive-gate__network-lines path {
+  stroke: url(#immersiveGateNetworkGradient);
+  stroke-width: 1.35;
+  filter:
+    drop-shadow(0 0 4px rgba(55, 197, 255, .16))
+    drop-shadow(0 0 9px rgba(125, 107, 255, .09));
+}
+
+.patroai-premium .neural-lobby__network-lines path {
+  stroke: url(#neuralLobbyNetworkGradient);
+  stroke-width: 1.5;
+  filter:
+    drop-shadow(0 0 5px rgba(55, 197, 255, .20))
+    drop-shadow(0 0 12px rgba(125, 107, 255, .12));
+}
+
+/* Bright energy streaks travel over a permanent luminous rail. */
+.patroai-premium .immersive-gate__energy-flow path,
+.patroai-premium .neural-lobby__energy-flow path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 190 810;
+  stroke-dashoffset: 0;
+  opacity: .90;
+  mix-blend-mode: screen;
+  animation:
+    efataEnergyRail calc(4.9s + (var(--i) * .19s)) cubic-bezier(.4,0,.2,1) infinite;
+  animation-delay: calc(var(--i) * -.47s);
+}
+
+.patroai-premium .immersive-gate__energy-flow path {
+  stroke: url(#immersiveGateNetworkGradient);
+  stroke-width: 3.2;
+  filter:
+    drop-shadow(0 0 3px rgba(255,255,255,.56))
+    drop-shadow(0 0 8px rgba(55,197,255,.54))
+    drop-shadow(0 0 18px rgba(125,107,255,.34))
+    drop-shadow(0 0 34px rgba(246,196,83,.16));
+}
+
+.patroai-premium .neural-lobby__energy-flow path {
+  stroke: url(#neuralLobbyNetworkGradient);
+  stroke-width: 3.5;
+  filter:
+    drop-shadow(0 0 3px rgba(255,255,255,.62))
+    drop-shadow(0 0 9px rgba(55,197,255,.60))
+    drop-shadow(0 0 21px rgba(125,107,255,.38))
+    drop-shadow(0 0 38px rgba(40,240,181,.15))
+    drop-shadow(0 0 44px rgba(246,196,83,.12));
+}
+
+/* Add a soft volumetric aura around the continuous rails. */
+.patroai-premium .immersive-gate__network,
+.patroai-premium .neural-lobby__network {
+  filter: saturate(132%) contrast(106%);
+}
+
+.patroai-premium .immersive-gate__network::after,
+.patroai-premium .neural-lobby__network::after {
+  content: "";
+  position: absolute;
+  inset: 4% 2%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 30% 36%, rgba(55,197,255,.15), transparent 35%),
+    radial-gradient(ellipse at 70% 34%, rgba(125,107,255,.16), transparent 36%),
+    radial-gradient(ellipse at 27% 70%, rgba(40,240,181,.11), transparent 34%),
+    radial-gradient(ellipse at 74% 70%, rgba(246,196,83,.13), transparent 35%);
+  filter: blur(30px);
+  opacity: .88;
+  mix-blend-mode: screen;
+  animation: efataEnergyFieldBreath 14s ease-in-out infinite alternate;
+}
+
+/* The gate must read as an intentional entry, not a generic modal. */
+.patroai-premium .immersive-gate {
+  display: grid;
+  background: #020509;
+}
+
+.patroai-premium .immersive-gate__panel {
+  width: min(720px, calc(100vw - 32px));
+  border-color: rgba(246,196,83,.28);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(246,196,83,.08), transparent 34%),
+    linear-gradient(180deg, rgba(10,17,28,.92), rgba(2,7,12,.94));
+  box-shadow:
+    0 36px 130px rgba(0,0,0,.68),
+    0 0 70px rgba(55,197,255,.07),
+    0 0 96px rgba(125,107,255,.06),
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.patroai-premium .immersive-gate__brand img {
+  mix-blend-mode: screen;
+  border-radius: 0 !important;
+  filter:
+    drop-shadow(0 0 7px rgba(255,242,195,.74))
+    drop-shadow(0 0 20px rgba(246,196,83,.42))
+    drop-shadow(0 0 42px rgba(246,196,83,.18));
+}
+
+.patroai-premium .immersive-gate__sound,
+.patroai-premium .immersive-gate__silent {
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.patroai-premium .immersive-gate__sound:hover,
+.patroai-premium .immersive-gate__sound:focus-visible {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px rgba(246,196,83,.36),
+    0 0 22px rgba(246,196,83,.18),
+    0 0 58px rgba(55,197,255,.10);
+}
+
+/* Clear way back after the visitor leaves the immersive nucleus. */
+.patroai-premium .immersive-return-button {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  border-color: rgba(125,107,255,.32) !important;
+  color: rgba(240,244,255,.94) !important;
+  background:
+    linear-gradient(135deg, rgba(55,197,255,.07), rgba(125,107,255,.10)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 0 22px rgba(125,107,255,.06);
+}
+
+.patroai-premium .immersive-return-button:hover,
+.patroai-premium .immersive-return-button:focus-visible {
+  border-color: rgba(55,197,255,.54) !important;
+  box-shadow:
+    0 0 16px rgba(55,197,255,.16),
+    0 0 38px rgba(125,107,255,.10);
+}
+
+body.immersive-gate-open .patroai-premium .immersive-return-button,
+body.neural-lobby-open .patroai-premium .immersive-return-button {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@keyframes efataEnergyRail {
+  0% {
+    stroke-dashoffset: 1020;
+    opacity: .18;
+  }
+  18% {
+    opacity: .95;
+  }
+  76% {
+    opacity: .86;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: .14;
+  }
+}
+
+@keyframes efataEnergyFieldBreath {
+  0% {
+    transform: scale(.985);
+    opacity: .70;
+  }
+  100% {
+    transform: scale(1.025);
+    opacity: .96;
+  }
+}
+
+@media (max-width: 1080px) {
+  .patroai-premium .immersive-return-button span:last-child {
+    display: none;
+  }
+  .patroai-premium .immersive-return-button {
+    min-width: 42px;
+    padding-inline: 12px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium .immersive-gate__energy-flow path,
+  .patroai-premium .neural-lobby__energy-flow path,
+  .patroai-premium .immersive-gate__network::after,
+  .patroai-premium .neural-lobby__network::after {
+    animation: none !important;
+  }
+
+  .patroai-premium .immersive-gate__energy-flow path,
+  .patroai-premium .neural-lobby__energy-flow path {
+    stroke-dasharray: none;
+    opacity: .42;
+  }
+}

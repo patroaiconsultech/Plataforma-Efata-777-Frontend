@@ -31,6 +31,17 @@ export const premiumMarkup = String.raw`
         <path style="--i:7" d="M704 248 L680 330 L742 460"></path>
         <path style="--i:8" d="M852 136 L824 404 L894 536"></path>
       </g>
+      <g class="immersive-gate__energy-flow" aria-hidden="true">
+        <path style="--i:0" d="M18 104 L144 194 L280 112 L418 236 L556 142 L704 248 L852 136 L990 220"></path>
+        <path style="--i:1" d="M-20 348 L128 288 L264 382 L404 300 L542 408 L680 330 L824 404 L1020 312"></path>
+        <path style="--i:2" d="M44 588 L176 486 L314 548 L450 454 L594 552 L742 460 L894 536 L1028 456"></path>
+        <path style="--i:3" d="M144 194 L128 288 L176 486"></path>
+        <path style="--i:4" d="M280 112 L264 382 L314 548"></path>
+        <path style="--i:5" d="M418 236 L404 300 L450 454"></path>
+        <path style="--i:6" d="M556 142 L542 408 L594 552"></path>
+        <path style="--i:7" d="M704 248 L680 330 L742 460"></path>
+        <path style="--i:8" d="M852 136 L824 404 L894 536"></path>
+      </g>
       <g class="immersive-gate__network-nodes">
         <circle style="--i:0" cx="18" cy="104" r="4"></circle><circle style="--i:1" cx="144" cy="194" r="5"></circle><circle style="--i:2" cx="280" cy="112" r="4"></circle><circle style="--i:3" cx="418" cy="236" r="5"></circle><circle style="--i:4" cx="556" cy="142" r="4"></circle><circle style="--i:5" cx="704" cy="248" r="5"></circle><circle style="--i:6" cx="852" cy="136" r="4"></circle><circle style="--i:7" cx="990" cy="220" r="4"></circle>
         <circle style="--i:8" cx="128" cy="288" r="4"></circle><circle style="--i:9" cx="264" cy="382" r="5"></circle><circle style="--i:10" cx="404" cy="300" r="4"></circle><circle style="--i:11" cx="542" cy="408" r="5"></circle><circle style="--i:12" cx="680" cy="330" r="4"></circle><circle style="--i:13" cx="824" cy="404" r="5"></circle><circle style="--i:14" cx="176" cy="486" r="4"></circle><circle style="--i:15" cx="314" cy="548" r="5"></circle><circle style="--i:16" cx="450" cy="454" r="4"></circle><circle style="--i:17" cx="594" cy="552" r="5"></circle><circle style="--i:18" cx="742" cy="460" r="4"></circle><circle style="--i:19" cx="894" cy="536" r="5"></circle>
@@ -49,7 +60,7 @@ export const premiumMarkup = String.raw`
     </div>
     <p class="immersive-gate__eyebrow" data-i18n="immersive.eyebrow">PATROAI · EXPERIÊNCIA IMERSIVA</p>
     <h1 id="immersiveTitle" data-i18n="immersive.title">Este é um ambiente imersivo.</h1>
-    <p id="immersiveCopy" data-i18n="immersive.copy">Escolha como deseja iniciar sua experiência PatroAI.</p>
+    <p id="immersiveCopy" data-i18n="immersive.copy">Escolha entrar com som para viver a experiência completa ou continuar sem áudio.</p>
 
     <div class="immersive-gate__actions">
       <button
@@ -68,7 +79,7 @@ export const premiumMarkup = String.raw`
         </span>
         <span>
           <strong data-i18n="immersive.sound.cta">Entrar com experiência sonora</strong>
-          <small data-i18n="immersive.sound.copy">Iniciar a obra dentro da experiência PatroAI</small>
+          <small data-i18n="immersive.sound.copy">Ativar a trilha e entrar no núcleo imersivo</small>
         </span>
       </button>
 
@@ -130,6 +141,20 @@ export const premiumMarkup = String.raw`
         </linearGradient>
       </defs>
       <g class="neural-lobby__network-lines">
+        <path style="--i:0" d="M24 126 L154 204 L286 118 L418 232 L560 146 L704 254 L846 144 L982 224"></path>
+        <path style="--i:1" d="M-20 350 L126 298 L260 376 L398 302 L536 412 L674 334 L826 404 L1020 322"></path>
+        <path style="--i:2" d="M48 582 L174 486 L314 548 L444 454 L594 548 L738 462 L894 536 L1026 464"></path>
+        <path style="--i:3" d="M154 204 L126 298 L174 486"></path>
+        <path style="--i:4" d="M286 118 L260 376 L314 548"></path>
+        <path style="--i:5" d="M418 232 L398 302 L444 454"></path>
+        <path style="--i:6" d="M560 146 L536 412 L594 548"></path>
+        <path style="--i:7" d="M704 254 L674 334 L738 462"></path>
+        <path style="--i:8" d="M846 144 L826 404 L894 536"></path>
+        <path style="--i:9" d="M286 118 L418 232 L536 412 L738 462"></path>
+        <path style="--i:10" d="M154 204 L398 302 L594 548 L894 536"></path>
+        <path style="--i:11" d="M48 582 L260 376 L560 146 L846 144"></path>
+      </g>
+      <g class="neural-lobby__energy-flow" aria-hidden="true">
         <path style="--i:0" d="M24 126 L154 204 L286 118 L418 232 L560 146 L704 254 L846 144 L982 224"></path>
         <path style="--i:1" d="M-20 350 L126 298 L260 376 L398 302 L536 412 L674 334 L826 404 L1020 322"></path>
         <path style="--i:2" d="M48 582 L174 486 L314 548 L444 454 L594 548 L738 462 L894 536 L1026 464"></path>
@@ -317,6 +342,16 @@ export const premiumMarkup = String.raw`
             <button type="button" data-lang="es" aria-pressed="false">ES</button>
             <button type="button" data-lang="en" aria-pressed="false">EN</button>
           </div>
+
+          <button
+            class="button ghost immersive-return-button"
+            type="button"
+            data-return-immersive="true"
+            aria-label="Voltar à experiência imersiva"
+          >
+            <span aria-hidden="true">↶</span>
+            <span>Voltar à experiência imersiva</span>
+          </button>
           <a class="button ghost" href="/app" data-private-entry="true" >Acessar Plataforma</a>
           <button class="icon-button" type="button" id="menuButton" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button>
         </div>
