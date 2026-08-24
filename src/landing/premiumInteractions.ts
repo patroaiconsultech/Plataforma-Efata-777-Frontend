@@ -1035,6 +1035,7 @@ export function mountPremiumLanding({
     const enableMotionOverride = () => {
       document.documentElement.dataset.motionOverride = "on";
       document.body.dataset.motionOverride = "on";
+      root.dataset.motionOverride = "on";
     };
 
     const returnToImmersiveLobby = (event?: Event) => {
@@ -1562,7 +1563,6 @@ export function mountPremiumLanding({
 
     if (immersiveSilent) {
       const onSilentEntry = () => {
-        enableMotionOverride();
         if (immersiveAudio) {
           immersiveAudio.pause();
           immersiveAudio.currentTime = 0;

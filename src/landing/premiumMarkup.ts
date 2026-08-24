@@ -140,33 +140,25 @@ export const premiumMarkup = String.raw`
           <stop offset="1" stop-color="#37C5FF" stop-opacity=".16"></stop>
         </linearGradient>
       </defs>
-      <g class="neural-lobby__network-lines">
-        <path style="--i:0" d="M24 126 L154 204 L286 118 L418 232 L560 146 L704 254 L846 144 L982 224"></path>
-        <path style="--i:1" d="M-20 350 L126 298 L260 376 L398 302 L536 412 L674 334 L826 404 L1020 322"></path>
-        <path style="--i:2" d="M48 582 L174 486 L314 548 L444 454 L594 548 L738 462 L894 536 L1026 464"></path>
-        <path style="--i:3" d="M154 204 L126 298 L174 486"></path>
-        <path style="--i:4" d="M286 118 L260 376 L314 548"></path>
-        <path style="--i:5" d="M418 232 L398 302 L444 454"></path>
-        <path style="--i:6" d="M560 146 L536 412 L594 548"></path>
-        <path style="--i:7" d="M704 254 L674 334 L738 462"></path>
-        <path style="--i:8" d="M846 144 L826 404 L894 536"></path>
-        <path style="--i:9" d="M286 118 L418 232 L536 412 L738 462"></path>
-        <path style="--i:10" d="M154 204 L398 302 L594 548 L894 536"></path>
-        <path style="--i:11" d="M48 582 L260 376 L560 146 L846 144"></path>
+      <g class="neural-lobby__network-lines neural-lobby__network-lines--curved">
+        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--rail" style="--i:0" d="M-40 160 C120 90 245 95 365 190 C430 242 458 264 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--rail" style="--i:1" d="M1040 150 C875 84 748 98 638 190 C575 242 545 263 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--rail" style="--i:2" d="M-55 520 C125 555 248 505 357 408 C428 345 460 319 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--rail" style="--i:3" d="M1055 510 C875 550 744 502 640 406 C573 344 541 319 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--rail neural-lobby__stream--secondary" style="--i:4" d="M-35 305 C132 248 280 260 392 305 C442 325 470 315 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--rail neural-lobby__stream--secondary" style="--i:5" d="M1035 302 C866 244 725 255 612 305 C560 328 531 316 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--rail neural-lobby__stream--secondary" style="--i:6" d="M185 700 C205 590 285 498 380 408 C438 353 469 321 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--rail neural-lobby__stream--secondary" style="--i:7" d="M815 700 C795 590 716 500 620 410 C563 356 531 322 500 286"></path>
       </g>
-      <g class="neural-lobby__energy-flow" aria-hidden="true">
-        <path style="--i:0" d="M24 126 L154 204 L286 118 L418 232 L560 146 L704 254 L846 144 L982 224"></path>
-        <path style="--i:1" d="M-20 350 L126 298 L260 376 L398 302 L536 412 L674 334 L826 404 L1020 322"></path>
-        <path style="--i:2" d="M48 582 L174 486 L314 548 L444 454 L594 548 L738 462 L894 536 L1026 464"></path>
-        <path style="--i:3" d="M154 204 L126 298 L174 486"></path>
-        <path style="--i:4" d="M286 118 L260 376 L314 548"></path>
-        <path style="--i:5" d="M418 232 L398 302 L444 454"></path>
-        <path style="--i:6" d="M560 146 L536 412 L594 548"></path>
-        <path style="--i:7" d="M704 254 L674 334 L738 462"></path>
-        <path style="--i:8" d="M846 144 L826 404 L894 536"></path>
-        <path style="--i:9" d="M286 118 L418 232 L536 412 L738 462"></path>
-        <path style="--i:10" d="M154 204 L398 302 L594 548 L894 536"></path>
-        <path style="--i:11" d="M48 582 L260 376 L560 146 L846 144"></path>
+      <g class="neural-lobby__energy-flow neural-lobby__energy-flow--curved" aria-hidden="true">
+        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--pulse" style="--i:0" d="M-40 160 C120 90 245 95 365 190 C430 242 458 264 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--pulse" style="--i:1" d="M1040 150 C875 84 748 98 638 190 C575 242 545 263 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--pulse" style="--i:2" d="M-55 520 C125 555 248 505 357 408 C428 345 460 319 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--pulse" style="--i:3" d="M1055 510 C875 550 744 502 640 406 C573 344 541 319 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--pulse neural-lobby__stream--secondary" style="--i:4" d="M-35 305 C132 248 280 260 392 305 C442 325 470 315 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--pulse neural-lobby__stream--secondary" style="--i:5" d="M1035 302 C866 244 725 255 612 305 C560 328 531 316 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--pulse neural-lobby__stream--secondary" style="--i:6" d="M185 700 C205 590 285 498 380 408 C438 353 469 321 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--pulse neural-lobby__stream--secondary" style="--i:7" d="M815 700 C795 590 716 500 620 410 C563 356 531 322 500 286"></path>
       </g>
       <g class="neural-lobby__network-nodes">
         <circle style="--i:0" cx="24" cy="126" r="4"></circle><circle style="--i:1" cx="154" cy="204" r="5"></circle><circle style="--i:2" cx="286" cy="118" r="4"></circle><circle style="--i:3" cx="418" cy="232" r="5"></circle><circle style="--i:4" cx="560" cy="146" r="4"></circle><circle style="--i:5" cx="704" cy="254" r="5"></circle><circle style="--i:6" cx="846" cy="144" r="4"></circle><circle style="--i:7" cx="982" cy="224" r="4"></circle>
