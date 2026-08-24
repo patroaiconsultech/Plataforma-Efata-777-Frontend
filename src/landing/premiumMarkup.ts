@@ -353,7 +353,7 @@ export const premiumMarkup = String.raw`
             <span class="header-brand-aura"></span>
             <span class="header-brand-orbit header-brand-orbit--outer"></span>
             <span class="header-brand-orbit header-brand-orbit--inner"></span>
-            <img class="header-brand-image" src="/assets/logo-patroai-oficial.png" alt="" />
+            <img class="header-brand-image" src="/assets/patroai-logo-integrated.png" alt="" />
           </span>
           <span class="header-brand-copy">
             <strong>Grupo PatroAI</strong>

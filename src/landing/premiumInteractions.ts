@@ -932,8 +932,41 @@ export function mountPremiumLanding({
       onTouchStart(event);
     };
 
+
+    const onDocumentTouchStartCapture = (event: TouchEvent) => {
+      if (drag.active) return;
+      const touch = event.touches[0] || event.changedTouches[0];
+      if (!touch) return;
+
+      const rect = neuralLobbyBrand.getBoundingClientRect();
+      const mobilePad = 28;
+      const hitsCore =
+        touch.clientX >= rect.left - mobilePad &&
+        touch.clientX <= rect.right + mobilePad &&
+        touch.clientY >= rect.top - mobilePad &&
+        touch.clientY <= rect.bottom + mobilePad;
+
+      if (!hitsCore) return;
+
+      // This is the canonical mobile drag start. It intentionally runs at
+      // document capture phase so decorative/menu layers cannot steal the
+      // touch before the core establishes its drag state.
+      drag.pointerId = -1;
+      drag.startX = touch.clientX;
+      drag.startY = touch.clientY;
+      drag.originX = position.x;
+      drag.originY = position.y;
+      drag.active = true;
+      neuralLobbyBrand.classList.add("is-dragging");
+      if (neuralLobbyDragHint) neuralLobbyDragHint.hidden = true;
+
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
     neuralLobby.addEventListener("pointerdown", onLobbyPointerDownCapture, { capture: true, passive: false });
     neuralLobby.addEventListener("touchstart", onLobbyTouchStartCapture, { capture: true, passive: false });
+    document.addEventListener("touchstart", onDocumentTouchStartCapture, { capture: true, passive: false });
     neuralLobbyBrand.addEventListener("pointerdown", onPointerDown);
     neuralLobbyDragSurface?.addEventListener("pointerdown", onPointerDown);
     neuralLobby.addEventListener("pointerdown", onLobbyDragSurfacePointerDown);
@@ -962,6 +995,7 @@ export function mountPremiumLanding({
       }
       neuralLobby.removeEventListener("pointerdown", onLobbyPointerDownCapture, true);
       neuralLobby.removeEventListener("touchstart", onLobbyTouchStartCapture, true);
+      document.removeEventListener("touchstart", onDocumentTouchStartCapture, true);
       neuralLobbyBrand.removeEventListener("pointerdown", onPointerDown);
       neuralLobbyDragSurface?.removeEventListener("pointerdown", onPointerDown);
       neuralLobby.removeEventListener("pointerdown", onLobbyDragSurfacePointerDown);

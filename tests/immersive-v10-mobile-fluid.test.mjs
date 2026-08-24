@@ -9,13 +9,13 @@ test("V10 manifest is a fresh PatroAI immersive identity", () => {
   assert.equal(manifest.id, "/?app=patroai");
   assert.equal(manifest.name, "PatroAI");
   assert.equal(manifest.short_name, "PatroAI");
-  assert.match(manifest.start_url, /experience=immersive&v=15/);
+  assert.match(manifest.start_url, /experience=immersive&v=16/);
 });
 
 test("manifest and apple icon references are cache-busted", () => {
   const html = read("index.html");
-  assert.match(html, /manifest\.webmanifest\?v=15/);
-  assert.match(html, /apple-touch-icon-180\.png\?v=15/);
+  assert.match(html, /manifest\.webmanifest\?v=16/);
+  assert.match(html, /apple-touch-icon-180\.png\?v=16/);
 });
 
 test("mobile logo dragging tracks pointer at window scope", () => {

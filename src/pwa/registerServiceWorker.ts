@@ -31,7 +31,7 @@ function installControllerRefresh(): void {
 
 export async function registerServiceWorker(): Promise<void> {
   if (isLegacyPwaLaunch()) {
-    window.location.replace("/?source=pwa&experience=immersive&v=15");
+    window.location.replace("/?source=pwa&experience=immersive&v=16");
     return;
   }
   if (!("serviceWorker" in navigator)) return;
