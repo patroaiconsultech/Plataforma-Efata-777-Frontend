@@ -6302,3 +6302,235 @@ body.neural-lobby-open .patroai-premium .immersive-return-button {
     border-radius: 16px;
   }
 }
+
+
+/* === EFATA777 IMMERSIVE V8 — ADAPTIVE PLASMA / MOBILE BOOT === */
+.patroai-premium .neural-lobby__network-nodes,
+.patroai-premium .aurora-particle-field--lobby {
+  display: none !important;
+}
+
+.patroai-premium .neural-lobby__plasma {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform-origin: 50% 41%;
+  pointer-events: none;
+}
+
+.patroai-premium .neural-lobby__stream {
+  stroke: rgb(var(--stream-color));
+  vector-effect: non-scaling-stroke;
+}
+
+/* Broad atmospheric halo: this is light volume, not a visible line. */
+.patroai-premium .neural-lobby__stream--haze {
+  stroke-width: 34px !important;
+  opacity: .09 !important;
+  filter:
+    blur(8px)
+    drop-shadow(0 0 22px rgba(var(--stream-color), .28)) !important;
+}
+
+/* Plasma body with soft edge. */
+.patroai-premium .neural-lobby__stream--body {
+  stroke-width: 13px !important;
+  opacity: .16 !important;
+  filter:
+    blur(1.2px)
+    drop-shadow(0 0 7px rgba(var(--stream-color), .64))
+    drop-shadow(0 0 25px rgba(var(--stream-color), .34)) !important;
+}
+
+/* Electrical filament embedded inside the plasma. */
+.patroai-premium .neural-lobby__stream--filament {
+  stroke-width: 1.5px !important;
+  opacity: .62 !important;
+  stroke-dasharray: 32 18 7 23 !important;
+  filter:
+    drop-shadow(0 0 2px rgba(255,255,255,.94))
+    drop-shadow(0 0 8px rgba(var(--stream-color), .78)) !important;
+  animation:
+    efataV8FilamentFlow calc(2.9s + var(--i) * .09s) linear infinite;
+  animation-delay: calc(var(--i) * -.21s);
+}
+
+/* Fast luminous packet riding inside the wider plasma field. */
+.patroai-premium .neural-lobby__stream--pulse {
+  stroke-width: 4.4px !important;
+  opacity: .88 !important;
+  stroke-dasharray: 150 1050 !important;
+  filter:
+    drop-shadow(0 0 2px rgba(255,255,255,1))
+    drop-shadow(0 0 10px rgba(var(--stream-color), .98))
+    drop-shadow(0 0 28px rgba(var(--stream-color), .72)) !important;
+  animation:
+    efataV8PlasmaPacket calc(3.1s + var(--i) * .08s)
+    cubic-bezier(.34,.02,.24,1) infinite;
+  animation-delay: calc(var(--i) * -.34s);
+}
+
+.patroai-premium .neural-lobby__stream--secondary.neural-lobby__stream--haze { stroke-width: 22px !important; opacity: .055 !important; }
+.patroai-premium .neural-lobby__stream--secondary.neural-lobby__stream--body { stroke-width: 8px !important; opacity: .11 !important; }
+.patroai-premium .neural-lobby__stream--secondary.neural-lobby__stream--filament { opacity: .42 !important; }
+.patroai-premium .neural-lobby__stream--secondary.neural-lobby__stream--pulse { stroke-width: 3px !important; opacity: .68 !important; }
+
+@keyframes efataV8FilamentFlow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -320; }
+}
+@keyframes efataV8PlasmaPacket {
+  0% { stroke-dashoffset: 1180; opacity: .20; }
+  12% { opacity: .98; }
+  70% { opacity: .94; }
+  100% { stroke-dashoffset: 0; opacity: .16; }
+}
+
+/* The music controls energy, not the base travel speed. Kick is deliberately sharp. */
+.patroai-premium.music-reactive-active .neural-lobby__plasma--haze {
+  transform: scale(calc(1 + var(--music-bass,0) * .012 + var(--music-beat,0) * .020));
+  opacity: calc(.86 + var(--music-energy,0) * .14);
+}
+.patroai-premium.music-reactive-active .neural-lobby__stream--haze {
+  stroke-width: calc(28px + var(--music-bass,0) * 12px + var(--music-beat,0) * 18px) !important;
+  opacity: calc(.06 + var(--music-mid,0) * .07 + var(--music-beat,0) * .08) !important;
+}
+.patroai-premium.music-reactive-active .neural-lobby__stream--body {
+  stroke-width: calc(10px + var(--music-bass,0) * 4px + var(--music-beat,0) * 7px) !important;
+  opacity: calc(.12 + var(--music-mid,0) * .10 + var(--music-beat,0) * .12) !important;
+}
+.patroai-premium.music-reactive-active .neural-lobby__stream--filament {
+  stroke-width: calc(1.25px + var(--music-high,0) * 1.0px + var(--music-beat,0) * 1.7px) !important;
+  opacity: calc(.42 + var(--music-high,0) * .32 + var(--music-beat,0) * .22) !important;
+}
+.patroai-premium.music-reactive-active .neural-lobby__stream--pulse {
+  stroke-width: calc(3.4px + var(--music-bass,0) * 2.8px + var(--music-beat,0) * 7px) !important;
+  opacity: calc(.55 + var(--music-energy,0) * .18 + var(--music-beat,0) * .27) !important;
+}
+.patroai-premium.music-reactive-active .neural-lobby__plasma--pulse {
+  filter:
+    brightness(calc(.9 + var(--music-energy,0) * .32 + var(--music-beat,0) * .90))
+    saturate(calc(112% + var(--music-mid,0) * 34% + var(--music-high,0) * 24%));
+}
+
+/* Remove the visual tile around the corner logo entirely. */
+.patroai-premium .neural-lobby__corner-brand,
+.patroai-premium .neural-lobby__corner-brand:hover,
+.patroai-premium .neural-lobby__corner-brand:focus-visible {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline-offset: 5px;
+}
+.patroai-premium .neural-lobby__corner-brand::before {
+  background: radial-gradient(circle, rgba(246,196,83,.13), transparent 68%) !important;
+  filter: blur(22px) !important;
+}
+.patroai-premium .neural-lobby__corner-brand img {
+  clip-path: inset(0 round 0);
+  background: transparent !important;
+}
+
+/* Input feedback is synchronous with the pointer/touch event. */
+.patroai-premium .neural-lobby__node,
+.patroai-premium .neural-lobby__source-reveal a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.patroai-premium .neural-lobby__node:is(:hover,:focus-visible,.is-hover-burst),
+.patroai-premium .neural-lobby__source-reveal a:is(:hover,:focus-visible,.is-hover-burst) {
+  filter: brightness(1.7) saturate(1.28) !important;
+  transition: none !important;
+}
+.patroai-premium .neural-lobby__node.is-hover-burst,
+.patroai-premium .neural-lobby__source-reveal a.is-hover-burst {
+  box-shadow:
+    inset 0 0 34px color-mix(in srgb,var(--node-accent,#37C5FF) 28%,transparent),
+    0 0 10px rgba(255,255,255,.72),
+    0 0 38px color-mix(in srgb,var(--node-accent,#37C5FF) 82%,transparent),
+    0 0 92px color-mix(in srgb,var(--node-accent,#37C5FF) 42%,transparent) !important;
+}
+
+/* Adaptive governor: reduce expensive blur first; never disable music-reactivity. */
+.patroai-premium[data-immersive-quality="balanced"] .neural-lobby__stream--haze {
+  filter: blur(5px) drop-shadow(0 0 16px rgba(var(--stream-color), .24)) !important;
+}
+.patroai-premium[data-immersive-quality="balanced"] .neural-lobby::before,
+.patroai-premium[data-immersive-quality="balanced"] .neural-lobby__brand-halo {
+  filter: blur(18px) !important;
+}
+.patroai-premium[data-immersive-quality="performance"] .neural-lobby__stream--haze {
+  stroke-width: 24px !important;
+  filter: blur(3px) drop-shadow(0 0 10px rgba(var(--stream-color), .20)) !important;
+}
+.patroai-premium[data-immersive-quality="performance"] .neural-lobby__stream--body {
+  filter: drop-shadow(0 0 8px rgba(var(--stream-color), .30)) !important;
+}
+.patroai-premium[data-immersive-quality="performance"] .neural-lobby::after {
+  display: none !important;
+}
+.patroai-premium[data-immersive-quality="performance"] .neural-lobby__brand-halo,
+.patroai-premium[data-immersive-quality="performance"] .neural-lobby::before {
+  filter: blur(12px) !important;
+}
+
+/* Deterministic mobile gate: first surface wins over every lobby/app layer. */
+@media (max-width: 820px) {
+  .patroai-premium .immersive-gate:not([hidden]) {
+    display: flex !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483000 !important;
+    visibility: visible !important;
+    opacity: 1;
+    min-height: 100dvh;
+    background:
+      radial-gradient(circle at 50% 32%, rgba(55,197,255,.10), transparent 32%),
+      radial-gradient(circle at 50% 48%, rgba(125,107,255,.08), transparent 42%),
+      #020607;
+  }
+
+  .patroai-premium .immersive-gate__panel {
+    position: relative;
+    z-index: 2;
+  }
+
+  .patroai-premium .neural-lobby__network svg {
+    width: 170vw !important;
+    transform: translateX(-20.5vw) !important;
+  }
+
+  .patroai-premium .neural-lobby__stream--haze {
+    stroke-width: 20px !important;
+    opacity: .055 !important;
+    filter: blur(3px) !important;
+  }
+  .patroai-premium .neural-lobby__stream--body {
+    stroke-width: 7px !important;
+    opacity: .10 !important;
+    filter: drop-shadow(0 0 6px rgba(var(--stream-color), .26)) !important;
+  }
+  .patroai-premium .neural-lobby__stream--filament {
+    stroke-width: 1px !important;
+    opacity: .38 !important;
+  }
+  .patroai-premium .neural-lobby__stream--pulse {
+    stroke-width: 2.8px !important;
+  }
+
+  .patroai-premium .neural-lobby__source-reveal a {
+    transition: transform 70ms ease-out !important;
+  }
+  .patroai-premium .neural-lobby__source-reveal a:active,
+  .patroai-premium .neural-lobby__source-reveal a.is-hover-burst {
+    transform: scale(.965) !important;
+    filter: brightness(1.75) saturate(1.25) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion-override="on"]) .patroai-premium .neural-lobby__stream--filament,
+  html:not([data-motion-override="on"]) .patroai-premium .neural-lobby__stream--pulse {
+    animation: none !important;
+  }
+}

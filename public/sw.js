@@ -1,5 +1,5 @@
 /* EFATA777 / PatroAI PWA — explicit public allowlist only */
-const VERSION = "efata777-v7-20260823-responsive-plasma";
+const VERSION = "efata777-v8-20260824-performance-plasma-mobile";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 const CACHE_PREFIXES = ["efata777-", "orkio-v2-"];
@@ -124,6 +124,14 @@ self.addEventListener("message", (event) => {
 });
 
 async function networkFirstNavigation(request) {
+  const requestUrl = new URL(request.url);
+  if (
+    requestUrl.pathname === "/app" &&
+    (requestUrl.searchParams.get("source") || "").startsWith("pwa")
+  ) {
+    return Response.redirect(`${self.location.origin}/?source=pwa`, 302);
+  }
+
   const runtime = await caches.open(RUNTIME);
   try {
     const response = await fetch(request, { cache: "no-store" });

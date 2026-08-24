@@ -38,8 +38,31 @@ function observeInstallingWorker(
   });
 }
 
+
+function isLegacyPwaLaunch(): boolean {
+  const url = new URL(window.location.href);
+  return (
+    url.pathname === "/app" &&
+    (url.searchParams.get("source") || "").startsWith("pwa")
+  );
+}
+
+function installV8ControllerMigration(): void {
+  const legacyPwaLaunch = isLegacyPwaLaunch();
+
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloaded) return;
+    reloaded = true;
+    if (legacyPwaLaunch) {
+      window.location.replace("/?source=pwa");
+    }
+  });
+}
+
 export async function registerServiceWorker(): Promise<void> {
   if (!("serviceWorker" in navigator)) return;
+  installV8ControllerMigration();
 
   const localHostnames = new Set(["localhost", "127.0.0.1", "::1"]);
   if (
@@ -62,7 +85,11 @@ export async function registerServiceWorker(): Promise<void> {
         );
 
         if (registration.waiting && navigator.serviceWorker.controller) {
-          dispatchWaitingUpdate(registration, registration.waiting);
+          if (isLegacyPwaLaunch()) {
+            registration.waiting.postMessage({ type: "SKIP_WAITING" });
+          } else {
+            dispatchWaitingUpdate(registration, registration.waiting);
+          }
         }
 
         registration.addEventListener("updatefound", () => {

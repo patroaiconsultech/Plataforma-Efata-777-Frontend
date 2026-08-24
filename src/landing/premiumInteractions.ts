@@ -1212,6 +1212,75 @@ export function mountPremiumLanding({
     ];
     let audioTrackIndex = 0;
 
+    // V8 adaptive quality governor. Visual fidelity is reduced before musical
+    // responsiveness, so a slower GPU does not turn the whole scene into slow motion.
+    let performanceGovernorFrame = 0;
+    let performanceGovernorLast = 0;
+    let performanceGovernorAccumulated = 0;
+    let performanceGovernorSamples = 0;
+    let performanceProfile: "full" | "balanced" | "performance" = "full";
+    let performanceLastDecision = 0;
+
+    const applyPerformanceProfile = (
+      profile: "full" | "balanced" | "performance",
+    ) => {
+      if (performanceProfile === profile && root.dataset.immersiveQuality === profile) return;
+      performanceProfile = profile;
+      root.dataset.immersiveQuality = profile;
+    };
+
+    const initialPerformanceProfile = () => {
+      const memory = Number((navigator as Navigator & { deviceMemory?: number }).deviceMemory || 0);
+      const cores = Number(navigator.hardwareConcurrency || 0);
+      if (window.innerWidth <= 820 || (memory > 0 && memory <= 4) || (cores > 0 && cores <= 4)) {
+        return "balanced" as const;
+      }
+      return "full" as const;
+    };
+
+    const runPerformanceGovernor = (timestamp: number) => {
+      performanceGovernorFrame = window.requestAnimationFrame(runPerformanceGovernor);
+      if (!neuralLobby?.classList.contains("is-active") || document.hidden) {
+        performanceGovernorLast = timestamp;
+        performanceGovernorAccumulated = 0;
+        performanceGovernorSamples = 0;
+        return;
+      }
+
+      if (!performanceGovernorLast) {
+        performanceGovernorLast = timestamp;
+        return;
+      }
+
+      const frameTime = Math.min(100, Math.max(1, timestamp - performanceGovernorLast));
+      performanceGovernorLast = timestamp;
+      performanceGovernorAccumulated += frameTime;
+      performanceGovernorSamples += 1;
+
+      if (performanceGovernorSamples < 45 || timestamp - performanceLastDecision < 1500) return;
+
+      const averageFrameTime = performanceGovernorAccumulated / performanceGovernorSamples;
+      const fps = 1000 / averageFrameTime;
+      performanceGovernorAccumulated = 0;
+      performanceGovernorSamples = 0;
+      performanceLastDecision = timestamp;
+
+      if (fps < 38) {
+        applyPerformanceProfile("performance");
+      } else if (fps < 53) {
+        applyPerformanceProfile("balanced");
+      } else if (fps > 57) {
+        applyPerformanceProfile("full");
+      }
+    };
+
+    applyPerformanceProfile(initialPerformanceProfile());
+    performanceGovernorFrame = window.requestAnimationFrame(runPerformanceGovernor);
+    cleanups.push(() => {
+      if (performanceGovernorFrame) window.cancelAnimationFrame(performanceGovernorFrame);
+      root.removeAttribute("data-immersive-quality");
+    });
+
     const selectAudioTrack = (index: number) => {
       if (!immersiveAudio) return;
       audioTrackIndex = Math.min(
@@ -1308,21 +1377,23 @@ export function mountPremiumLanding({
         release: number,
       ) => current + (target - current) * (target > current ? attack : release);
 
-      audioBassLevel = smoothBand(audioBassLevel, rawBass, 0.48, 0.12);
-      audioMidLevel = smoothBand(audioMidLevel, rawMid, 0.34, 0.10);
-      audioHighLevel = smoothBand(audioHighLevel, rawHigh, 0.28, 0.09);
-      audioReactiveLevel = smoothBand(audioReactiveLevel, rawEnergy, 0.32, 0.09);
+      // V8: the kick/bass path must feel immediate. Musical body still gets
+      // smoothing so the scene does not flicker between frames.
+      audioBassLevel = smoothBand(audioBassLevel, rawBass, 0.66, 0.16);
+      audioMidLevel = smoothBand(audioMidLevel, rawMid, 0.40, 0.11);
+      audioHighLevel = smoothBand(audioHighLevel, rawHigh, 0.38, 0.10);
+      audioReactiveLevel = smoothBand(audioReactiveLevel, rawEnergy, 0.40, 0.10);
 
       // Beat detection: a fast bass envelope is compared with a slower moving
       // baseline. Strong kick/transient events create a short visual impulse.
-      audioBeatFast += (rawBass - audioBeatFast) * 0.44;
-      audioBeatSlow += (rawBass - audioBeatSlow) * 0.035;
-      const beatDelta = Math.max(0, audioBeatFast - audioBeatSlow * 1.04);
-      const beatCandidate = Math.min(1, beatDelta * 8.5);
+      audioBeatFast += (rawBass - audioBeatFast) * 0.72;
+      audioBeatSlow += (rawBass - audioBeatSlow) * 0.028;
+      const beatDelta = Math.max(0, audioBeatFast - audioBeatSlow * 1.015);
+      const beatCandidate = Math.min(1, beatDelta * 12.5);
       audioBeatLevel =
         beatCandidate > audioBeatLevel
-          ? audioBeatLevel + (beatCandidate - audioBeatLevel) * 0.74
-          : audioBeatLevel * 0.82;
+          ? audioBeatLevel + (beatCandidate - audioBeatLevel) * 0.93
+          : audioBeatLevel * 0.70;
 
       const normalized = Math.min(1, Math.max(0, audioReactiveLevel * 1.72));
       const bass = Math.min(1, Math.max(0, audioBassLevel * 1.55));
@@ -1649,10 +1720,9 @@ export function mountPremiumLanding({
     }
 
     const triggerNodeBurst = (anchor: HTMLAnchorElement) => {
-      anchor.classList.remove("is-hover-burst");
-      void anchor.offsetWidth;
+      // No forced layout read here: apply the light in the same input frame.
       anchor.classList.add("is-hover-burst");
-      window.setTimeout(() => anchor.classList.remove("is-hover-burst"), 520);
+      window.setTimeout(() => anchor.classList.remove("is-hover-burst"), 460);
     };
 
     neuralLobbyLinks.forEach((anchor) => {

@@ -145,17 +145,37 @@ export const premiumMarkup = String.raw`
           <feGaussianBlur stdDeviation="1.4"></feGaussianBlur>
         </filter>
       </defs>
-      <g class="neural-lobby__network-lines neural-lobby__network-lines--curved" filter="url(#efataPlasmaWarp)">
-        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--rail" style="--i:0" d="M-40 160 C120 90 245 95 365 190 C430 242 458 264 500 286"></path>
-        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--rail" style="--i:1" d="M1040 150 C875 84 748 98 638 190 C575 242 545 263 500 286"></path>
-        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--rail" style="--i:2" d="M-55 520 C125 555 248 505 357 408 C428 345 460 319 500 286"></path>
-        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--rail" style="--i:3" d="M1055 510 C875 550 744 502 640 406 C573 344 541 319 500 286"></path>
-        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--rail neural-lobby__stream--secondary" style="--i:4" d="M-35 305 C132 248 280 260 392 305 C442 325 470 315 500 286"></path>
-        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--rail neural-lobby__stream--secondary" style="--i:5" d="M1035 302 C866 244 725 255 612 305 C560 328 531 316 500 286"></path>
-        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--rail neural-lobby__stream--secondary" style="--i:6" d="M185 700 C205 590 285 498 380 408 C438 353 469 321 500 286"></path>
-        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--rail neural-lobby__stream--secondary" style="--i:7" d="M815 700 C795 590 716 500 620 410 C563 356 531 322 500 286"></path>
+      <g class="neural-lobby__plasma neural-lobby__plasma--haze" aria-hidden="true">
+        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--haze" style="--i:0" d="M-40 160 C120 90 245 95 365 190 C430 242 458 264 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--haze" style="--i:1" d="M1040 150 C875 84 748 98 638 190 C575 242 545 263 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--haze" style="--i:2" d="M-55 520 C125 555 248 505 357 408 C428 345 460 319 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--haze" style="--i:3" d="M1055 510 C875 550 744 502 640 406 C573 344 541 319 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--haze neural-lobby__stream--secondary" style="--i:4" d="M-35 305 C132 248 280 260 392 305 C442 325 470 315 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--haze neural-lobby__stream--secondary" style="--i:5" d="M1035 302 C866 244 725 255 612 305 C560 328 531 316 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--haze neural-lobby__stream--secondary" style="--i:6" d="M185 700 C205 590 285 498 380 408 C438 353 469 321 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--haze neural-lobby__stream--secondary" style="--i:7" d="M815 700 C795 590 716 500 620 410 C563 356 531 322 500 286"></path>
       </g>
-      <g class="neural-lobby__energy-flow neural-lobby__energy-flow--curved" aria-hidden="true">
+      <g class="neural-lobby__network-lines neural-lobby__plasma neural-lobby__plasma--body" aria-hidden="true">
+        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--body" style="--i:0" d="M-40 160 C120 90 245 95 365 190 C430 242 458 264 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--body" style="--i:1" d="M1040 150 C875 84 748 98 638 190 C575 242 545 263 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--body" style="--i:2" d="M-55 520 C125 555 248 505 357 408 C428 345 460 319 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--body" style="--i:3" d="M1055 510 C875 550 744 502 640 406 C573 344 541 319 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--body neural-lobby__stream--secondary" style="--i:4" d="M-35 305 C132 248 280 260 392 305 C442 325 470 315 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--body neural-lobby__stream--secondary" style="--i:5" d="M1035 302 C866 244 725 255 612 305 C560 328 531 316 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--body neural-lobby__stream--secondary" style="--i:6" d="M185 700 C205 590 285 498 380 408 C438 353 469 321 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--body neural-lobby__stream--secondary" style="--i:7" d="M815 700 C795 590 716 500 620 410 C563 356 531 322 500 286"></path>
+      </g>
+      <g class="neural-lobby__plasma neural-lobby__plasma--filament" aria-hidden="true">
+        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--filament" style="--i:0" d="M-40 160 C120 90 245 95 365 190 C430 242 458 264 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--filament" style="--i:1" d="M1040 150 C875 84 748 98 638 190 C575 242 545 263 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--filament" style="--i:2" d="M-55 520 C125 555 248 505 357 408 C428 345 460 319 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--filament" style="--i:3" d="M1055 510 C875 550 744 502 640 406 C573 344 541 319 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--filament neural-lobby__stream--secondary" style="--i:4" d="M-35 305 C132 248 280 260 392 305 C442 325 470 315 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--filament neural-lobby__stream--secondary" style="--i:5" d="M1035 302 C866 244 725 255 612 305 C560 328 531 316 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--filament neural-lobby__stream--secondary" style="--i:6" d="M185 700 C205 590 285 498 380 408 C438 353 469 321 500 286"></path>
+        <path class="neural-lobby__stream neural-lobby__stream--gold neural-lobby__stream--filament neural-lobby__stream--secondary" style="--i:7" d="M815 700 C795 590 716 500 620 410 C563 356 531 322 500 286"></path>
+      </g>
+      <g class="neural-lobby__plasma neural-lobby__plasma--pulse" aria-hidden="true">
         <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--pulse" style="--i:0" d="M-40 160 C120 90 245 95 365 190 C430 242 458 264 500 286"></path>
         <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--pulse" style="--i:1" d="M1040 150 C875 84 748 98 638 190 C575 242 545 263 500 286"></path>
         <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--pulse" style="--i:2" d="M-55 520 C125 555 248 505 357 408 C428 345 460 319 500 286"></path>
