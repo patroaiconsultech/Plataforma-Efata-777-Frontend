@@ -8,10 +8,10 @@ const required = [
   "manifest.webmanifest",
   "sw.js",
   "offline.html",
-  "icons/orkio-192.png",
-  "icons/orkio-maskable-192.png",
-  "icons/orkio-512.png",
-  "icons/orkio-maskable-512.png",
+  "icons/patroai-192.png",
+  "icons/patroai-maskable-192.png",
+  "icons/patroai-512.png",
+  "icons/patroai-maskable-512.png",
   "icons/apple-touch-icon-180.png",
 ];
 
