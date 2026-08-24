@@ -159,7 +159,7 @@ export const premiumMarkup = String.raw`
   <div class="neural-lobby__vignette" aria-hidden="true"></div>
 
   <a class="neural-lobby__corner-brand" href="#top" data-neural-lobby-link aria-label="PatroAI">
-    <img src="/assets/logo-patroai-oficial.png" alt="PatroAI" />
+    <img src="/assets/patroai-logo-integrated.png" alt="PatroAI" />
   </a>
 
   <div class="neural-lobby__source-reveal" aria-label="Fontes PatroAI" data-source-reveal>
@@ -186,7 +186,7 @@ export const premiumMarkup = String.raw`
       <span class="neural-lobby__brand-orbit neural-lobby__brand-orbit--inner"></span>
       <img
         class="neural-lobby__logo-image"
-        src="/assets/logo-patroai-oficial.png"
+        src="/assets/patroai-logo-integrated.png"
         alt=""
       />
     </div>

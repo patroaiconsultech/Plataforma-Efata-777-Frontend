@@ -5182,3 +5182,203 @@ html[data-motion-override="on"] .patroai-premium .neural-lobby__network::after {
     display: none !important;
   }
 }
+
+
+/* === EFATA777 IMMERSIVE ENERGY FIELD V3 ===
+   Direction: filaments + volumetric light; no decorative floating "balls".
+   Brand art is preserved as a transparent integrated cutout from the supplied official logo. */
+.patroai-premium .neural-lobby__network-nodes,
+.patroai-premium .aurora-particle-field--lobby {
+  display: none !important;
+}
+
+.patroai-premium .neural-lobby__network {
+  opacity: .96;
+  mix-blend-mode: screen;
+}
+
+.patroai-premium .neural-lobby__network-lines path {
+  stroke-width: 1.45;
+  stroke-dasharray: 40 24 7 34;
+  opacity: .66;
+  filter:
+    drop-shadow(0 0 4px rgba(55, 197, 255, .24))
+    drop-shadow(0 0 9px rgba(125, 107, 255, .14));
+  animation-duration: calc(10.5s + (var(--i) * .46s));
+}
+
+.patroai-premium .neural-lobby::before {
+  inset: -16%;
+  background:
+    radial-gradient(ellipse at 28% 38%, rgba(55, 197, 255, .28) 0 4%, rgba(55, 197, 255, .10) 18%, transparent 42%),
+    radial-gradient(ellipse at 73% 34%, rgba(125, 107, 255, .30) 0 4%, rgba(125, 107, 255, .11) 19%, transparent 43%),
+    radial-gradient(ellipse at 26% 72%, rgba(40, 240, 181, .22) 0 4%, rgba(40, 240, 181, .08) 20%, transparent 44%),
+    radial-gradient(ellipse at 76% 72%, rgba(246, 196, 83, .24) 0 4%, rgba(246, 196, 83, .09) 18%, transparent 43%),
+    radial-gradient(circle at 50% 39%, rgba(246, 196, 83, .30), rgba(246, 196, 83, .08) 13%, transparent 31%);
+  filter: blur(24px) saturate(128%);
+  opacity: 1;
+  animation: efataSpectralBreath 18s ease-in-out infinite alternate;
+}
+
+.patroai-premium .neural-lobby::after {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    conic-gradient(
+      from 204deg at 50% 41%,
+      transparent 0 4%,
+      rgba(55, 197, 255, .22) 5%,
+      transparent 8% 18%,
+      rgba(40, 240, 181, .16) 20%,
+      transparent 24% 42%,
+      rgba(246, 196, 83, .20) 45%,
+      transparent 49% 66%,
+      rgba(125, 107, 255, .22) 69%,
+      transparent 73% 100%
+    );
+  -webkit-mask-image: radial-gradient(ellipse at 50% 42%, transparent 0 16%, #000 28% 66%, transparent 88%);
+  mask-image: radial-gradient(ellipse at 50% 42%, transparent 0 16%, #000 28% 66%, transparent 88%);
+  filter: blur(8px);
+  opacity: .86;
+  mix-blend-mode: screen;
+  animation: efataSpectralSweep 26s ease-in-out infinite alternate;
+}
+
+.patroai-premium .neural-lobby__canvas-stage {
+  opacity: .92;
+  filter: saturate(138%) contrast(108%);
+}
+
+.patroai-premium .neural-lobby__vignette {
+  background:
+    radial-gradient(circle at 50% 41%, transparent 0 21%, rgba(2, 5, 9, .06) 43%, rgba(1, 4, 8, .76) 100%),
+    linear-gradient(180deg, rgba(1, 4, 9, .54), transparent 17%, transparent 79%, rgba(1, 4, 8, .72));
+}
+
+.patroai-premium .neural-lobby__brand {
+  width: 214px;
+  height: 214px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 22px rgba(246, 196, 83, .20));
+}
+
+.patroai-premium .neural-lobby__logo-image {
+  width: 192px !important;
+  height: 192px !important;
+  object-fit: contain !important;
+  mix-blend-mode: screen;
+  opacity: .98;
+  filter:
+    drop-shadow(0 0 8px rgba(255, 238, 180, .78))
+    drop-shadow(0 0 24px rgba(246, 196, 83, .56))
+    drop-shadow(0 0 56px rgba(246, 196, 83, .22)) !important;
+  animation: efataLogoFloat 9.8s cubic-bezier(.45,.05,.55,.95) infinite;
+}
+
+.patroai-premium .neural-lobby__brand-halo {
+  inset: -70px;
+  background:
+    radial-gradient(circle, rgba(255, 247, 211, .18) 0 10%, rgba(246, 196, 83, .28) 16%, transparent 38%),
+    conic-gradient(
+      from 10deg,
+      rgba(55, 197, 255, .18),
+      rgba(125, 107, 255, .46),
+      rgba(246, 196, 83, .54),
+      rgba(40, 240, 181, .34),
+      rgba(55, 197, 255, .18)
+    );
+  filter: blur(24px);
+  opacity: .96;
+  animation: efataCoreAura 13.5s ease-in-out infinite alternate;
+}
+
+.patroai-premium .neural-lobby__brand-orbit--outer {
+  inset: -25px;
+  border-color: rgba(246, 196, 83, .82);
+  box-shadow:
+    0 0 16px rgba(246, 196, 83, .40),
+    0 0 52px rgba(246, 196, 83, .15),
+    inset 0 0 30px rgba(55, 197, 255, .10);
+}
+
+.patroai-premium .neural-lobby__brand-orbit--inner {
+  inset: 3px;
+  border-color: rgba(125, 107, 255, .54);
+  box-shadow:
+    0 0 22px rgba(125, 107, 255, .22),
+    inset 0 0 24px rgba(40, 240, 181, .10);
+}
+
+.patroai-premium .neural-lobby__corner-brand {
+  width: 110px;
+  height: 96px;
+  top: 16px;
+  left: 20px;
+  border-radius: 0;
+  opacity: .98;
+}
+
+.patroai-premium .neural-lobby__corner-brand::before {
+  inset: -18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(246, 196, 83, .18), transparent 62%);
+  filter: blur(18px);
+}
+
+.patroai-premium .neural-lobby__corner-brand img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
+  mix-blend-mode: screen;
+  filter:
+    drop-shadow(0 0 7px rgba(246, 196, 83, .68))
+    drop-shadow(0 0 18px rgba(246, 196, 83, .24)) !important;
+}
+
+.patroai-premium .neural-lobby__node {
+  box-shadow:
+    inset 0 0 28px color-mix(in srgb, var(--node-accent) 10%, transparent),
+    0 0 24px color-mix(in srgb, var(--node-accent) 13%, transparent),
+    0 0 66px color-mix(in srgb, var(--node-accent) 7%, transparent);
+}
+
+.patroai-premium .neural-lobby__node:hover,
+.patroai-premium .neural-lobby__node:focus-visible,
+.patroai-premium .neural-lobby__node.is-selected {
+  box-shadow:
+    inset 0 0 38px color-mix(in srgb, var(--node-accent) 18%, transparent),
+    0 0 16px color-mix(in srgb, var(--node-accent) 64%, transparent),
+    0 0 46px color-mix(in srgb, var(--node-accent) 34%, transparent),
+    0 0 96px color-mix(in srgb, var(--node-accent) 17%, transparent);
+}
+
+@keyframes efataSpectralBreath {
+  0% { transform: scale(1) translate3d(-.5%, .2%, 0); filter: blur(24px) saturate(118%); }
+  100% { transform: scale(1.035) translate3d(.5%, -.35%, 0); filter: blur(27px) saturate(145%); }
+}
+
+@keyframes efataSpectralSweep {
+  0% { transform: rotate(-1.5deg) scale(1.01); opacity: .72; }
+  100% { transform: rotate(2deg) scale(1.035); opacity: .96; }
+}
+
+@keyframes efataLogoFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -3px, 0) scale(1.018); }
+}
+
+@keyframes efataCoreAura {
+  0% { transform: scale(.96) rotate(-2deg); opacity: .80; }
+  100% { transform: scale(1.06) rotate(3deg); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium .neural-lobby::before,
+  .patroai-premium .neural-lobby::after,
+  .patroai-premium .neural-lobby__logo-image {
+    animation: none !important;
+  }
+}

@@ -108,9 +108,9 @@ void main() {
     node += pointer * depth * (0.055 + u_energy * 0.018);
 
     float distanceToNode = length(p - node);
-    float nodeGlow = exp(-distanceToNode * (52.0 - u_energy * 14.0));
-    float nodeCore = exp(-distanceToNode * 230.0);
-    glow += nodeGlow;
+    float nodeGlow = exp(-distanceToNode * (58.0 - u_energy * 10.0)) * 0.20;
+    float nodeCore = exp(-distanceToNode * 260.0) * 0.035;
+    glow += nodeGlow * 0.34;
 
     vec3 electricBlue = vec3(0.216, 0.773, 1.0);
     vec3 violet = vec3(0.490, 0.420, 1.0);
@@ -122,8 +122,8 @@ void main() {
       seed < 0.85 ? livingGreen :
                     auroraGold;
 
-    color += nodeColor * nodeGlow;
-    color += mix(vec3(1.0, 0.95, 0.78), auroraGold, 0.44) * nodeCore * (0.7 + u_energy * 1.5);
+    color += nodeColor * nodeGlow * 0.34;
+    color += mix(vec3(1.0, 0.95, 0.78), auroraGold, 0.44) * nodeCore * (0.20 + u_energy * 0.30);
 
     for (int j = 0; j < 4; j++) {
       float fj = float(j);
@@ -138,7 +138,7 @@ void main() {
       float otherDepth = mix(-0.10, 0.34, otherSeed);
       other += pointer * otherDepth * (0.055 + u_energy * 0.018);
       float edge = lineSegment(p, node, other);
-      network += exp(-edge * (110.0 - u_energy * 38.0)) * 0.17;
+      network += exp(-edge * (104.0 - u_energy * 32.0)) * 0.31;
     }
   }
 
@@ -155,13 +155,13 @@ void main() {
   spectralNetwork = mix(spectralNetwork, livingGreen, 0.18 + wave * 0.08);
 
   color += spectralNetwork * network * (0.62 + wave * 0.48);
-  color += mix(violet, electricBlue, 0.46) * glow * 0.028;
-  color += auroraGold * glow * 0.022;
+  color += mix(violet, electricBlue, 0.46) * glow * 0.010;
+  color += auroraGold * glow * 0.008;
   color += mix(auroraGold, electricBlue, 0.24) * core * (0.18 + u_energy * 0.13);
   color += mix(electricBlue, violet, 0.38) * noiseField;
 
   float vignette = smoothstep(1.18, 0.18, length(p));
-  float alpha = (0.16 + network * 0.52 + glow * 0.16 + core * 0.18) * vignette * u_visibility;
+  float alpha = (0.12 + network * 0.72 + glow * 0.035 + core * 0.16) * vignette * u_visibility;
   outColor = vec4(color * 1.12, alpha);
 }
 `;
