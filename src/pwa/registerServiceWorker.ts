@@ -1,5 +1,5 @@
-export const UPDATE_EVENT = "orkio:pwa-update";
-export const REGISTRATION_ERROR_EVENT = "orkio:pwa-registration-error";
+export const UPDATE_EVENT = "patroai:pwa-update";
+export const REGISTRATION_ERROR_EVENT = "patroai:pwa-registration-error";
 
 type WaitingUpdateDetail = {
   registration: ServiceWorkerRegistration;
@@ -61,6 +61,10 @@ function installV8ControllerMigration(): void {
 }
 
 export async function registerServiceWorker(): Promise<void> {
+  if (isLegacyPwaLaunch()) {
+    window.location.replace("/?source=pwa&experience=immersive");
+    return;
+  }
   if (!("serviceWorker" in navigator)) return;
   installV8ControllerMigration();
 

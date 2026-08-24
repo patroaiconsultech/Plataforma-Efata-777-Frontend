@@ -6534,3 +6534,64 @@ body.neural-lobby-open .patroai-premium .immersive-return-button {
     animation: none !important;
   }
 }
+
+
+/* === EFATA777 V9 RESILIENT MOBILE BOOT === */
+.landing-safe-recovery {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% 32%, rgba(55, 197, 255, .16), transparent 34%),
+    radial-gradient(circle at 72% 70%, rgba(125, 107, 255, .13), transparent 36%),
+    #05080d;
+}
+
+.landing-safe-recovery__card {
+  width: min(100%, 480px);
+  padding: 28px;
+  border: 1px solid rgba(55, 197, 255, .22);
+  border-radius: 24px;
+  background: rgba(5, 9, 15, .92);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .48), 0 0 52px rgba(55, 197, 255, .08);
+  backdrop-filter: blur(18px);
+}
+
+.landing-safe-recovery__card span {
+  display: block;
+  margin-bottom: 10px;
+  color: #37C5FF;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.landing-safe-recovery__card h1 {
+  margin: 0 0 14px;
+  color: #F5F7FA;
+  font-size: clamp(28px, 8vw, 42px);
+  line-height: 1.03;
+}
+
+.landing-safe-recovery__card p {
+  margin: 0 0 22px;
+  color: rgba(245, 247, 250, .74);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.landing-safe-recovery__card button {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 10px;
+  border: 1px solid rgba(55, 197, 255, .28);
+  border-radius: 16px;
+  color: #F5F7FA;
+  background: linear-gradient(135deg, rgba(55, 197, 255, .18), rgba(125, 107, 255, .14));
+  font: inherit;
+  font-weight: 650;
+}

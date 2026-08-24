@@ -6,7 +6,7 @@ import RuntimeErrorBoundary from "./components/RuntimeErrorBoundary";
 
 const container = document.getElementById("root");
 if (!container) {
-  throw new Error("ORKIO root container not found");
+  throw new Error("PatroAI root container not found");
 }
 
 createRoot(container).render(

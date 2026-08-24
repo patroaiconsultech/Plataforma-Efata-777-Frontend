@@ -1,11 +1,11 @@
 {
-  "id": "/app",
+  "id": "/?app=patroai-immersive-v9",
   "name": "PatroAI — Executive OS",
   "short_name": "PatroAI",
   "description": "Plataforma privada de inteligência governada, colaboração executiva e decisão com rastreabilidade.",
   "lang": "pt-BR",
   "dir": "ltr",
-  "start_url": "/?source=pwa",
+  "start_url": "/?source=pwa&experience=immersive",
   "scope": "/",
   "display": "standalone",
   "display_override": [

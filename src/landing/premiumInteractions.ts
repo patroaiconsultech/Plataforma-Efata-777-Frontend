@@ -6,6 +6,32 @@ type PremiumLandingOptions = {
   onPwaSlot?: (slot: HTMLElement | null) => void;
 };
 
+function addMediaQueryChangeListener(
+  media: MediaQueryList,
+  listener: (event: MediaQueryListEvent) => void,
+) {
+  if (typeof media.addEventListener === "function") {
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }
+
+  const legacy = media as MediaQueryList & {
+    addListener?: (callback: (event: MediaQueryListEvent) => void) => void;
+    removeListener?: (callback: (event: MediaQueryListEvent) => void) => void;
+  };
+  legacy.addListener?.(listener);
+  return () => legacy.removeListener?.(listener);
+}
+
+function runOptionalLandingFeature(name: string, feature: () => void) {
+  try {
+    feature();
+  } catch (error) {
+    // Optional visual layers must fail-soft on mobile browsers/GPUs.
+    console.warn(`PatroAI optional landing feature disabled: ${name}`, error);
+  }
+}
+
 const translations: Record<string, Record<string, string>> = {
         pt: {
           "nav.cocreation": "Cocriação", "nav.ecosystem": "Ecossistema", "nav.governance": "Governança", "nav.method": "Método", "nav.contact": "Contato", "nav.careers": "Carreiras", "nav.cocreator": "Co-Criador", "nav.private": "Acesso privado", "immersive.eyebrow": "PATROAI · EXPERIÊNCIA IMERSIVA", "immersive.title": "Este é um ambiente imersivo.", "immersive.copy": "Escolha entrar com som para viver a experiência completa ou continuar sem áudio.", "immersive.sound.cta": "Entrar com som", "immersive.sound.copy": "Ativar a trilha e entrar no núcleo imersivo", "immersive.silent": "Entrar sem som", "immersive.direct": "Ir direto para a apresentação", "immersive.headphones": "Recomendamos o uso de fones de ouvido para uma experiência mais imersiva.", "lobby.eyebrow": "PATROAI · NÚCLEO IMERSIVO", "lobby.title": "Escolha por onde deseja entrar.", "lobby.copy": "Navegue pelo ecossistema enquanto a experiência sonora permanece ativa.", "lobby.node.about": "Conheça a PatroAI", "lobby.node.ecosystem": "Ecossistema", "lobby.node.governance": "Governança", "lobby.node.method": "Método", "lobby.node.careers": "Carreiras & Talentos", "lobby.node.contact": "Contato Estratégico", "lobby.node.platform": "Acessar Plataforma", "lobby.hint": "Selecione um núcleo para entrar", "lobby.dragHint": "Toque e conduza o núcleo",
@@ -642,7 +668,10 @@ export function mountPremiumLanding({
       "visibilitychange",
       onVisibilityChange,
     );
-    reducedMotion.addEventListener("change", onMotionChange);
+    const removeMotionChangeListener = addMediaQueryChangeListener(
+      reducedMotion,
+      onMotionChange,
+    );
 
     let observer: IntersectionObserver | null = null;
     if ("IntersectionObserver" in window) {
@@ -673,7 +702,7 @@ export function mountPremiumLanding({
         "visibilitychange",
         onVisibilityChange,
       );
-      reducedMotion.removeEventListener("change", onMotionChange);
+      removeMotionChangeListener();
       delete canvas.dataset.neuralRenderer;
       delete canvas.dataset.neuralMotion;
       delete canvas.dataset.neuralFrame;
@@ -1855,15 +1884,17 @@ export function mountPremiumLanding({
   );
 
   updateProgress();
-  animateCounts();
-  initReveal();
-  initPointerGlow();
-  initLobbyLogoControl();
-  initLobbyCarousel();
-  initBrainCanvas();
-  initBrainCanvas("#lobbyBrainCanvas", 1.45, {
-    getPointer: () => (lobbyPointer.active ? lobbyPointer : null),
-  });
+  runOptionalLandingFeature("animated counters", animateCounts);
+  runOptionalLandingFeature("reveal observer", initReveal);
+  runOptionalLandingFeature("pointer glow", initPointerGlow);
+  runOptionalLandingFeature("lobby logo control", initLobbyLogoControl);
+  runOptionalLandingFeature("lobby carousel", initLobbyCarousel);
+  runOptionalLandingFeature("hero neural canvas", () => initBrainCanvas());
+  runOptionalLandingFeature("lobby neural canvas", () =>
+    initBrainCanvas("#lobbyBrainCanvas", 1.45, {
+      getPointer: () => (lobbyPointer.active ? lobbyPointer : null),
+    }),
+  );
 
   return () => {
     timers.forEach((timer) => window.clearInterval(timer));

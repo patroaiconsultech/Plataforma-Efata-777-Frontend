@@ -1,5 +1,5 @@
 /* EFATA777 / PatroAI PWA — explicit public allowlist only */
-const VERSION = "efata777-v8-20260824-performance-plasma-mobile";
+const VERSION = "efata777-v9-20260824-resilient-mobile-boot";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 const CACHE_PREFIXES = ["efata777-", "orkio-v2-"];
@@ -94,7 +94,13 @@ async function cacheIfPublic(cache, request, response) {
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(PRECACHE).then((cache) => cache.addAll(PUBLIC_SHELL)),
+    (async () => {
+      const cache = await caches.open(PRECACHE);
+      await cache.addAll(PUBLIC_SHELL);
+      // V9 is a mobile recovery release: activate immediately so installed
+      // standalone PWAs cannot remain controlled by a stale landing shell.
+      await self.skipWaiting();
+    })(),
   );
 });
 
@@ -129,7 +135,7 @@ async function networkFirstNavigation(request) {
     requestUrl.pathname === "/app" &&
     (requestUrl.searchParams.get("source") || "").startsWith("pwa")
   ) {
-    return Response.redirect(`${self.location.origin}/?source=pwa`, 302);
+    return Response.redirect(`${self.location.origin}/?source=pwa&experience=immersive`, 302);
   }
 
   const runtime = await caches.open(RUNTIME);

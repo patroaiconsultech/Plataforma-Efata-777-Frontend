@@ -11,7 +11,7 @@ const html = fs.readFileSync("index.html", "utf8");
 test("manifest supports Android installability fields", () => {
   assert.equal(manifest.display, "standalone");
   assert.equal(manifest.prefer_related_applications, false);
-  assert.equal(manifest.start_url, "/?source=pwa");
+  assert.equal(manifest.start_url, "/?source=pwa&experience=immersive");
   assert.ok(manifest.name);
   assert.ok(manifest.short_name);
   for (const size of ["192x192", "512x512"]) {
@@ -60,9 +60,9 @@ test("service worker provides public offline fallback", () => {
   assert.match(serviceWorker, /staleWhileRevalidate/);
 });
 
-test("service worker update is user-controlled", () => {
+test("service worker keeps manual update support and V9 mobile recovery activates immediately", () => {
   assert.match(serviceWorker, /SKIP_WAITING/);
-  assert.doesNotMatch(serviceWorker, /install[\s\S]{0,300}skipWaiting\(\)/);
+  assert.match(serviceWorker, /install[\s\S]{0,500}skipWaiting\(\)/);
 });
 
 test("service worker and manifest files exist", () => {
