@@ -192,6 +192,7 @@ export function mountPremiumLanding({
     queryAll<HTMLAnchorElement>("[data-neural-lobby-link]");
   const neuralLobbyBrand = query<HTMLElement>(".neural-lobby__brand");
   const neuralLobbyDragHint = query<HTMLElement>("#neuralLobbyDragHint");
+  const neuralLobbyTransition = query<HTMLElement>("[data-lobby-transition]");
   const neuralLobbyCarousel = query<HTMLElement>("[data-lobby-carousel]");
   const neuralLobbyCarouselTrack = query<HTMLElement>("[data-lobby-carousel-track]");
   const neuralLobbyCarouselItems = queryAll<HTMLAnchorElement>("[data-carousel-item]");
@@ -1077,6 +1078,77 @@ export function mountPremiumLanding({
       }, 680);
     };
 
+    let lobbyTransitionLocked = false;
+
+    const prepareLobbyTransition = (anchor: HTMLAnchorElement) => {
+      if (!neuralLobby || !neuralLobbyTransition || !neuralLobbyBrand) return;
+
+      const source = anchor.getBoundingClientRect();
+      const core = neuralLobbyBrand.getBoundingClientRect();
+      const lobby = neuralLobby.getBoundingClientRect();
+
+      const sx = source.left + source.width * 0.5 - lobby.left;
+      const sy = source.top + source.height * 0.5 - lobby.top;
+      const cx = core.left + core.width * 0.5 - lobby.left;
+      const cy = core.top + core.height * 0.5 - lobby.top;
+      const dx = cx - sx;
+      const dy = cy - sy;
+      const distance = Math.max(48, Math.hypot(dx, dy));
+      const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+      neuralLobby.style.setProperty("--transition-source-x", `${sx}px`);
+      neuralLobby.style.setProperty("--transition-source-y", `${sy}px`);
+      neuralLobby.style.setProperty("--transition-core-x", `${cx}px`);
+      neuralLobby.style.setProperty("--transition-core-y", `${cy}px`);
+      neuralLobby.style.setProperty("--transition-beam-length", `${distance}px`);
+      neuralLobby.style.setProperty("--transition-beam-angle", `${angle}deg`);
+      const transitionAccent =
+        getComputedStyle(anchor).getPropertyValue("--node-accent").trim() ||
+        "#37C5FF";
+      neuralLobby.style.setProperty("--transition-accent", transitionAccent);
+
+      neuralLobbyLinks.forEach((link) => link.classList.remove("is-selected"));
+      anchor.classList.add("is-selected");
+      neuralLobby.classList.add("is-transitioning");
+      neuralLobbyTransition.setAttribute("aria-hidden", "false");
+    };
+
+    const finishLobbyTransition = () => {
+      if (!neuralLobby || !neuralLobbyTransition) return;
+      neuralLobby.classList.remove("is-transitioning");
+      neuralLobbyLinks.forEach((link) => link.classList.remove("is-selected"));
+      neuralLobbyTransition.setAttribute("aria-hidden", "true");
+      neuralLobby.style.removeProperty("--transition-source-x");
+      neuralLobby.style.removeProperty("--transition-source-y");
+      neuralLobby.style.removeProperty("--transition-core-x");
+      neuralLobby.style.removeProperty("--transition-core-y");
+      neuralLobby.style.removeProperty("--transition-beam-length");
+      neuralLobby.style.removeProperty("--transition-beam-angle");
+      neuralLobby.style.removeProperty("--transition-accent");
+      lobbyTransitionLocked = false;
+    };
+
+    const runLobbyTransition = async (
+      anchor: HTMLAnchorElement,
+      destination: () => void | Promise<void>,
+    ) => {
+      if (lobbyTransitionLocked) return;
+      lobbyTransitionLocked = true;
+
+      if (reducedMotionPreference.matches) {
+        await Promise.resolve(destination());
+        lobbyTransitionLocked = false;
+        return;
+      }
+
+      prepareLobbyTransition(anchor);
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, 760);
+      });
+      await Promise.resolve(destination());
+      window.setTimeout(finishLobbyTransition, 760);
+    };
+
     const syncMusicDock = () => {
       if (!immersiveAudio || !musicDock) return;
       musicDock.hidden = false;
@@ -1506,15 +1578,28 @@ export function mountPremiumLanding({
     neuralLobbyLinks.forEach((anchor) => {
       const onLobbyLink = (event: MouseEvent) => {
         const href = anchor.getAttribute("href") || "";
-        if (href.startsWith("#")) {
-          event.preventDefault();
-          closeNeuralLobby(href);
+        const isPrivateEntry = anchor.hasAttribute("data-private-entry");
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (isPrivateEntry) {
+          void runLobbyTransition(anchor, async () => {
+            closeNeuralLobby();
+            await Promise.resolve(onPrivateAccess());
+          });
           return;
         }
 
-        // For canonical private access, let the existing auth handler own
-        // navigation while this visual layer exits.
-        closeNeuralLobby();
+        if (href.startsWith("#")) {
+          void runLobbyTransition(anchor, () => closeNeuralLobby(href));
+          return;
+        }
+
+        void runLobbyTransition(anchor, () => {
+          closeNeuralLobby();
+          window.location.assign(href);
+        });
       };
 
       anchor.addEventListener("click", onLobbyLink);
@@ -1553,6 +1638,8 @@ export function mountPremiumLanding({
 
   queryAll<HTMLAnchorElement>("[data-private-entry]").forEach(
     (anchor) => {
+      if (anchor.hasAttribute("data-neural-lobby-link")) return;
+
       const onClick = (event: MouseEvent) => {
         event.preventDefault();
         void Promise.resolve(onPrivateAccess());

@@ -122,9 +122,11 @@ export const premiumMarkup = String.raw`
     <svg viewBox="0 0 1000 700" preserveAspectRatio="none" role="presentation">
       <defs>
         <linearGradient id="neuralLobbyNetworkGradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#36e7c1" stop-opacity=".08"></stop>
-          <stop offset=".5" stop-color="#ffe29a" stop-opacity=".72"></stop>
-          <stop offset="1" stop-color="#36e7c1" stop-opacity=".08"></stop>
+          <stop offset="0" stop-color="#37C5FF" stop-opacity=".18"></stop>
+          <stop offset=".28" stop-color="#7D6BFF" stop-opacity=".62"></stop>
+          <stop offset=".52" stop-color="#F6C453" stop-opacity=".88"></stop>
+          <stop offset=".76" stop-color="#28F0B5" stop-opacity=".58"></stop>
+          <stop offset="1" stop-color="#37C5FF" stop-opacity=".16"></stop>
         </linearGradient>
       </defs>
       <g class="neural-lobby__network-lines">
@@ -155,6 +157,10 @@ export const premiumMarkup = String.raw`
   </div>
 
   <div class="neural-lobby__vignette" aria-hidden="true"></div>
+
+  <a class="neural-lobby__corner-brand" href="#top" data-neural-lobby-link aria-label="PatroAI">
+    <img src="/assets/logo-patroai-oficial.png" alt="PatroAI" />
+  </a>
 
   <div class="neural-lobby__source-reveal" aria-label="Fontes PatroAI" data-source-reveal>
     <a href="#top" data-neural-lobby-link data-reveal-index="0"><span data-i18n="lobby.node.about">Conheça a PatroAI</span></a>
@@ -245,6 +251,15 @@ export const premiumMarkup = String.raw`
   <p class="neural-lobby__drag-hint" id="neuralLobbyDragHint" data-i18n="lobby.dragHint">
     Toque e conduza o núcleo
   </p>
+
+  <div class="neural-lobby__transition" data-lobby-transition aria-hidden="true">
+    <span class="neural-lobby__transition-beam" data-lobby-transition-beam></span>
+    <span class="neural-lobby__transition-impact"></span>
+    <span class="neural-lobby__transition-burst"></span>
+    <span class="neural-lobby__transition-ring neural-lobby__transition-ring--a"></span>
+    <span class="neural-lobby__transition-ring neural-lobby__transition-ring--b"></span>
+    <span class="neural-lobby__transition-flash"></span>
+  </div>
 </section>
 
 <audio
