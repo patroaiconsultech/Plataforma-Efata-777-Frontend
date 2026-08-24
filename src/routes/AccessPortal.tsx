@@ -2,8 +2,6 @@ import React, { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ApiError,
-  nativeBootstrapOwner,
-  nativeBootstrapStatus,
   nativeClaimAccount,
   nativeForgotPassword,
   nativeLogin,
@@ -23,7 +21,6 @@ export const ONBOARDING_DRAFT_KEY = "patroai_hyper_cocreator_onboarding";
 type Mode =
   | "login"
   | "register"
-  | "bootstrap"
   | "forgot"
   | "reset"
   | "activate"
@@ -125,10 +122,7 @@ export default function AccessPortal() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resetToken, setResetToken] = useState("");
   const [issuedResetToken, setIssuedResetToken] = useState("");
-  const [bootstrapSecret, setBootstrapSecret] = useState("");
-  const [bootstrapAvailable, setBootstrapAvailable] = useState(false);
   const [tenantId, setTenantId] = useState("patroai");
-  const [tenantName, setTenantName] = useState("Grupo PatroAI");
   const [displayName, setDisplayName] = useState("");
   const [challengeToken, setChallengeToken] = useState("");
   const [mfaSecret, setMfaSecret] = useState("");
@@ -157,10 +151,6 @@ export default function AccessPortal() {
       setMode("claim");
       setActionToken(token);
     }
-
-    nativeBootstrapStatus()
-      .then((status) => setBootstrapAvailable(Boolean(status.enabled && !status.completed)))
-      .catch(() => setBootstrapAvailable(false));
   }, []);
 
   function switchMode(next: Mode) {
@@ -226,32 +216,6 @@ export default function AccessPortal() {
       return false;
     }
     return true;
-  }
-
-  async function submitBootstrap(event: FormEvent) {
-    event.preventDefault();
-    if (!email.trim() || !password || !bootstrapSecret.trim() || busy) return;
-    if (!passwordsMatch()) return;
-    setBusy(true);
-    setError("");
-    try {
-      const result = await nativeBootstrapOwner({
-        bootstrap_secret: bootstrapSecret.trim(),
-        tenant_id: tenantId.trim() || "patroai",
-        tenant_name: tenantName.trim() || "Grupo PatroAI",
-        email: email.trim(),
-        display_name: displayName.trim() || email.trim(),
-        password,
-      });
-      setBootstrapAvailable(false);
-      setActionToken(result.verification_token || "");
-      setMode(result.verification_token ? "verify" : "login");
-      setError("Conta criada. Confirme o endereço de e-mail antes do primeiro login.");
-    } catch (err) {
-      setError(friendlyAuthError(err));
-    } finally {
-      setBusy(false);
-    }
   }
 
   async function submitCode(event: FormEvent) {
@@ -453,16 +417,13 @@ export default function AccessPortal() {
         <p className="access-eyebrow">PATROAI · ACESSO PROTEGIDO</p>
         <h1 id="access-title">Entre no núcleo PatroAI.</h1>
         <p className="access-lead">
-          Sessão por cookie HttpOnly, identidade confirmada e controles adicionais para contas privilegiadas.
+          Identidade protegida e controles adicionais para contas privilegiadas.
         </p>
 
         {!["verify", "claim", "activate", "mfa-enroll", "mfa-verify", "recovery-codes"].includes(mode) ? (
           <div className="access-tabs" role="tablist" aria-label="Modo de acesso">
             <button type="button" className={mode === "login" ? "active" : ""} onClick={() => switchMode("login")}>Entrar</button>
             <button type="button" className={mode === "register" ? "active" : ""} onClick={() => switchMode("register")}>Código</button>
-            {bootstrapAvailable ? (
-              <button type="button" className={mode === "bootstrap" ? "active" : ""} onClick={() => switchMode("bootstrap")}>Primeira conta</button>
-            ) : null}
           </div>
         ) : null}
 
@@ -559,23 +520,6 @@ export default function AccessPortal() {
               <button className="access-text-button" type="button" onClick={() => setShowConfirmPassword((v) => !v)}>{showConfirmPassword ? "Ocultar repetição" : "Mostrar repetição"}</button>
             </div>
             <button className="access-primary" disabled={busy}>{busy ? "Redefinindo..." : "Redefinir senha"}</button>
-          </form>
-        ) : null}
-
-        {mode === "bootstrap" && bootstrapAvailable ? (
-          <form className="access-step" onSubmit={submitBootstrap}>
-            <span>CONFIGURAÇÃO INICIAL</span><h2>Crie a primeira conta segura.</h2>
-            <p>Use apenas durante o bootstrap governado. O backend também exige que nenhuma credencial nativa exista.</p>
-            <div className="access-grid">
-              <label><span>Chave inicial</span><input value={bootstrapSecret} onChange={(e) => setBootstrapSecret(e.target.value)} autoComplete="off" type="password" /></label>
-              <label><span>Nome</span><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} autoComplete="name" /></label>
-              <label><span>E-mail</span><input value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" inputMode="email" /></label>
-              <label><span>Senha</span><input value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" type={showPassword ? "text" : "password"} placeholder="Mínimo de 15 caracteres" /></label>
-              <label><span>Repetir senha</span><input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" type={showConfirmPassword ? "text" : "password"} /></label>
-              <label><span>Tenant ID</span><input value={tenantId} onChange={(e) => setTenantId(e.target.value)} /></label>
-              <label><span>Tenant</span><input value={tenantName} onChange={(e) => setTenantName(e.target.value)} /></label>
-            </div>
-            <button className="access-primary" disabled={busy}>{busy ? "Configurando..." : "Criar primeira conta"}</button>
           </form>
         ) : null}
 
