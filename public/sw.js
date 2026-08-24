@@ -1,5 +1,5 @@
 /* EFATA777 / PatroAI PWA — explicit public allowlist only */
-const VERSION = "efata777-v10-20260824-mobile-fluid-drag";
+const VERSION = "efata777-v11-20260824-mobile-immersive-polish";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 const CACHE_PREFIXES = ["efata777-", "orkio-v2-"];

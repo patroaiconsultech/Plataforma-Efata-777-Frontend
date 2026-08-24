@@ -788,6 +788,20 @@ export function mountPremiumLanding({
       event.preventDefault();
     };
 
+    const onLobbyDragSurfacePointerDown = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      if (target?.closest("a,button,input,select,textarea")) return;
+      const rect = neuralLobbyBrand.getBoundingClientRect();
+      const pad = event.pointerType === "touch" ? 42 : 18;
+      const insideExpandedBrand =
+        event.clientX >= rect.left - pad &&
+        event.clientX <= rect.right + pad &&
+        event.clientY >= rect.top - pad &&
+        event.clientY <= rect.bottom + pad;
+      if (!insideExpandedBrand) return;
+      onPointerDown(event);
+    };
+
     const onPointerMove = (event: PointerEvent) => {
       if (!drag.active || drag.pointerId !== event.pointerId) return;
       applyPosition(
@@ -855,16 +869,20 @@ export function mountPremiumLanding({
     };
 
     neuralLobbyBrand.addEventListener("pointerdown", onPointerDown);
+    neuralLobby.addEventListener("pointerdown", onLobbyDragSurfacePointerDown);
     // Samsung Internet can lose pointer capture when transformed layers move.
     // Track movement at window level so dragging remains continuous even when
     // the finger leaves the logo's original hit box.
     window.addEventListener("pointermove", onPointerMove, { passive: false });
     window.addEventListener("pointerup", onPointerUp, { passive: false });
     window.addEventListener("pointercancel", onPointerUp, { passive: false });
-    neuralLobbyBrand.addEventListener("touchstart", onTouchStart, { passive: false });
-    neuralLobbyBrand.addEventListener("touchmove", onTouchMove, { passive: false });
-    neuralLobbyBrand.addEventListener("touchend", onTouchEnd, { passive: false });
-    neuralLobbyBrand.addEventListener("touchcancel", onTouchEnd, { passive: false });
+    const needsTouchFallback = !("PointerEvent" in window);
+    if (needsTouchFallback) {
+      neuralLobbyBrand.addEventListener("touchstart", onTouchStart, { passive: false });
+      window.addEventListener("touchmove", onTouchMove, { passive: false });
+      window.addEventListener("touchend", onTouchEnd, { passive: false });
+      window.addEventListener("touchcancel", onTouchEnd, { passive: false });
+    }
     neuralLobbyBrand.addEventListener("keydown", onKeyDown);
     neuralLobbyBrand.addEventListener("dblclick", recenter);
     applyPosition(0, 0);
@@ -874,13 +892,16 @@ export function mountPremiumLanding({
         window.clearTimeout(lobbyPointerReleaseTimer);
       }
       neuralLobbyBrand.removeEventListener("pointerdown", onPointerDown);
+      neuralLobby.removeEventListener("pointerdown", onLobbyDragSurfacePointerDown);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);
-      neuralLobbyBrand.removeEventListener("touchstart", onTouchStart);
-      neuralLobbyBrand.removeEventListener("touchmove", onTouchMove);
-      neuralLobbyBrand.removeEventListener("touchend", onTouchEnd);
-      neuralLobbyBrand.removeEventListener("touchcancel", onTouchEnd);
+      if (needsTouchFallback) {
+        neuralLobbyBrand.removeEventListener("touchstart", onTouchStart);
+        window.removeEventListener("touchmove", onTouchMove);
+        window.removeEventListener("touchend", onTouchEnd);
+        window.removeEventListener("touchcancel", onTouchEnd);
+      }
       neuralLobbyBrand.removeEventListener("keydown", onKeyDown);
       neuralLobbyBrand.removeEventListener("dblclick", recenter);
       neuralLobbyBrand.style.removeProperty("--logo-drag-x");
@@ -1226,6 +1247,7 @@ export function mountPremiumLanding({
     let audioMasterGain: GainNode | null = null;
     let audioCompressor: DynamicsCompressorNode | null = null;
     let audioAnalyser: AnalyserNode | null = null;
+    let audioFrequencyData: Uint8Array | null = null;
     let audioReactiveFrame = 0;
     let audioReactiveLevel = 0;
     let audioBassLevel = 0;
@@ -1321,14 +1343,26 @@ export function mountPremiumLanding({
       root.removeAttribute("data-immersive-quality");
     });
 
+    const rampMasterGain = (target: number, duration = 0.09) => {
+      if (!audioMasterGain || !audioContext) return;
+      const now = audioContext.currentTime;
+      const gain = audioMasterGain.gain;
+      const current = Math.max(0.0001, gain.value || 0.0001);
+      gain.cancelScheduledValues(now);
+      gain.setValueAtTime(current, now);
+      gain.linearRampToValueAtTime(Math.max(0.0001, target), now + duration);
+    };
+
     const selectAudioTrack = (index: number) => {
       if (!immersiveAudio) return;
       audioTrackIndex = Math.min(
         Math.max(index, 0),
         audioPlaylist.length - 1,
       );
+      rampMasterGain(0.0001, 0.035);
       immersiveAudio.src = audioPlaylist[audioTrackIndex];
       immersiveAudio.volume = 0.58;
+      immersiveAudio.preload = "auto";
       immersiveAudio.load();
       if (musicDockStatus) {
         musicDockStatus.textContent = `Faixa ${audioTrackIndex + 1} de ${audioPlaylist.length}`;
@@ -1379,7 +1413,13 @@ export function mountPremiumLanding({
         return;
       }
 
-      const frequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
+      if (
+        !audioFrequencyData ||
+        audioFrequencyData.length !== audioAnalyser.frequencyBinCount
+      ) {
+        audioFrequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
+      }
+      const frequencyData = audioFrequencyData;
       audioAnalyser.getByteFrequencyData(frequencyData);
 
       const nyquist = audioContext.sampleRate / 2;
@@ -1495,7 +1535,9 @@ export function mountPremiumLanding({
         const source =
           audioContext.createMediaElementSource(immersiveAudio);
         audioMasterGain = audioContext.createGain();
-        audioMasterGain.gain.value = 0.48;
+        // Start silent and ramp after playback begins. This avoids hard
+        // discontinuities ("clicks") when Samsung/Chromium opens or swaps media.
+        audioMasterGain.gain.value = 0.0001;
         audioCompressor = audioContext.createDynamicsCompressor();
         audioCompressor.threshold.value = -24;
         audioCompressor.knee.value = 24;
@@ -1503,8 +1545,12 @@ export function mountPremiumLanding({
         audioCompressor.attack.value = 0.003;
         audioCompressor.release.value = 0.3;
         audioAnalyser = audioContext.createAnalyser();
-        audioAnalyser.fftSize = 512;
-        audioAnalyser.smoothingTimeConstant = 0.58;
+        const mobileAudioProfile =
+          window.innerWidth <= 820 ||
+          window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+        audioAnalyser.fftSize = mobileAudioProfile ? 256 : 512;
+        audioAnalyser.smoothingTimeConstant = mobileAudioProfile ? 0.66 : 0.58;
+        audioFrequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
         source.connect(audioMasterGain);
         audioMasterGain.connect(audioCompressor);
         audioCompressor.connect(audioAnalyser);
@@ -1519,6 +1565,7 @@ export function mountPremiumLanding({
         audioMasterGain = null;
         audioCompressor = null;
         audioAnalyser = null;
+        audioFrequencyData = null;
         audioReactiveReady = false;
       }
     };
@@ -1532,6 +1579,7 @@ export function mountPremiumLanding({
       selectAudioTrack(audioTrackIndex + 1);
       try {
         await immersiveAudio.play();
+        rampMasterGain(0.48, 0.12);
         startAudioReactiveLogo();
         syncMusicDock();
       } catch {
@@ -1636,6 +1684,7 @@ export function mountPremiumLanding({
             await audioContext.resume();
           }
           await immersiveAudio.play();
+          rampMasterGain(0.48, 0.12);
           syncMusicDock();
           startAudioReactiveLogo();
         } catch {
@@ -1675,8 +1724,11 @@ export function mountPremiumLanding({
     if (immersiveSilent) {
       const onSilentEntry = () => {
         if (immersiveAudio) {
-          immersiveAudio.pause();
-          immersiveAudio.currentTime = 0;
+          rampMasterGain(0.0001, 0.045);
+          window.setTimeout(() => {
+            immersiveAudio.pause();
+            immersiveAudio.currentTime = 0;
+          }, 54);
         }
         resetAudioReactiveLogo();
         if (musicDock) musicDock.hidden = true;
@@ -1719,12 +1771,18 @@ export function mountPremiumLanding({
             // Browser playback policy/error remains visible through dock state.
           }
         } else {
-          immersiveAudio.pause();
-          resetAudioReactiveLogo();
+          rampMasterGain(0.0001, 0.055);
+          window.setTimeout(() => {
+            immersiveAudio.pause();
+            resetAudioReactiveLogo();
+            syncMusicDock();
+          }, 64);
+          return;
         }
         syncMusicDock();
       };
       const onPlay = () => {
+        rampMasterGain(0.48, 0.12);
         syncMusicDock();
         startAudioReactiveLogo();
       };

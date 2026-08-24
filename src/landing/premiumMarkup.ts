@@ -56,7 +56,7 @@ export const premiumMarkup = String.raw`
   <div class="immersive-gate__panel">
     <div class="immersive-gate__brand" aria-hidden="true">
       <span class="immersive-gate__halo"></span>
-      <img src="/assets/logo-patroai-oficial.png" alt="" />
+      <img src="/assets/patroai-logo-integrated.png" alt="" />
     </div>
     <p class="immersive-gate__eyebrow" data-i18n="immersive.eyebrow">PATROAI · EXPERIÊNCIA IMERSIVA</p>
     <h1 id="immersiveTitle" data-i18n="immersive.title">Este é um ambiente imersivo.</h1>
