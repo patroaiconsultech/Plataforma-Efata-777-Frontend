@@ -198,6 +198,17 @@ export const premiumMarkup = String.raw`
     </div>
   </div>
 
+
+  <div class="neural-lobby__dimensional-portals" aria-hidden="true">
+    <span class="neural-lobby__portal neural-lobby__portal--a"><i></i></span>
+    <span class="neural-lobby__portal neural-lobby__portal--b"><i></i></span>
+    <span class="neural-lobby__portal neural-lobby__portal--c"><i></i></span>
+    <span class="neural-lobby__portal neural-lobby__portal--d"><i></i></span>
+    <span class="neural-lobby__portal neural-lobby__portal--e"><i></i></span>
+    <span class="neural-lobby__portal neural-lobby__portal--f"><i></i></span>
+    <span class="neural-lobby__portal neural-lobby__portal--g"><i></i></span>
+  </div>
+
   <div class="neural-lobby__vignette" aria-hidden="true"></div>
 
   <a class="neural-lobby__corner-brand" href="#top" data-neural-lobby-link aria-label="PatroAI">
@@ -215,6 +226,11 @@ export const premiumMarkup = String.raw`
   </div>
 
   <div class="neural-lobby__center">
+    <span
+      class="neural-lobby__drag-surface"
+      data-neural-drag-surface
+      aria-hidden="true"
+    ></span>
     <div
       class="neural-lobby__brand"
       tabindex="0"

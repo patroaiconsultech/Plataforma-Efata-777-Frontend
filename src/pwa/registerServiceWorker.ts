@@ -24,7 +24,7 @@ function installControllerRefresh(): void {
 
 export async function registerServiceWorker(): Promise<void> {
   if (isLegacyPwaLaunch()) {
-    window.location.replace("/?source=pwa&experience=immersive&v=12");
+    window.location.replace("/?source=pwa&experience=immersive&v=13");
     return;
   }
   if (!("serviceWorker" in navigator)) return;
@@ -48,7 +48,7 @@ export async function registerServiceWorker(): Promise<void> {
           updateViaCache: "none",
         });
 
-        // V12 uses a single update model: the worker auto-activates via
+        // V13 uses a single update model: the worker auto-activates via
         // skipWaiting(), while controllerchange reloads the page. Do not
         // dispatch a manual "waiting worker" banner for a worker that is
         // intentionally transient.

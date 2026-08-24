@@ -29,10 +29,10 @@ test("V8 mobile gate has deterministic first-surface priority", () => {
 });
 
 test("V8 PWA launches at the public immersive root and migrates legacy PWA launches", () => {
-  assert.equal(manifest.start_url, "/?source=pwa&experience=immersive&v=12");
+  assert.equal(manifest.start_url, "/?source=pwa&experience=immersive&v=13");
   assert.match(app, /source\.startsWith\("pwa"\)/);
   assert.match(sw, /requestUrl\.pathname === "\/app"/);
-  assert.match(sw, /Response\.redirect\(`\$\{self\.location\.origin\}\/\?source=pwa&experience=immersive&v=12`/);
+  assert.match(sw, /Response\.redirect\(`\$\{self\.location\.origin\}\/\?source=pwa&experience=immersive&v=13`/);
 });
 
 test("V8 music path uses fast kick attack instead of only slow average energy", () => {

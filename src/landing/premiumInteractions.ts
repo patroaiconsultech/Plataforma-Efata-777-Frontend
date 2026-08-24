@@ -218,6 +218,7 @@ export function mountPremiumLanding({
   const neuralLobbyLinks =
     queryAll<HTMLAnchorElement>("[data-neural-lobby-link]");
   const neuralLobbyBrand = query<HTMLElement>(".neural-lobby__brand");
+  const neuralLobbyDragSurface = query<HTMLElement>("[data-neural-drag-surface]");
   const neuralLobbyDragHint = query<HTMLElement>("#neuralLobbyDragHint");
   const neuralLobbyTransition = query<HTMLElement>("[data-lobby-transition]");
   const neuralLobbyCarousel = query<HTMLElement>("[data-lobby-carousel]");
@@ -743,6 +744,8 @@ export function mountPremiumLanding({
       position.y = clamp(y, -safeY, safeY);
       neuralLobbyBrand.style.setProperty("--logo-drag-x", `${position.x.toFixed(2)}px`);
       neuralLobbyBrand.style.setProperty("--logo-drag-y", `${position.y.toFixed(2)}px`);
+      neuralLobby.style.setProperty("--logo-drag-x", `${position.x.toFixed(2)}px`);
+      neuralLobby.style.setProperty("--logo-drag-y", `${position.y.toFixed(2)}px`);
       updateNeuralPointer();
     };
 
@@ -869,6 +872,7 @@ export function mountPremiumLanding({
     };
 
     neuralLobbyBrand.addEventListener("pointerdown", onPointerDown);
+    neuralLobbyDragSurface?.addEventListener("pointerdown", onPointerDown);
     neuralLobby.addEventListener("pointerdown", onLobbyDragSurfacePointerDown);
     // Samsung Internet can lose pointer capture when transformed layers move.
     // Track movement at window level so dragging remains continuous even when
@@ -878,6 +882,7 @@ export function mountPremiumLanding({
     window.addEventListener("pointercancel", onPointerUp, { passive: false });
     const needsTouchFallback = true;
     neuralLobbyBrand.addEventListener("touchstart", onTouchStart, { passive: false });
+    neuralLobbyDragSurface?.addEventListener("touchstart", onTouchStart, { passive: false });
     window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onTouchEnd, { passive: false });
     window.addEventListener("touchcancel", onTouchEnd, { passive: false });
@@ -890,12 +895,14 @@ export function mountPremiumLanding({
         window.clearTimeout(lobbyPointerReleaseTimer);
       }
       neuralLobbyBrand.removeEventListener("pointerdown", onPointerDown);
+      neuralLobbyDragSurface?.removeEventListener("pointerdown", onPointerDown);
       neuralLobby.removeEventListener("pointerdown", onLobbyDragSurfacePointerDown);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);
       if (needsTouchFallback) {
         neuralLobbyBrand.removeEventListener("touchstart", onTouchStart);
+        neuralLobbyDragSurface?.removeEventListener("touchstart", onTouchStart);
         window.removeEventListener("touchmove", onTouchMove);
         window.removeEventListener("touchend", onTouchEnd);
         window.removeEventListener("touchcancel", onTouchEnd);
@@ -904,6 +911,8 @@ export function mountPremiumLanding({
       neuralLobbyBrand.removeEventListener("dblclick", recenter);
       neuralLobbyBrand.style.removeProperty("--logo-drag-x");
       neuralLobbyBrand.style.removeProperty("--logo-drag-y");
+      neuralLobby.style.removeProperty("--logo-drag-x");
+      neuralLobby.style.removeProperty("--logo-drag-y");
       lobbyPointer.active = false;
     });
   }
@@ -1397,6 +1406,9 @@ export function mountPremiumLanding({
       root.style.removeProperty("--music-beat");
       root.style.removeProperty("--music-beat-flash");
       root.style.removeProperty("--music-motion-duration");
+      root.style.removeProperty("--portal-scale");
+      root.style.removeProperty("--portal-glow");
+      root.style.removeProperty("--portal-breathe");
     };
 
     const renderAudioReactiveLogo = (timestamp = performance.now()) => {
@@ -1515,6 +1527,9 @@ export function mountPremiumLanding({
       root.style.setProperty("--music-high", high.toFixed(3));
       root.style.setProperty("--music-beat", beat.toFixed(3));
       root.style.setProperty("--music-beat-flash", (beat * beat).toFixed(3));
+      root.style.setProperty("--portal-scale", (1 + bass * 0.035 + beat * 0.055).toFixed(4));
+      root.style.setProperty("--portal-glow", (0.30 + normalized * 0.28 + beat * 0.34).toFixed(3));
+      root.style.setProperty("--portal-breathe", (0.58 + mid * 0.22 + high * 0.12).toFixed(3));
 
       audioReactiveFrame = window.requestAnimationFrame(renderAudioReactiveLogo);
     };
