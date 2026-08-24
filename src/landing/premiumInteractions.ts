@@ -855,9 +855,12 @@ export function mountPremiumLanding({
     };
 
     neuralLobbyBrand.addEventListener("pointerdown", onPointerDown);
-    neuralLobbyBrand.addEventListener("pointermove", onPointerMove);
-    neuralLobbyBrand.addEventListener("pointerup", onPointerUp);
-    neuralLobbyBrand.addEventListener("pointercancel", onPointerUp);
+    // Samsung Internet can lose pointer capture when transformed layers move.
+    // Track movement at window level so dragging remains continuous even when
+    // the finger leaves the logo's original hit box.
+    window.addEventListener("pointermove", onPointerMove, { passive: false });
+    window.addEventListener("pointerup", onPointerUp, { passive: false });
+    window.addEventListener("pointercancel", onPointerUp, { passive: false });
     neuralLobbyBrand.addEventListener("touchstart", onTouchStart, { passive: false });
     neuralLobbyBrand.addEventListener("touchmove", onTouchMove, { passive: false });
     neuralLobbyBrand.addEventListener("touchend", onTouchEnd, { passive: false });
@@ -871,9 +874,9 @@ export function mountPremiumLanding({
         window.clearTimeout(lobbyPointerReleaseTimer);
       }
       neuralLobbyBrand.removeEventListener("pointerdown", onPointerDown);
-      neuralLobbyBrand.removeEventListener("pointermove", onPointerMove);
-      neuralLobbyBrand.removeEventListener("pointerup", onPointerUp);
-      neuralLobbyBrand.removeEventListener("pointercancel", onPointerUp);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
       neuralLobbyBrand.removeEventListener("touchstart", onTouchStart);
       neuralLobbyBrand.removeEventListener("touchmove", onTouchMove);
       neuralLobbyBrand.removeEventListener("touchend", onTouchEnd);
@@ -1261,7 +1264,11 @@ export function mountPremiumLanding({
     const initialPerformanceProfile = () => {
       const memory = Number((navigator as Navigator & { deviceMemory?: number }).deviceMemory || 0);
       const cores = Number(navigator.hardwareConcurrency || 0);
-      if (window.innerWidth <= 820 || (memory > 0 && memory <= 4) || (cores > 0 && cores <= 4)) {
+      const coarsePointer = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+      if (window.innerWidth <= 820 || coarsePointer) {
+        return "performance" as const;
+      }
+      if ((memory > 0 && memory <= 4) || (cores > 0 && cores <= 4)) {
         return "balanced" as const;
       }
       return "full" as const;
@@ -1286,7 +1293,7 @@ export function mountPremiumLanding({
       performanceGovernorAccumulated += frameTime;
       performanceGovernorSamples += 1;
 
-      if (performanceGovernorSamples < 45 || timestamp - performanceLastDecision < 1500) return;
+      if (performanceGovernorSamples < 30 || timestamp - performanceLastDecision < 900) return;
 
       const averageFrameTime = performanceGovernorAccumulated / performanceGovernorSamples;
       const fps = 1000 / averageFrameTime;
@@ -1294,11 +1301,15 @@ export function mountPremiumLanding({
       performanceGovernorSamples = 0;
       performanceLastDecision = timestamp;
 
-      if (fps < 38) {
+      const mobileLike =
+        window.innerWidth <= 820 ||
+        window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+      if (fps < 42) {
         applyPerformanceProfile("performance");
-      } else if (fps < 53) {
+      } else if (fps < 55 || mobileLike) {
+        // Mobile never auto-upgrades to the expensive FULL profile.
         applyPerformanceProfile("balanced");
-      } else if (fps > 57) {
+      } else if (fps > 58) {
         applyPerformanceProfile("full");
       }
     };

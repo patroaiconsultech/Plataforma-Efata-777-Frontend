@@ -11,7 +11,7 @@ const html = fs.readFileSync("index.html", "utf8");
 test("manifest supports Android installability fields", () => {
   assert.equal(manifest.display, "standalone");
   assert.equal(manifest.prefer_related_applications, false);
-  assert.equal(manifest.start_url, "/?source=pwa&experience=immersive");
+  assert.equal(manifest.start_url, "/?source=pwa&experience=immersive&v=10");
   assert.ok(manifest.name);
   assert.ok(manifest.short_name);
   for (const size of ["192x192", "512x512"]) {

@@ -62,7 +62,7 @@ function installV8ControllerMigration(): void {
 
 export async function registerServiceWorker(): Promise<void> {
   if (isLegacyPwaLaunch()) {
-    window.location.replace("/?source=pwa&experience=immersive");
+    window.location.replace("/?source=pwa&experience=immersive&v=10");
     return;
   }
   if (!("serviceWorker" in navigator)) return;

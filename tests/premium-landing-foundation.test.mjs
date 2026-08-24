@@ -36,7 +36,7 @@ test("public crawl surfaces are explicit and brand-consistent", () => {
   assert.match(robots, /Sitemap: https:\/\/plataforma-efata-777-frontend-production\.up\.railway\.app\/sitemap\.xml/);
   assert.match(robots, /Disallow: \/access/);
   assert.match(sitemap, /<loc>https:\/\/plataforma-efata-777-frontend-production\.up\.railway\.app\/\<\/loc>/);
-  assert.match(manifest, /"name": "PatroAI — Executive OS"/);
+  assert.match(manifest, /"name": "PatroAI"/);
   assert.match(manifest, /"short_name": "PatroAI"/);
   assert.doesNotMatch(manifest, /ORKIO — Inteligência Orquestrada/);
 });
