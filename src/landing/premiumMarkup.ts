@@ -139,8 +139,13 @@ export const premiumMarkup = String.raw`
           <stop offset=".76" stop-color="#28F0B5" stop-opacity=".58"></stop>
           <stop offset="1" stop-color="#37C5FF" stop-opacity=".16"></stop>
         </linearGradient>
+        <filter id="efataPlasmaWarp" x="-20%" y="-25%" width="140%" height="150%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency=".006 .018" numOctaves="2" seed="17" result="noise"></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="13" xChannelSelector="R" yChannelSelector="B"></feDisplacementMap>
+          <feGaussianBlur stdDeviation="1.4"></feGaussianBlur>
+        </filter>
       </defs>
-      <g class="neural-lobby__network-lines neural-lobby__network-lines--curved">
+      <g class="neural-lobby__network-lines neural-lobby__network-lines--curved" filter="url(#efataPlasmaWarp)">
         <path class="neural-lobby__stream neural-lobby__stream--blue neural-lobby__stream--rail" style="--i:0" d="M-40 160 C120 90 245 95 365 190 C430 242 458 264 500 286"></path>
         <path class="neural-lobby__stream neural-lobby__stream--violet neural-lobby__stream--rail" style="--i:1" d="M1040 150 C875 84 748 98 638 190 C575 242 545 263 500 286"></path>
         <path class="neural-lobby__stream neural-lobby__stream--green neural-lobby__stream--rail" style="--i:2" d="M-55 520 C125 555 248 505 357 408 C428 345 460 319 500 286"></path>

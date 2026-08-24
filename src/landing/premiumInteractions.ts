@@ -1264,7 +1264,7 @@ export function mountPremiumLanding({
         !audioContext ||
         immersiveAudio.paused ||
         immersiveAudio.ended ||
-        reducedMotionPreference.matches
+        (reducedMotionPreference.matches && root.dataset.motionOverride !== "on")
       ) {
         resetAudioReactiveLogo();
         return;
@@ -1501,7 +1501,7 @@ export function mountPremiumLanding({
         !audioAnalyser ||
         !immersiveAudio ||
         immersiveAudio.paused ||
-        reducedMotionPreference.matches
+        (reducedMotionPreference.matches && root.dataset.motionOverride !== "on")
       ) {
         resetAudioReactiveLogo();
         return;
@@ -1647,6 +1647,24 @@ export function mountPremiumLanding({
         }
       });
     }
+
+    const triggerNodeBurst = (anchor: HTMLAnchorElement) => {
+      anchor.classList.remove("is-hover-burst");
+      void anchor.offsetWidth;
+      anchor.classList.add("is-hover-burst");
+      window.setTimeout(() => anchor.classList.remove("is-hover-burst"), 520);
+    };
+
+    neuralLobbyLinks.forEach((anchor) => {
+      const onPointerEnter = () => triggerNodeBurst(anchor);
+      const onPointerDown = () => triggerNodeBurst(anchor);
+      anchor.addEventListener("pointerenter", onPointerEnter, { passive: true });
+      anchor.addEventListener("pointerdown", onPointerDown, { passive: true });
+      cleanups.push(() => {
+        anchor.removeEventListener("pointerenter", onPointerEnter);
+        anchor.removeEventListener("pointerdown", onPointerDown);
+      });
+    });
 
     neuralLobbyLinks.forEach((anchor) => {
       const onLobbyLink = (event: MouseEvent) => {

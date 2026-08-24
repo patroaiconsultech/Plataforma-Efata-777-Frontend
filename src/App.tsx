@@ -13,6 +13,15 @@ import AdminPanel from "./routes/AdminPanel";
 import PwaUpdateBanner from "./components/PwaUpdateBanner";
 import "./styles.css";
 
+
+function AppEntry() {
+  const source = new URLSearchParams(window.location.search).get("source") || "";
+  if (source.startsWith("pwa")) {
+    return <Navigate to="/?source=pwa" replace />;
+  }
+  return <AppConsole />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -22,7 +31,7 @@ export default function App() {
       <PwaUpdateBanner />
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/app" element={<AppConsole />} />
+        <Route path="/app" element={<AppEntry />} />
         <Route path="/access" element={<AccessPortal />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/invite/:token" element={<InviteAccept />} />

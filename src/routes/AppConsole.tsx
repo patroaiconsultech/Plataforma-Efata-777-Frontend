@@ -2673,7 +2673,7 @@ export default function AppConsole() {
             <p className="agent-picker__governance">
               Voice Message (gravar → transcrever → revisar → enviar) permanece separado do
               Realtime. O Realtime só inicia quando sessão, bridge, input e output estão elegíveis;
-              a resposta canônica é persistida pela ORKIO antes da reprodução por voz.
+              a resposta canônica é persistida pela plataforma antes da reprodução por voz.
             </p>
             <div className="modal-card__actions">
               <button

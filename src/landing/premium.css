@@ -6030,3 +6030,275 @@ body.neural-lobby-open .patroai-premium .immersive-return-button {
     animation: efataHoverShock 620ms cubic-bezier(.14,.84,.24,1) both !important;
   }
 }
+
+
+/* === EFATA777 IMMERSIVE V7 — PLASMA / RESPONSIVE / INSTANT INPUT === */
+.patroai-premium .neural-lobby__network-lines--curved {
+  opacity: .9 !important;
+  mix-blend-mode: screen;
+}
+.patroai-premium .neural-lobby__stream--rail {
+  stroke-width: 15px !important;
+  opacity: .18 !important;
+  filter:
+    drop-shadow(0 0 5px rgba(var(--stream-color), .58))
+    drop-shadow(0 0 18px rgba(var(--stream-color), .42))
+    drop-shadow(0 0 42px rgba(var(--stream-color), .24)) !important;
+}
+.patroai-premium .neural-lobby__stream--rail.neural-lobby__stream--secondary {
+  stroke-width: 9px !important;
+  opacity: .11 !important;
+}
+.patroai-premium .neural-lobby__stream--pulse {
+  stroke-width: 5.5px !important;
+  stroke-dasharray: 120 980 !important;
+  filter:
+    drop-shadow(0 0 2px rgba(255,255,255,.98))
+    drop-shadow(0 0 9px rgba(var(--stream-color), .96))
+    drop-shadow(0 0 28px rgba(var(--stream-color), .72))
+    drop-shadow(0 0 64px rgba(var(--stream-color), .34)) !important;
+}
+.patroai-premium.music-reactive-active .neural-lobby__stream--rail {
+  stroke-width: calc(12px + var(--music-bass,0) * 8px + var(--music-beat,0) * 12px) !important;
+  opacity: calc(.13 + var(--music-mid,0) * .12 + var(--music-beat,0) * .13) !important;
+}
+.patroai-premium.music-reactive-active .neural-lobby__stream--pulse {
+  stroke-width: calc(4.8px + var(--music-bass,0) * 2px + var(--music-beat,0) * 6px) !important;
+}
+.patroai-premium.music-reactive-active .neural-lobby__network-lines--curved {
+  transform: scale(calc(1 + var(--music-bass,0) * .014 + var(--music-beat,0) * .025));
+  filter: brightness(calc(.92 + var(--music-energy,0) * .28 + var(--music-beat,0) * .64));
+}
+
+/* Logo: no visual tile/frame in the upper-left corner. */
+.patroai-premium .neural-lobby__corner-brand {
+  width: 94px !important;
+  height: 94px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+.patroai-premium .neural-lobby__corner-brand::before {
+  inset: -20px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, rgba(246,196,83,.19), transparent 66%) !important;
+  filter: blur(20px) !important;
+}
+.patroai-premium .neural-lobby__corner-brand img {
+  mix-blend-mode: screen;
+  filter:
+    drop-shadow(0 0 6px rgba(255,242,191,.78))
+    drop-shadow(0 0 20px rgba(246,196,83,.42)) !important;
+}
+
+/* Hover/touch must light on the same frame as the pointer event. */
+.patroai-premium .neural-lobby__node {
+  transition:
+    transform 90ms cubic-bezier(.16,.9,.24,1),
+    border-color 0ms,
+    background 0ms,
+    box-shadow 0ms,
+    color 0ms !important;
+}
+.patroai-premium .neural-lobby__node:is(:hover,:focus-visible,.is-hover-burst)::before {
+  opacity: 1 !important;
+  transform: scale(1.12) !important;
+  transition: none !important;
+}
+.patroai-premium .neural-lobby__node.is-hover-burst::after {
+  animation: efataHoverShock 520ms cubic-bezier(.12,.9,.22,1) both !important;
+}
+.patroai-premium .neural-lobby__node.is-hover-burst {
+  color: #fff !important;
+  border-color: rgba(var(--node-rgb,55,197,255),.98) !important;
+  box-shadow:
+    inset 0 0 34px rgba(var(--node-rgb,55,197,255),.24),
+    0 0 12px rgba(255,255,255,.52),
+    0 0 42px rgba(var(--node-rgb,55,197,255),.82),
+    0 0 104px rgba(var(--node-rgb,55,197,255),.42) !important;
+}
+
+/* Mobile is a first-class composition, not the desktop scattered layout squeezed down. */
+@media (max-width: 820px) {
+  .patroai-premium .neural-lobby {
+    min-height: 100dvh;
+    height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding:
+      calc(env(safe-area-inset-top) + 14px)
+      14px
+      calc(env(safe-area-inset-bottom) + 20px);
+  }
+
+  .patroai-premium .neural-lobby__corner-brand {
+    top: calc(env(safe-area-inset-top) + 10px) !important;
+    left: 12px !important;
+    width: 62px !important;
+    height: 62px !important;
+  }
+
+  .patroai-premium .neural-lobby__network {
+    position: fixed;
+    inset: 0;
+    opacity: .72 !important;
+    pointer-events: none;
+  }
+  .patroai-premium .neural-lobby__network svg {
+    width: 150vw;
+    height: 100%;
+    transform: translateX(-16.5vw);
+  }
+  .patroai-premium .neural-lobby__network-lines--curved {
+    filter: none !important;
+  }
+  .patroai-premium .neural-lobby__stream--rail {
+    stroke-width: 10px !important;
+    opacity: .12 !important;
+  }
+  .patroai-premium .neural-lobby__stream--pulse {
+    stroke-width: 4px !important;
+  }
+
+  .patroai-premium .neural-lobby__nodes,
+  .patroai-premium .neural-lobby__carousel {
+    display: none !important;
+  }
+
+  .patroai-premium .neural-lobby__center {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    width: min(100%, 430px);
+    margin: 54px auto 0;
+    min-height: auto;
+    padding: 0 8px;
+    z-index: 12;
+  }
+  .patroai-premium .neural-lobby__brand {
+    width: 150px !important;
+    height: 150px !important;
+    margin: 0 auto 8px !important;
+  }
+  .patroai-premium .neural-lobby__logo-image {
+    width: 134px !important;
+    height: 134px !important;
+  }
+  .patroai-premium .neural-lobby__center h2 {
+    font-size: clamp(31px, 9.4vw, 46px) !important;
+    line-height: 1 !important;
+    margin-bottom: 12px;
+  }
+  .patroai-premium .neural-lobby__center p:last-child {
+    max-width: 360px;
+    margin-inline: auto;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .patroai-premium .neural-lobby__source-reveal {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 18 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 10px;
+    width: min(100%, 430px);
+    margin: 20px auto 0;
+    padding: 0 6px 22px;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+  .patroai-premium .neural-lobby__source-reveal a,
+  .patroai-premium .neural-lobby__source-reveal a:nth-child(n) {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    min-width: 0 !important;
+    min-height: 54px;
+    width: 100%;
+    padding: 10px 12px !important;
+    border: 1px solid color-mix(in srgb,var(--node-accent,#37C5FF) 50%,transparent);
+    border-radius: 18px;
+    background: rgba(3,9,16,.76);
+    box-shadow:
+      inset 0 0 18px color-mix(in srgb,var(--node-accent,#37C5FF) 8%,transparent),
+      0 0 20px color-mix(in srgb,var(--node-accent,#37C5FF) 10%,transparent);
+    color: #f7f9ff;
+    font-size: 12px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+  }
+  .patroai-premium .neural-lobby__source-reveal a:nth-child(7) {
+    grid-column: 1 / -1;
+    min-height: 58px;
+    border-color: rgba(246,196,83,.68);
+    box-shadow: 0 0 30px rgba(246,196,83,.14);
+  }
+  .patroai-premium .neural-lobby__source-reveal a:active {
+    transform: scale(.97) !important;
+    filter: brightness(1.7);
+  }
+
+  .patroai-premium .neural-lobby__hint {
+    top: calc(env(safe-area-inset-top) + 18px) !important;
+    right: 14px !important;
+    left: auto !important;
+    transform: none !important;
+    max-width: 180px;
+  }
+  .patroai-premium .neural-lobby__drag-hint {
+    display: none !important;
+  }
+
+  .patroai-premium .immersive-gate {
+    align-items: start;
+    overflow-y: auto;
+    padding:
+      calc(env(safe-area-inset-top) + 12px)
+      12px
+      calc(env(safe-area-inset-bottom) + 18px);
+  }
+  .patroai-premium .immersive-gate__panel {
+    width: 100%;
+    max-height: none;
+    margin: auto 0;
+    padding: 24px 18px;
+  }
+  .patroai-premium .immersive-gate h1 {
+    font-size: clamp(34px, 10vw, 46px);
+  }
+  .patroai-premium .immersive-gate h1 + p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 14px auto 20px;
+  }
+  .patroai-premium .immersive-gate__sound {
+    min-height: 68px;
+  }
+}
+
+@media (max-width: 430px) {
+  .patroai-premium .neural-lobby__center { margin-top: 48px; }
+  .patroai-premium .neural-lobby__brand {
+    width: 132px !important;
+    height: 132px !important;
+  }
+  .patroai-premium .neural-lobby__logo-image {
+    width: 118px !important;
+    height: 118px !important;
+  }
+  .patroai-premium .neural-lobby__source-reveal {
+    gap: 8px;
+  }
+  .patroai-premium .neural-lobby__source-reveal a,
+  .patroai-premium .neural-lobby__source-reveal a:nth-child(n) {
+    font-size: 11px;
+    min-height: 50px;
+    border-radius: 16px;
+  }
+}

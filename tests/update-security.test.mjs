@@ -90,7 +90,8 @@ test("vary authorization and cookie responses are not cached", () => {
 });
 
 test("old ORKIO caches are removed", () => {
-  assert.match(sw, /ORKIO_CACHE_PREFIX/);
+  assert.match(sw, /CACHE_PREFIXES/);
+  assert.match(sw, /"orkio-v2-"/);
   assert.match(sw, /caches\.delete/);
 });
 

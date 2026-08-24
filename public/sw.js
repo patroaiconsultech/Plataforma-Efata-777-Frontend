@@ -1,19 +1,19 @@
-/* ORKIO v2 Premium PWA — explicit public allowlist only */
-const VERSION = "orkio-v2-alpha2-3-pwa-20260819-neural-desktop";
+/* EFATA777 / PatroAI PWA — explicit public allowlist only */
+const VERSION = "efata777-v7-20260823-responsive-plasma";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
-const ORKIO_CACHE_PREFIX = "orkio-v2-";
+const CACHE_PREFIXES = ["efata777-", "orkio-v2-"];
 
 const PUBLIC_SHELL = Object.freeze([
   "/",
   "/index.html",
   "/offline.html",
   "/manifest.webmanifest",
-  "/icons/orkio-48.png",
-  "/icons/orkio-192.png",
-  "/icons/orkio-maskable-192.png",
-  "/icons/orkio-512.png",
-  "/icons/orkio-maskable-512.png",
+  "/icons/patroai-48.png",
+  "/icons/patroai-192.png",
+  "/icons/patroai-maskable-192.png",
+  "/icons/patroai-512.png",
+  "/icons/patroai-maskable-512.png",
   "/icons/apple-touch-icon-180.png",
 ]);
 
@@ -106,7 +106,7 @@ self.addEventListener("activate", (event) => {
         keys
           .filter(
             (key) =>
-              key.startsWith(ORKIO_CACHE_PREFIX) &&
+              CACHE_PREFIXES.some((prefix) => key.startsWith(prefix)) &&
               key !== PRECACHE &&
               key !== RUNTIME,
           )

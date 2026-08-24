@@ -5,7 +5,7 @@
   "description": "Plataforma privada de inteligência governada, colaboração executiva e decisão com rastreabilidade.",
   "lang": "pt-BR",
   "dir": "ltr",
-  "start_url": "/app?source=pwa",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "display_override": [
@@ -17,28 +17,31 @@
   "theme_color": "#020605",
   "background_color": "#020605",
   "prefer_related_applications": false,
-  "categories": ["business", "productivity"],
+  "categories": [
+    "business",
+    "productivity"
+  ],
   "icons": [
     {
-      "src": "/icons/orkio-192.png",
+      "src": "/icons/patroai-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/orkio-maskable-192.png",
+      "src": "/icons/patroai-maskable-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icons/orkio-512.png",
+      "src": "/icons/patroai-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/orkio-maskable-512.png",
+      "src": "/icons/patroai-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -46,26 +49,13 @@
   ],
   "shortcuts": [
     {
-      "name": "Abrir Executive OS",
-      "short_name": "Executive OS",
-      "description": "Acessar a plataforma privada PatroAI.",
-      "url": "/app?source=pwa_shortcut",
-      "icons": [
-        {
-          "src": "/icons/orkio-192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Conhecer a PatroAI",
-      "short_name": "Início",
-      "description": "Abrir a experiência pública do Grupo PatroAI.",
+      "name": "Experiência imersiva PatroAI",
+      "short_name": "Experiência",
+      "description": "Abrir a experiência imersiva PatroAI.",
       "url": "/?source=pwa_shortcut",
       "icons": [
         {
-          "src": "/icons/orkio-192.png",
+          "src": "/icons/patroai-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }

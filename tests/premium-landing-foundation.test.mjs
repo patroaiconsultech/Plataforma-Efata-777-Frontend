@@ -62,7 +62,7 @@ test("offline fallback keeps public PatroAI branding", () => {
 
 test("critical router surfaces remain canonical", () => {
   assert.match(app, /path="\/" element={<Landing/);
-  assert.match(app, /path="\/app" element={<AppConsole/);
+  assert.match(app, /path="\/app" element={<AppEntry/);
   assert.match(app, /path="\/invite\/:token"/);
   assert.match(app, /path="\/access"/);
   assert.doesNotMatch(app, /path="\/auth\/callback"/);

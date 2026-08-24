@@ -11,7 +11,7 @@ const html = fs.readFileSync("index.html", "utf8");
 test("manifest supports Android installability fields", () => {
   assert.equal(manifest.display, "standalone");
   assert.equal(manifest.prefer_related_applications, false);
-  assert.equal(manifest.start_url, "/app?source=pwa");
+  assert.equal(manifest.start_url, "/?source=pwa");
   assert.ok(manifest.name);
   assert.ok(manifest.short_name);
   for (const size of ["192x192", "512x512"]) {
@@ -70,10 +70,10 @@ test("service worker and manifest files exist", () => {
     "public/sw.js",
     "public/offline.html",
     "public/manifest.webmanifest",
-    "public/icons/orkio-192.png",
-    "public/icons/orkio-maskable-192.png",
-    "public/icons/orkio-512.png",
-    "public/icons/orkio-maskable-512.png",
+    "public/icons/patroai-192.png",
+    "public/icons/patroai-maskable-192.png",
+    "public/icons/patroai-512.png",
+    "public/icons/patroai-maskable-512.png",
     "public/icons/apple-touch-icon-180.png",
   ]) {
     assert.ok(fs.existsSync(file), `${file} is missing`);

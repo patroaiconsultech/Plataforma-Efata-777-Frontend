@@ -20,7 +20,7 @@ const install = fs.readFileSync(
 
 test("landing and app are separate routes", () => {
   assert.match(app, /path="\/" element={<Landing/);
-  assert.match(app, /path="\/app" element={<AppConsole/);
+  assert.match(app, /path="\/app" element={<AppEntry/);
 });
 
 test("landing contains PatroAI premium institutional sections", () => {
