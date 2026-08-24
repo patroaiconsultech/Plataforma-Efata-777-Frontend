@@ -28,6 +28,6 @@ test("mobile audio prioritizes playback stability", () => {
 });
 test("V14 boot is cache-busted", () => {
   const manifest = JSON.parse(read("public/manifest.webmanifest")), sw = read("public/sw.js");
-  assert.match(manifest.start_url, /v=14/);
-  assert.match(sw, /efata777-v14-20260824-traceable-energy-audio/);
+  assert.match(manifest.start_url, /v=15/);
+  assert.match(sw, /efata777-v15-20260824-patroai-clean-mobile-drag/);
 });

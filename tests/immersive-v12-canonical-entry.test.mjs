@@ -6,8 +6,8 @@ const read = (path) => fs.readFileSync(path, "utf8");
 
 test("V12 preserves historical PWA id while launching immersive root", () => {
   const manifest = JSON.parse(read("public/manifest.webmanifest"));
-  assert.equal(manifest.id, "/app");
-  assert.match(manifest.start_url, /^\/\?source=pwa&experience=immersive&v=14$/);
+  assert.equal(manifest.id, "/?app=patroai");
+  assert.match(manifest.start_url, /^\/\?source=pwa&experience=immersive&v=15$/);
   assert.deepEqual(manifest.launch_handler.client_mode, ["navigate-new", "auto"]);
 });
 

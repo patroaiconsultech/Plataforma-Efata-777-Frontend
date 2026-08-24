@@ -25,7 +25,7 @@ test("account credentials are handled by native HttpOnly session auth", () => {
   assert.match(access, /nativeForgotPassword/);
   assert.match(access, /nativeResetPassword/);
   assert.match(access, /type=\{showPassword \? "text" : "password"\}/);
-  assert.match(access, /cookie HttpOnly/);
+  assert.match(api, /credentials: "include"/);
   assert.doesNotMatch(access, /beginLogin/);
 });
 

@@ -9,6 +9,13 @@ function isLegacyPwaLaunch(): boolean {
   );
 }
 
+async function clearLegacyBrandCaches(): Promise<void> {
+  if (!("caches" in window)) return;
+  try {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((key) => /orkio|efata777-v(?:[0-9]|1[0-4])-/i.test(key)).map((key) => caches.delete(key)));
+  } catch {}
+}
 function installControllerRefresh(): void {
   const hadController = Boolean(navigator.serviceWorker.controller);
   let reloadIssued = false;
@@ -24,7 +31,7 @@ function installControllerRefresh(): void {
 
 export async function registerServiceWorker(): Promise<void> {
   if (isLegacyPwaLaunch()) {
-    window.location.replace("/?source=pwa&experience=immersive&v=14");
+    window.location.replace("/?source=pwa&experience=immersive&v=15");
     return;
   }
   if (!("serviceWorker" in navigator)) return;
@@ -37,6 +44,7 @@ export async function registerServiceWorker(): Promise<void> {
     return;
   }
 
+  await clearLegacyBrandCaches();
   installControllerRefresh();
 
   window.addEventListener(

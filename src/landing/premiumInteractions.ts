@@ -861,7 +861,7 @@ export function mountPremiumLanding({
 
     const onTouchStart = (event: TouchEvent) => {
       if (drag.active) return;
-      const touch = event.changedTouches[0];
+      const touch = event.touches[0] || event.changedTouches[0];
       if (!touch) return;
       drag.pointerId = -1;
       drag.startX = touch.clientX;
@@ -876,7 +876,7 @@ export function mountPremiumLanding({
 
     const onTouchMove = (event: TouchEvent) => {
       if (!drag.active || drag.pointerId !== -1) return;
-      const touch = event.changedTouches[0];
+      const touch = event.touches[0] || event.changedTouches[0];
       if (!touch) return;
       applyPosition(
         drag.originX + touch.clientX - drag.startX,
@@ -911,6 +911,29 @@ export function mountPremiumLanding({
       if (neuralLobbyDragHint) neuralLobbyDragHint.hidden = true;
     };
 
+
+    const isInsideExpandedBrand = (clientX: number, clientY: number, pad = 92) => {
+      const rect = neuralLobbyBrand.getBoundingClientRect();
+      return clientX >= rect.left - pad && clientX <= rect.right + pad && clientY >= rect.top - pad && clientY <= rect.bottom + pad;
+    };
+    const onLobbyPointerDownCapture = (event: PointerEvent) => {
+      if (event.pointerType !== "touch") return;
+      const target = event.target as Element | null;
+      if (target?.closest("a,button,input,select,textarea")) return;
+      if (!isInsideExpandedBrand(event.clientX, event.clientY, 104)) return;
+      onPointerDown(event);
+    };
+    const onLobbyTouchStartCapture = (event: TouchEvent) => {
+      if (drag.active) return;
+      const target = event.target as Element | null;
+      if (target?.closest("a,button,input,select,textarea")) return;
+      const touch = event.touches[0] || event.changedTouches[0];
+      if (!touch || !isInsideExpandedBrand(touch.clientX, touch.clientY, 112)) return;
+      onTouchStart(event);
+    };
+
+    neuralLobby.addEventListener("pointerdown", onLobbyPointerDownCapture, { capture: true, passive: false });
+    neuralLobby.addEventListener("touchstart", onLobbyTouchStartCapture, { capture: true, passive: false });
     neuralLobbyBrand.addEventListener("pointerdown", onPointerDown);
     neuralLobbyDragSurface?.addEventListener("pointerdown", onPointerDown);
     neuralLobby.addEventListener("pointerdown", onLobbyDragSurfacePointerDown);
@@ -923,9 +946,9 @@ export function mountPremiumLanding({
     const needsTouchFallback = true;
     neuralLobbyBrand.addEventListener("touchstart", onTouchStart, { passive: false });
     neuralLobbyDragSurface?.addEventListener("touchstart", onTouchStart, { passive: false });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("touchend", onTouchEnd, { passive: false });
-    window.addEventListener("touchcancel", onTouchEnd, { passive: false });
+    window.addEventListener("touchmove", onTouchMove, { passive: false, capture: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: false, capture: true });
+    window.addEventListener("touchcancel", onTouchEnd, { passive: false, capture: true });
     neuralLobbyBrand.addEventListener("keydown", onKeyDown);
     neuralLobbyBrand.addEventListener("dblclick", recenter);
     const onEnergyResize = () => scheduleDynamicEnergyPaths();
@@ -937,6 +960,8 @@ export function mountPremiumLanding({
       if (lobbyPointerReleaseTimer !== null) {
         window.clearTimeout(lobbyPointerReleaseTimer);
       }
+      neuralLobby.removeEventListener("pointerdown", onLobbyPointerDownCapture, true);
+      neuralLobby.removeEventListener("touchstart", onLobbyTouchStartCapture, true);
       neuralLobbyBrand.removeEventListener("pointerdown", onPointerDown);
       neuralLobbyDragSurface?.removeEventListener("pointerdown", onPointerDown);
       neuralLobby.removeEventListener("pointerdown", onLobbyDragSurfacePointerDown);

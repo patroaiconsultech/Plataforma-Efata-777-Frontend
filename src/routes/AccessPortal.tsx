@@ -2,7 +2,6 @@ import React, { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ApiError,
-  nativeBootstrapOwner,
   nativeForgotPassword,
   nativeLogin,
   nativeRegister,
@@ -13,7 +12,7 @@ import "../access.css";
 
 export const ONBOARDING_DRAFT_KEY = "patroai_hyper_cocreator_onboarding";
 
-type Mode = "login" | "register" | "bootstrap" | "forgot" | "reset";
+type Mode = "login" | "register" | "forgot" | "reset";
 type RegisterStep = "code" | "cocreator" | "objective" | "credentials";
 
 const GOALS = [
@@ -40,10 +39,6 @@ function friendlyAuthError(error: unknown): string {
       "Por segurança, esse acesso foi pausado por alguns minutos.",
     NATIVE_AUTH_DISABLED:
       "O acesso próprio da PatroAI ainda não está ativo nesta implantação.",
-    NATIVE_BOOTSTRAP_FORBIDDEN:
-      "A chave de configuração inicial não foi aceita.",
-    NATIVE_BOOTSTRAP_ALREADY_COMPLETED:
-      "A primeira conta segura da PatroAI já foi configurada.",
     PASSWORD_TOO_SHORT:
       "Use uma senha mais longa. A configuração atual exige pelo menos 12 caracteres.",
     NETWORK_ERROR:
@@ -81,9 +76,6 @@ export default function AccessPortal() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resetToken, setResetToken] = useState("");
   const [issuedResetToken, setIssuedResetToken] = useState("");
-  const [bootstrapSecret, setBootstrapSecret] = useState("");
-  const [tenantId, setTenantId] = useState("patroai");
-  const [tenantName, setTenantName] = useState("Grupo PatroAI");
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -124,29 +116,6 @@ export default function AccessPortal() {
       return false;
     }
     return true;
-  }
-
-  async function submitBootstrap(event: FormEvent) {
-    event.preventDefault();
-    if (!email.trim() || !password || !bootstrapSecret.trim() || busy) return;
-    if (!passwordsMatch()) return;
-    setBusy(true);
-    setError("");
-    try {
-      await nativeBootstrapOwner({
-        bootstrap_secret: bootstrapSecret.trim(),
-        tenant_id: tenantId.trim() || "patroai",
-        tenant_name: tenantName.trim() || "Grupo PatroAI",
-        email: email.trim(),
-        display_name: displayName.trim() || email.trim(),
-        password,
-      });
-      navigate("/app", { replace: true });
-    } catch (err) {
-      setError(friendlyAuthError(err));
-    } finally {
-      setBusy(false);
-    }
   }
 
   async function submitCode(event: FormEvent) {
@@ -255,8 +224,7 @@ export default function AccessPortal() {
         <p className="access-eyebrow">PATROAI · ACESSO PROTEGIDO</p>
         <h1 id="access-title">Entre no núcleo PatroAI.</h1>
         <p className="access-lead">
-          Sua sessão é protegida por cookie seguro, senha hasheada no servidor e
-          autorização canônica por membership. Sem token sensível exposto no navegador.
+          Acesse sua conta PatroAI para continuar em um ambiente protegido.
         </p>
 
         <div className="access-tabs" role="tablist" aria-label="Modo de acesso">
@@ -274,13 +242,6 @@ export default function AccessPortal() {
           >
             Código
           </button>
-          <button
-            type="button"
-            className={mode === "bootstrap" ? "active" : ""}
-            onClick={() => switchMode("bootstrap")}
-          >
-            Primeira conta
-          </button>
         </div>
 
         {mode === "login" ? (
@@ -288,8 +249,7 @@ export default function AccessPortal() {
             <span>SESSÃO PATROAI</span>
             <h2>Bem-vindo de volta.</h2>
             <p>
-              Use sua credencial PatroAI. A sessão será criada no backend e mantida
-              em cookie HttpOnly.
+              Use seu e-mail e sua senha para acessar sua área segura.
             </p>
             <label>
               <span>E-mail</span>
@@ -364,82 +324,6 @@ export default function AccessPortal() {
           </form>
         ) : null}
 
-        {mode === "bootstrap" ? (
-          <form className="access-step" onSubmit={submitBootstrap}>
-            <span>CONFIGURAÇÃO INICIAL</span>
-            <h2>Crie a primeira conta segura.</h2>
-            <p>
-              Use apenas uma vez, com a chave temporária definida no ambiente do
-              backend. Depois da primeira credencial, esta porta se fecha.
-            </p>
-            <div className="access-grid">
-              <label>
-                <span>Chave inicial</span>
-                <input
-                  value={bootstrapSecret}
-                  onChange={(event) => setBootstrapSecret(event.target.value)}
-                  autoComplete="off"
-                  type="password"
-                  placeholder="PLATFORM_NATIVE_BOOTSTRAP_SECRET"
-                />
-              </label>
-              <label>
-                <span>Nome</span>
-                <input
-                  value={displayName}
-                  onChange={(event) => setDisplayName(event.target.value)}
-                  autoComplete="name"
-                  placeholder="Seu nome"
-                />
-              </label>
-              <label>
-                <span>E-mail</span>
-                <input
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  autoComplete="email"
-                  inputMode="email"
-                  placeholder="admin@patroai.com"
-                />
-              </label>
-              <label>
-                <span>Senha</span>
-                <input
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  autoComplete="new-password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Mínimo de 12 caracteres"
-                />
-              </label>
-              <label>
-                <span>Repetir senha</span>
-                <input
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                  autoComplete="new-password"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Repita a senha"
-                />
-              </label>
-              <label>
-                <span>Tenant ID</span>
-                <input value={tenantId} onChange={(event) => setTenantId(event.target.value)} />
-              </label>
-              <label>
-                <span>Tenant</span>
-                <input value={tenantName} onChange={(event) => setTenantName(event.target.value)} />
-              </label>
-            </div>
-            <button className="access-primary" disabled={busy}>
-              {busy ? "Configurando..." : "Criar primeira conta"}
-            </button>
-            <div className="access-inline-actions">
-              <button className="access-text-button" type="button" onClick={() => setShowPassword((value) => !value)}>{showPassword ? "Ocultar senha" : "Mostrar senha"}</button>
-              <button className="access-text-button" type="button" onClick={() => setShowConfirmPassword((value) => !value)}>{showConfirmPassword ? "Ocultar repetição" : "Mostrar repetição"}</button>
-            </div>
-          </form>
-        ) : null}
 
         {mode === "register" && step === "code" ? (
           <form className="access-step" onSubmit={submitCode}>

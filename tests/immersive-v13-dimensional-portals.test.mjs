@@ -59,6 +59,6 @@ test("V13 legacy ORKIO icon paths contain PatroAI artwork", () => {
 test("V13 PWA and service worker are cache-busted", () => {
   const manifest = JSON.parse(read("public/manifest.webmanifest"));
   const sw = read("public/sw.js");
-  assert.match(manifest.start_url, /v=14/);
-  assert.match(sw, /efata777-v14-20260824-traceable-energy-audio/);
+  assert.match(manifest.start_url, /v=15/);
+  assert.match(sw, /efata777-v15-20260824-patroai-clean-mobile-drag/);
 });
