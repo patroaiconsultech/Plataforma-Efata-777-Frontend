@@ -5607,3 +5607,209 @@ body.neural-lobby-open .patroai-premium .immersive-return-button {
     opacity: .42;
   }
 }
+
+
+/* === EFATA777 MUSIC-REACTIVE ENERGY V5 ===
+   Audio bands are written as bounded CSS variables by premiumInteractions.ts:
+   --music-bass / --music-mid / --music-high / --music-beat / --music-energy.
+   The visual system follows the actual track, not a fixed BPM. */
+.patroai-premium.music-reactive-active .neural-lobby {
+  --beat-glow: var(--music-beat, 0);
+  --bass-glow: var(--music-bass, 0);
+  --mid-glow: var(--music-mid, 0);
+  --high-glow: var(--music-high, 0);
+}
+
+.patroai-premium.music-reactive-active .neural-lobby::before {
+  opacity: calc(.78 + var(--music-energy, 0) * .16 + var(--music-beat-flash, 0) * .18);
+  transform:
+    scale(calc(1 + var(--music-bass, 0) * .022 + var(--music-beat, 0) * .048));
+  filter:
+    blur(calc(22px - var(--music-beat, 0) * 3px))
+    saturate(calc(118% + var(--music-mid, 0) * 36% + var(--music-beat, 0) * 28%));
+}
+
+.patroai-premium.music-reactive-active .neural-lobby::after {
+  opacity: calc(.56 + var(--music-mid, 0) * .22 + var(--music-beat, 0) * .30);
+  filter:
+    blur(calc(10px - var(--music-beat, 0) * 4px))
+    brightness(calc(1 + var(--music-beat, 0) * .48));
+}
+
+.patroai-premium.music-reactive-active .neural-lobby__network-lines path {
+  stroke-width: calc(1.35px + var(--music-bass, 0) * .75px + var(--music-beat, 0) * 1.8px) !important;
+  stroke-opacity: calc(.48 + var(--music-mid, 0) * .22 + var(--music-beat, 0) * .30) !important;
+  filter:
+    drop-shadow(0 0 calc(3px + var(--music-high, 0) * 5px) rgba(55, 197, 255, .42))
+    drop-shadow(0 0 calc(6px + var(--music-beat, 0) * 15px) rgba(125, 107, 255, .34))
+    drop-shadow(0 0 calc(4px + var(--music-beat, 0) * 18px) rgba(246, 196, 83, .28)) !important;
+}
+
+/* A second optical pulse rides the continuous filaments on beat.
+   It is not a dotted dash pattern: the apparent "wave" comes from brightness
+   modulation on the existing continuous route. */
+.patroai-premium.music-reactive-active .neural-lobby__network svg {
+  filter:
+    brightness(calc(.92 + var(--music-energy, 0) * .26 + var(--music-beat, 0) * .66))
+    contrast(calc(1.02 + var(--music-beat, 0) * .18));
+}
+
+.patroai-premium.music-reactive-active .neural-lobby__brand {
+  transform:
+    translate3d(0, calc(var(--music-beat, 0) * -2px), 0)
+    scale(calc(1 + var(--music-bass, 0) * .025 + var(--music-beat, 0) * .07));
+  filter:
+    drop-shadow(0 0 calc(18px + var(--music-bass, 0) * 16px) rgba(246, 196, 83, .24))
+    drop-shadow(0 0 calc(24px + var(--music-beat, 0) * 34px) rgba(55, 197, 255, .18));
+}
+
+.patroai-premium.music-reactive-active .neural-lobby__brand-halo {
+  transform:
+    scale(calc(var(--music-aura-scale, 1) + var(--music-beat, 0) * .08));
+  opacity:
+    calc(var(--music-aura-opacity, .72) + var(--music-beat, 0) * .16);
+  filter:
+    blur(calc(25px - var(--music-beat, 0) * 5px))
+    brightness(calc(1 + var(--music-beat, 0) * .58));
+}
+
+.patroai-premium.music-reactive-active .neural-lobby__brand-orbit--outer {
+  box-shadow:
+    0 0 calc(16px + var(--music-beat, 0) * 22px) rgba(246, 196, 83, .56),
+    0 0 calc(46px + var(--music-beat, 0) * 64px) rgba(246, 196, 83, .18),
+    inset 0 0 calc(24px + var(--music-bass, 0) * 22px) rgba(55, 197, 255, .13);
+}
+
+.patroai-premium.music-reactive-active .neural-lobby__brand-orbit--inner {
+  box-shadow:
+    0 0 calc(16px + var(--music-high, 0) * 18px) rgba(125, 107, 255, .34),
+    inset 0 0 calc(18px + var(--music-mid, 0) * 20px) rgba(40, 240, 181, .13);
+}
+
+/* Node chromatic identities */
+.patroai-premium .neural-lobby__node--a,
+.patroai-premium .neural-lobby__node--d { --node-accent: #37C5FF; }
+.patroai-premium .neural-lobby__node--b,
+.patroai-premium .neural-lobby__node--c { --node-accent: #7D6BFF; }
+.patroai-premium .neural-lobby__node--e { --node-accent: #28F0B5; }
+.patroai-premium .neural-lobby__node--f,
+.patroai-premium .neural-lobby__node--g { --node-accent: #F6C453; }
+
+/* Restore a strong, immediate hover response: bloom + radial shock ring.
+   This is deliberately short (220–320ms), matching premium microinteraction
+   timing rather than a long decorative animation. */
+.patroai-premium .neural-lobby__node {
+  isolation: isolate;
+  overflow: visible;
+  border-color: color-mix(in srgb, var(--node-accent, #37C5FF) 34%, transparent);
+  transition:
+    transform 220ms cubic-bezier(.2,.8,.2,1),
+    border-color 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease,
+    color 220ms ease !important;
+}
+
+.patroai-premium .neural-lobby__node::before {
+  width: 12px !important;
+  height: 12px !important;
+  background: var(--node-accent, #37C5FF) !important;
+  box-shadow:
+    0 0 10px var(--node-accent, #37C5FF),
+    0 0 28px color-mix(in srgb, var(--node-accent, #37C5FF) 72%, transparent),
+    0 0 56px color-mix(in srgb, var(--node-accent, #37C5FF) 38%, transparent) !important;
+  opacity: .16 !important;
+}
+
+.patroai-premium .neural-lobby__node::after {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(.72);
+  background:
+    radial-gradient(circle at 50% 50%,
+      color-mix(in srgb, var(--node-accent, #37C5FF) 46%, white) 0 3%,
+      color-mix(in srgb, var(--node-accent, #37C5FF) 30%, transparent) 18%,
+      transparent 62%);
+  border: 1px solid color-mix(in srgb, var(--node-accent, #37C5FF) 76%, white);
+  box-shadow:
+    0 0 18px color-mix(in srgb, var(--node-accent, #37C5FF) 84%, transparent),
+    0 0 52px color-mix(in srgb, var(--node-accent, #37C5FF) 48%, transparent),
+    0 0 96px color-mix(in srgb, var(--node-accent, #37C5FF) 24%, transparent);
+}
+
+.patroai-premium .neural-lobby__node:hover,
+.patroai-premium .neural-lobby__node:focus-visible {
+  color: #fff !important;
+  border-color: color-mix(in srgb, var(--node-accent, #37C5FF) 88%, white) !important;
+  background:
+    radial-gradient(circle at 50% 50%,
+      color-mix(in srgb, var(--node-accent, #37C5FF) 14%, rgba(7,13,22,.94)),
+      rgba(6,12,20,.92) 68%) !important;
+  box-shadow:
+    inset 0 0 28px color-mix(in srgb, var(--node-accent, #37C5FF) 18%, transparent),
+    0 0 10px color-mix(in srgb, var(--node-accent, #37C5FF) 92%, white),
+    0 0 34px color-mix(in srgb, var(--node-accent, #37C5FF) 68%, transparent),
+    0 0 82px color-mix(in srgb, var(--node-accent, #37C5FF) 34%, transparent) !important;
+  transform: scale(1.075) !important;
+}
+
+.patroai-premium .neural-lobby__node--g:hover,
+.patroai-premium .neural-lobby__node--g:focus-visible {
+  transform: translateX(-50%) scale(1.075) !important;
+}
+
+.patroai-premium .neural-lobby__node:hover::before,
+.patroai-premium .neural-lobby__node:focus-visible::before {
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(2.1) !important;
+}
+
+.patroai-premium .neural-lobby__node:hover::after,
+.patroai-premium .neural-lobby__node:focus-visible::after {
+  animation: efataNodeLightBurst 520ms cubic-bezier(.16,.84,.24,1) both;
+}
+
+@keyframes efataNodeLightBurst {
+  0% {
+    opacity: 0;
+    transform: scale(.68);
+    filter: brightness(1);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(.88);
+    filter: brightness(1.9);
+  }
+  52% {
+    opacity: .88;
+    transform: scale(1.16);
+    filter: brightness(1.45);
+  }
+  100% {
+    opacity: .42;
+    transform: scale(1.34);
+    filter: brightness(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patroai-premium.music-reactive-active .neural-lobby::before,
+  .patroai-premium.music-reactive-active .neural-lobby::after,
+  .patroai-premium.music-reactive-active .neural-lobby__brand,
+  .patroai-premium.music-reactive-active .neural-lobby__brand-halo,
+  .patroai-premium .neural-lobby__node:hover::after,
+  .patroai-premium .neural-lobby__node:focus-visible::after {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .patroai-premium .neural-lobby__node--g:hover,
+  .patroai-premium .neural-lobby__node--g:focus-visible {
+    transform: translateX(-50%) !important;
+  }
+}

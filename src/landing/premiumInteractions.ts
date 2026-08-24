@@ -952,7 +952,7 @@ export function mountPremiumLanding({
     if (!canvas || !stage) return;
 
     const webgl = initNeuralWebgl(canvas, stage, {
-      getEnergy: () => musicEnergy,
+      getEnergy: () => Math.min(1, musicEnergy * 0.58 + audioBassLevel * 0.34 + audioBeatLevel * 0.82),
       getReactive: () => musicReactiveActive,
       getPointer: options.getPointer,
     });
@@ -1195,6 +1195,12 @@ export function mountPremiumLanding({
     let audioAnalyser: AnalyserNode | null = null;
     let audioReactiveFrame = 0;
     let audioReactiveLevel = 0;
+    let audioBassLevel = 0;
+    let audioMidLevel = 0;
+    let audioHighLevel = 0;
+    let audioBeatFast = 0;
+    let audioBeatSlow = 0;
+    let audioBeatLevel = 0;
     let audioReactiveReady = false;
     let desktopNeuralMotionFrame = 0;
     const audioPlaylist = [
@@ -1225,6 +1231,12 @@ export function mountPremiumLanding({
         audioReactiveFrame = 0;
       }
       audioReactiveLevel = 0;
+      audioBassLevel = 0;
+      audioMidLevel = 0;
+      audioHighLevel = 0;
+      audioBeatFast = 0;
+      audioBeatSlow = 0;
+      audioBeatLevel = 0;
       musicEnergy = 0;
       musicReactiveActive = false;
       root.classList.remove("music-reactive-active");
@@ -1236,6 +1248,11 @@ export function mountPremiumLanding({
       root.style.removeProperty("--music-dock-energy");
       root.style.removeProperty("--music-energy");
       root.style.removeProperty("--music-pulse");
+      root.style.removeProperty("--music-bass");
+      root.style.removeProperty("--music-mid");
+      root.style.removeProperty("--music-high");
+      root.style.removeProperty("--music-beat");
+      root.style.removeProperty("--music-beat-flash");
       root.style.removeProperty("--music-motion-duration");
     };
 
@@ -1243,6 +1260,7 @@ export function mountPremiumLanding({
       if (
         !immersiveAudio ||
         !audioAnalyser ||
+        !audioContext ||
         immersiveAudio.paused ||
         immersiveAudio.ended ||
         reducedMotionPreference.matches
@@ -1251,77 +1269,96 @@ export function mountPremiumLanding({
         return;
       }
 
-      const frequencyData = new Uint8Array(
-        audioAnalyser.frequencyBinCount,
-      );
+      const frequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
       audioAnalyser.getByteFrequencyData(frequencyData);
 
-      // Use the lower ~60% of bins: enough musical body to feel the track
-      // without making the logo jitter on every high-frequency transient.
-      const usefulBins = Math.max(
+      const nyquist = audioContext.sampleRate / 2;
+      const hzPerBin = nyquist / frequencyData.length;
+
+      const bandEnergy = (minHz: number, maxHz: number) => {
+        const startBin = Math.max(0, Math.floor(minHz / hzPerBin));
+        const endBin = Math.min(
+          frequencyData.length - 1,
+          Math.ceil(maxHz / hzPerBin),
+        );
+        let total = 0;
+        let count = 0;
+        for (let index = startBin; index <= endBin; index += 1) {
+          total += frequencyData[index];
+          count += 1;
+        }
+        return count ? total / count / 255 : 0;
+      };
+
+      // Four independent musical signals. This makes the visuals follow the
+      // actual content of each track instead of a fixed CSS animation/BPM.
+      const rawBass = bandEnergy(35, 180);
+      const rawMid = bandEnergy(180, 2200);
+      const rawHigh = bandEnergy(2200, 9000);
+      const rawEnergy = Math.min(
         1,
-        Math.floor(frequencyData.length * 0.6),
+        rawBass * 0.50 + rawMid * 0.34 + rawHigh * 0.16,
       );
-      let energyTotal = 0;
-      for (let index = 0; index < usefulBins; index += 1) {
-        energyTotal += frequencyData[index];
-      }
 
-      const rawEnergy =
-        energyTotal / usefulBins / 255;
+      const smoothBand = (
+        current: number,
+        target: number,
+        attack: number,
+        release: number,
+      ) => current + (target - current) * (target > current ? attack : release);
 
-      // Faster attack, slower release keeps the motion musical rather than noisy.
-      const smoothing =
-        rawEnergy > audioReactiveLevel ? 0.34 : 0.12;
-      audioReactiveLevel +=
-        (rawEnergy - audioReactiveLevel) * smoothing;
+      audioBassLevel = smoothBand(audioBassLevel, rawBass, 0.48, 0.12);
+      audioMidLevel = smoothBand(audioMidLevel, rawMid, 0.34, 0.10);
+      audioHighLevel = smoothBand(audioHighLevel, rawHigh, 0.28, 0.09);
+      audioReactiveLevel = smoothBand(audioReactiveLevel, rawEnergy, 0.32, 0.09);
 
-      const normalized = Math.min(
+      // Beat detection: a fast bass envelope is compared with a slower moving
+      // baseline. Strong kick/transient events create a short visual impulse.
+      audioBeatFast += (rawBass - audioBeatFast) * 0.44;
+      audioBeatSlow += (rawBass - audioBeatSlow) * 0.035;
+      const beatDelta = Math.max(0, audioBeatFast - audioBeatSlow * 1.04);
+      const beatCandidate = Math.min(1, beatDelta * 8.5);
+      audioBeatLevel =
+        beatCandidate > audioBeatLevel
+          ? audioBeatLevel + (beatCandidate - audioBeatLevel) * 0.74
+          : audioBeatLevel * 0.82;
+
+      const normalized = Math.min(1, Math.max(0, audioReactiveLevel * 1.72));
+      const bass = Math.min(1, Math.max(0, audioBassLevel * 1.55));
+      const mid = Math.min(1, Math.max(0, audioMidLevel * 1.62));
+      const high = Math.min(1, Math.max(0, audioHighLevel * 1.78));
+      const beat = Math.min(1, Math.max(0, audioBeatLevel));
+      const pulse = Math.min(
         1,
-        Math.max(0, audioReactiveLevel * 1.8),
+        Math.max(0, bass * 0.54 + normalized * 0.22 + beat * 0.86),
       );
-      const pulse = Math.min(1, Math.max(0, rawEnergy * 2.45));
+
       musicEnergy = normalized;
       musicReactiveActive = true;
-      const scale = 1 + normalized * 0.085;
-      const lift = -normalized * 3.2;
-      const glow = 0.32 + normalized * 0.62;
-      const auraScale = 0.98 + normalized * 0.18;
-      const auraOpacity = 0.58 + normalized * 0.4;
+
+      const scale = 1 + normalized * 0.035 + bass * 0.025 + beat * 0.055;
+      const lift = -(normalized * 1.8 + beat * 2.2);
+      const glow = 0.30 + normalized * 0.34 + bass * 0.16 + beat * 0.30;
+      const auraScale = 0.98 + normalized * 0.08 + bass * 0.05 + beat * 0.10;
+      const auraOpacity = 0.56 + normalized * 0.24 + beat * 0.20;
 
       root.classList.add("music-reactive-active");
-      root.style.setProperty(
-        "--music-logo-scale",
-        scale.toFixed(4),
-      );
-      root.style.setProperty(
-        "--music-logo-lift",
-        `${lift.toFixed(2)}px`,
-      );
-      root.style.setProperty(
-        "--music-logo-glow",
-        glow.toFixed(3),
-      );
-      root.style.setProperty(
-        "--music-aura-scale",
-        auraScale.toFixed(4),
-      );
-      root.style.setProperty(
-        "--music-aura-opacity",
-        auraOpacity.toFixed(3),
-      );
-      root.style.setProperty(
-        "--music-dock-energy",
-        normalized.toFixed(3),
-      );
+      root.style.setProperty("--music-logo-scale", scale.toFixed(4));
+      root.style.setProperty("--music-logo-lift", `${lift.toFixed(2)}px`);
+      root.style.setProperty("--music-logo-glow", Math.min(1, glow).toFixed(3));
+      root.style.setProperty("--music-aura-scale", auraScale.toFixed(4));
+      root.style.setProperty("--music-aura-opacity", Math.min(1, auraOpacity).toFixed(3));
+      root.style.setProperty("--music-dock-energy", normalized.toFixed(3));
       root.style.setProperty("--music-energy", normalized.toFixed(3));
       root.style.setProperty("--music-pulse", pulse.toFixed(3));
+      root.style.setProperty("--music-bass", bass.toFixed(3));
+      root.style.setProperty("--music-mid", mid.toFixed(3));
+      root.style.setProperty("--music-high", high.toFixed(3));
+      root.style.setProperty("--music-beat", beat.toFixed(3));
+      root.style.setProperty("--music-beat-flash", (beat * beat).toFixed(3));
 
-      audioReactiveFrame = window.requestAnimationFrame(
-        renderAudioReactiveLogo,
-      );
+      audioReactiveFrame = window.requestAnimationFrame(renderAudioReactiveLogo);
     };
-
     const ensureAudioReactiveLogo = async () => {
       if (
         !immersiveAudio ||
@@ -1354,8 +1391,8 @@ export function mountPremiumLanding({
         audioCompressor.attack.value = 0.003;
         audioCompressor.release.value = 0.3;
         audioAnalyser = audioContext.createAnalyser();
-        audioAnalyser.fftSize = 256;
-        audioAnalyser.smoothingTimeConstant = 0.72;
+        audioAnalyser.fftSize = 512;
+        audioAnalyser.smoothingTimeConstant = 0.58;
         source.connect(audioMasterGain);
         audioMasterGain.connect(audioCompressor);
         audioCompressor.connect(audioAnalyser);
@@ -1399,14 +1436,30 @@ export function mountPremiumLanding({
       if (isDesktop && !reduced && document.visibilityState === 'visible') {
         const phase = timestamp * 0.001;
         const energy = musicReactiveActive ? musicEnergy : 0;
-        const pulse = musicReactiveActive ? Math.min(1, Math.max(0, musicEnergy * 0.72 + audioReactiveLevel * 0.82)) : 0;
+        const bass = musicReactiveActive ? audioBassLevel : 0;
+        const beat = musicReactiveActive ? audioBeatLevel : 0;
+        const pulse = musicReactiveActive
+          ? Math.min(1, Math.max(0, energy * 0.28 + bass * 0.72 + beat * 0.92))
+          : 0;
         const musicalBreath = Math.sin(phase * 0.9) * 0.5 + 0.5;
         const fieldX = Math.sin(phase * 0.38) * (1.8 + energy * 3.8) + Math.sin(phase * 3.6) * pulse * 0.7;
         const fieldY = Math.cos(phase * 0.29) * (1.25 + energy * 2.4) + Math.cos(phase * 2.8) * pulse * 0.45;
-        const fieldScale = 1.018 + ((Math.sin(phase * 0.23) + 1) * 0.008) + energy * 0.025 + pulse * 0.012;
-        const beamX = Math.sin(phase * 0.52) * (58 + energy * 22) + Math.sin(phase * 4.2) * pulse * 6;
-        const coreScale = 0.92 + ((Math.sin(phase * 0.76) + 1) * 0.16) + energy * 0.2 + pulse * 0.12 + musicalBreath * energy * 0.04;
-        const motionDuration = Math.max(3.1, 5.7 - energy * 1.65 - pulse * 0.55);
+        const fieldScale =
+          1.012 +
+          ((Math.sin(phase * 0.23) + 1) * 0.006) +
+          energy * 0.018 +
+          bass * 0.014 +
+          beat * 0.026;
+        const beamX =
+          Math.sin(phase * 0.52) * (52 + energy * 18) +
+          Math.sin(phase * 4.2) * pulse * 4;
+        const coreScale =
+          0.98 +
+          energy * 0.055 +
+          bass * 0.065 +
+          beat * 0.095 +
+          musicalBreath * energy * 0.018;
+        const motionDuration = Math.max(2.6, 5.8 - energy * 1.2 - beat * 1.1);
         root.style.setProperty('--desktop-field-x', `${fieldX.toFixed(3)}%`);
         root.style.setProperty('--desktop-field-y', `${fieldY.toFixed(3)}%`);
         root.style.setProperty('--desktop-field-scale', fieldScale.toFixed(4));
