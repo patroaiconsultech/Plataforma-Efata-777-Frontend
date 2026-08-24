@@ -5,7 +5,7 @@
   "description": "Experiência imersiva PatroAI e acesso à plataforma.",
   "lang": "pt-BR",
   "dir": "ltr",
-  "start_url": "/?source=pwa&experience=immersive&v=13",
+  "start_url": "/?source=pwa&experience=immersive&v=14",
   "scope": "/",
   "display": "standalone",
   "display_override": [

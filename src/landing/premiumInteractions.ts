@@ -219,6 +219,8 @@ export function mountPremiumLanding({
     queryAll<HTMLAnchorElement>("[data-neural-lobby-link]");
   const neuralLobbyBrand = query<HTMLElement>(".neural-lobby__brand");
   const neuralLobbyDragSurface = query<HTMLElement>("[data-neural-drag-surface]");
+  const neuralLobbySvg = query<SVGSVGElement>(".neural-lobby__network svg");
+  const neuralEnergyPaths = queryAll<SVGPathElement>(".neural-lobby__stream");
   const neuralLobbyDragHint = query<HTMLElement>("#neuralLobbyDragHint");
   const neuralLobbyTransition = query<HTMLElement>("[data-lobby-transition]");
   const neuralLobbyCarousel = query<HTMLElement>("[data-lobby-carousel]");
@@ -711,6 +713,43 @@ export function mountPremiumLanding({
     canvas.dataset.neuralRenderer = "canvas2d";
   }
 
+
+  const ENERGY_VIEWBOX = { width: 1000, height: 700 };
+  const energyAnchors = [
+    { x: -42, y: 150, bend: -42 }, { x: 1042, y: 146, bend: 44 },
+    { x: -52, y: 520, bend: 56 }, { x: 1052, y: 514, bend: -56 },
+    { x: -36, y: 304, bend: -26 }, { x: 1036, y: 302, bend: 28 },
+    { x: 182, y: 706, bend: -34 }, { x: 818, y: 706, bend: 34 },
+  ] as const;
+  let energyPathFrame = 0;
+  const updateDynamicEnergyPaths = () => {
+    energyPathFrame = 0;
+    if (!neuralLobby || !neuralLobbyBrand || !neuralLobbySvg || neuralEnergyPaths.length === 0) return;
+    const svgRect = neuralLobbySvg.getBoundingClientRect();
+    const brandRect = neuralLobbyBrand.getBoundingClientRect();
+    if (!svgRect.width || !svgRect.height) return;
+    const centerX = ((brandRect.left + brandRect.width * 0.5 - svgRect.left) / svgRect.width) * ENERGY_VIEWBOX.width;
+    const centerY = ((brandRect.top + brandRect.height * 0.5 - svgRect.top) / svgRect.height) * ENERGY_VIEWBOX.height;
+    neuralEnergyPaths.forEach((path) => {
+      const styleIndex = Number(path.style.getPropertyValue("--i") || 0);
+      const index = Number.isFinite(styleIndex) ? Math.abs(Math.trunc(styleIndex)) % energyAnchors.length : 0;
+      const anchor = energyAnchors[index];
+      const dx = anchor.x - centerX, dy = anchor.y - centerY;
+      const length = Math.max(1, Math.hypot(dx, dy));
+      const px = -dy / length, py = dx / length, bend = anchor.bend;
+      const c1x = centerX + dx * 0.24 + px * bend;
+      const c1y = centerY + dy * 0.24 + py * bend;
+      const c2x = centerX + dx * 0.72 + px * bend * 0.46;
+      const c2y = centerY + dy * 0.72 + py * bend * 0.46;
+      // Canonical orientation is core -> outer field. Return pulses invert only the animation, not geometry.
+      path.setAttribute("d", `M${centerX.toFixed(1)} ${centerY.toFixed(1)} C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${anchor.x} ${anchor.y}`);
+    });
+  };
+  const scheduleDynamicEnergyPaths = () => {
+    if (energyPathFrame) return;
+    energyPathFrame = window.requestAnimationFrame(updateDynamicEnergyPaths);
+  };
+
   function initLobbyLogoControl() {
     if (!neuralLobby || !neuralLobbyBrand) return;
 
@@ -747,6 +786,7 @@ export function mountPremiumLanding({
       neuralLobby.style.setProperty("--logo-drag-x", `${position.x.toFixed(2)}px`);
       neuralLobby.style.setProperty("--logo-drag-y", `${position.y.toFixed(2)}px`);
       updateNeuralPointer();
+      scheduleDynamicEnergyPaths();
     };
 
     const releasePointer = () => {
@@ -787,7 +827,7 @@ export function mountPremiumLanding({
       drag.active = true;
       neuralLobbyBrand.classList.add("is-dragging");
       if (neuralLobbyDragHint) neuralLobbyDragHint.hidden = true;
-      neuralLobbyBrand.setPointerCapture?.(event.pointerId);
+      if (event.pointerType !== "touch") neuralLobbyBrand.setPointerCapture?.(event.pointerId);
       event.preventDefault();
     };
 
@@ -888,7 +928,10 @@ export function mountPremiumLanding({
     window.addEventListener("touchcancel", onTouchEnd, { passive: false });
     neuralLobbyBrand.addEventListener("keydown", onKeyDown);
     neuralLobbyBrand.addEventListener("dblclick", recenter);
+    const onEnergyResize = () => scheduleDynamicEnergyPaths();
+    window.addEventListener("resize", onEnergyResize, { passive: true });
     applyPosition(0, 0);
+    scheduleDynamicEnergyPaths();
 
     cleanups.push(() => {
       if (lobbyPointerReleaseTimer !== null) {
@@ -909,6 +952,8 @@ export function mountPremiumLanding({
       }
       neuralLobbyBrand.removeEventListener("keydown", onKeyDown);
       neuralLobbyBrand.removeEventListener("dblclick", recenter);
+      window.removeEventListener("resize", onEnergyResize);
+      if (energyPathFrame) { window.cancelAnimationFrame(energyPathFrame); energyPathFrame = 0; }
       neuralLobbyBrand.style.removeProperty("--logo-drag-x");
       neuralLobbyBrand.style.removeProperty("--logo-drag-y");
       neuralLobby.style.removeProperty("--logo-drag-x");
@@ -1415,7 +1460,7 @@ export function mountPremiumLanding({
       const mobileReactiveProfile =
         window.innerWidth <= 820 ||
         window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-      if (mobileReactiveProfile && timestamp - audioReactiveLastSample < 33) {
+      if (mobileReactiveProfile && timestamp - audioReactiveLastSample < 50) {
         audioReactiveFrame = window.requestAnimationFrame(renderAudioReactiveLogo);
         return;
       }
@@ -1553,29 +1598,36 @@ export function mountPremiumLanding({
       if (!AudioContextClass) return;
 
       try {
-        audioContext = new AudioContextClass();
+        const mobileAudioProfile =
+          window.innerWidth <= 820 ||
+          window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+        audioContext = new AudioContextClass(
+          mobileAudioProfile ? { latencyHint: "playback" } : { latencyHint: "interactive" },
+        );
         const source =
           audioContext.createMediaElementSource(immersiveAudio);
         audioMasterGain = audioContext.createGain();
         // Start silent and ramp after playback begins. This avoids hard
         // discontinuities ("clicks") when Samsung/Chromium opens or swaps media.
         audioMasterGain.gain.value = 0.0001;
-        audioCompressor = audioContext.createDynamicsCompressor();
-        audioCompressor.threshold.value = -24;
-        audioCompressor.knee.value = 24;
-        audioCompressor.ratio.value = 4.5;
-        audioCompressor.attack.value = 0.003;
-        audioCompressor.release.value = 0.3;
         audioAnalyser = audioContext.createAnalyser();
-        const mobileAudioProfile =
-          window.innerWidth <= 820 ||
-          window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-        audioAnalyser.fftSize = mobileAudioProfile ? 128 : 512;
-        audioAnalyser.smoothingTimeConstant = mobileAudioProfile ? 0.66 : 0.58;
+        audioAnalyser.fftSize = mobileAudioProfile ? 64 : 512;
+        audioAnalyser.smoothingTimeConstant = mobileAudioProfile ? 0.72 : 0.58;
         audioFrequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
         source.connect(audioMasterGain);
-        audioMasterGain.connect(audioCompressor);
-        audioCompressor.connect(audioAnalyser);
+        if (mobileAudioProfile) {
+          audioCompressor = null;
+          audioMasterGain.connect(audioAnalyser);
+        } else {
+          audioCompressor = audioContext.createDynamicsCompressor();
+          audioCompressor.threshold.value = -24;
+          audioCompressor.knee.value = 24;
+          audioCompressor.ratio.value = 4.5;
+          audioCompressor.attack.value = 0.003;
+          audioCompressor.release.value = 0.3;
+          audioMasterGain.connect(audioCompressor);
+          audioCompressor.connect(audioAnalyser);
+        }
         audioAnalyser.connect(audioContext.destination);
         audioReactiveReady = true;
 

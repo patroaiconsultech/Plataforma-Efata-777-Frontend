@@ -33,7 +33,7 @@ test("audio path avoids hard gain discontinuities and per-frame FFT allocation",
   assert.match(source, /rampMasterGain/);
   assert.match(source, /linearRampToValueAtTime/);
   assert.match(source, /audioFrequencyData/);
-  assert.match(source, /mobileAudioProfile \? 128 : 512/);
+  assert.match(source, /mobileAudioProfile \? 64 : 512/);
 });
 
 test("legacy ORKIO icon paths resolve to PatroAI artwork for stale installed clients", () => {

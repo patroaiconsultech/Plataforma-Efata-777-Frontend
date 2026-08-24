@@ -7,7 +7,7 @@ const read = (path) => fs.readFileSync(path, "utf8");
 test("V12 preserves historical PWA id while launching immersive root", () => {
   const manifest = JSON.parse(read("public/manifest.webmanifest"));
   assert.equal(manifest.id, "/app");
-  assert.match(manifest.start_url, /^\/\?source=pwa&experience=immersive&v=13$/);
+  assert.match(manifest.start_url, /^\/\?source=pwa&experience=immersive&v=14$/);
   assert.deepEqual(manifest.launch_handler.client_mode, ["navigate-new", "auto"]);
 });
 
@@ -26,8 +26,8 @@ test("V12 mobile drag keeps a touch fallback even with PointerEvent support", ()
 
 test("V12 mobile audio analysis is throttled and lower cost", () => {
   const source = read("src/landing/premiumInteractions.ts");
-  assert.match(source, /audioAnalyser\.fftSize = mobileAudioProfile \? 128 : 512/);
-  assert.match(source, /timestamp - audioReactiveLastSample < 33/);
+  assert.match(source, /audioAnalyser\.fftSize = mobileAudioProfile \? 64 : 512/);
+  assert.match(source, /timestamp - audioReactiveLastSample < 50/);
 });
 
 test("V12 desktop has a distinct spectral plasma visual pass", () => {
