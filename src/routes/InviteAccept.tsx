@@ -97,7 +97,7 @@ export default function InviteAccept() {
         <p role="status">Convite aceito. Redirecionando.</p>
       )}
       <Link className="ghost-link" to="/">
-        Voltar ao início
+        Voltar à experiência imersiva
       </Link>
     </main>
   );

@@ -57,9 +57,12 @@ test("controlled update states are explicit", () => {
   }
 });
 
-test("registration dispatches the actual waiting worker", () => {
-  assert.match(registration, /registration\.waiting/);
-  assert.match(registration, /dispatchWaitingUpdate/);
+test("registration auto refreshes after a new service worker controls the page", () => {
+  const source = registration;
+  assert.match(source, /controllerchange/);
+  assert.match(source, /window\.location\.reload\(\)/);
+  assert.match(source, /registration\.waiting\.postMessage/);
+  assert.doesNotMatch(source, /dispatchWaitingUpdate/);
 });
 
 test("cache model is explicit allowlist", () => {

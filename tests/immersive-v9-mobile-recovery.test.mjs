@@ -6,15 +6,15 @@ const read = (path) => fs.readFileSync(path, "utf8");
 
 test("PWA V9 has a new root-scoped immersive identity", () => {
   const manifest = JSON.parse(read("public/manifest.webmanifest"));
-  assert.equal(manifest.id, "/?app=patroai-immersive-v10");
-  assert.equal(manifest.start_url, "/?source=pwa&experience=immersive&v=10");
+  assert.equal(manifest.id, "/app");
+  assert.equal(manifest.start_url, "/?source=pwa&experience=immersive&v=12");
   assert.equal(manifest.scope, "/");
 });
 
 test("legacy PWA launch is normalized before service worker registration", () => {
   const source = read("src/pwa/registerServiceWorker.ts");
   assert.match(source, /if \(isLegacyPwaLaunch\(\)\)/);
-  assert.match(source, /window\.location\.replace\("\/\?source=pwa&experience=immersive&v=10"\)/);
+  assert.match(source, /window\.location\.replace\("\/\?source=pwa&experience=immersive&v=12"\)/);
 });
 
 test("public landing global failures are fail-soft", () => {

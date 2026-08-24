@@ -6,16 +6,16 @@ const read = (path) => fs.readFileSync(path, "utf8");
 
 test("V10 manifest is a fresh PatroAI immersive identity", () => {
   const manifest = JSON.parse(read("public/manifest.webmanifest"));
-  assert.equal(manifest.id, "/?app=patroai-immersive-v10");
+  assert.equal(manifest.id, "/app");
   assert.equal(manifest.name, "PatroAI");
   assert.equal(manifest.short_name, "PatroAI");
-  assert.match(manifest.start_url, /experience=immersive&v=10/);
+  assert.match(manifest.start_url, /experience=immersive&v=12/);
 });
 
 test("manifest and apple icon references are cache-busted", () => {
   const html = read("index.html");
-  assert.match(html, /manifest\.webmanifest\?v=10/);
-  assert.match(html, /apple-touch-icon-180\.png\?v=10/);
+  assert.match(html, /manifest\.webmanifest\?v=12/);
+  assert.match(html, /apple-touch-icon-180\.png\?v=12/);
 });
 
 test("mobile logo dragging tracks pointer at window scope", () => {

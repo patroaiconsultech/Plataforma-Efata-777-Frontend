@@ -17,7 +17,7 @@ import "./styles.css";
 function AppEntry() {
   const source = new URLSearchParams(window.location.search).get("source") || "";
   if (source.startsWith("pwa")) {
-    return <Navigate to="/?source=pwa" replace />;
+    return <Navigate to="/?source=pwa&experience=immersive&v=12" replace />;
   }
   return <AppConsole />;
 }

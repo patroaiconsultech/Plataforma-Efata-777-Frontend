@@ -42,7 +42,7 @@ test("MediaQueryList change listener has a legacy mobile fallback", () => {
 
 test("V9 service worker activates immediately to replace stale mobile shells", () => {
   const sw = fs.readFileSync("public/sw.js", "utf8");
-  assert.match(sw, /efata777-v11-20260824-mobile-immersive-polish/);
+  assert.match(sw, /efata777-v12-20260824-canonical-immersive/);
   assert.match(sw, /await self\.skipWaiting\(\)/);
   assert.match(sw, /await self\.clients\.claim\(\)/);
 });

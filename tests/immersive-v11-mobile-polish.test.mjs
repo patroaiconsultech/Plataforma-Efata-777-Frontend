@@ -24,7 +24,7 @@ test("mobile drag uses an expanded lobby hit surface and window-scoped tracking"
   const source = read("src/landing/premiumInteractions.ts");
   assert.match(source, /onLobbyDragSurfacePointerDown/);
   assert.match(source, /window\.addEventListener\("pointermove", onPointerMove/);
-  assert.match(source, /const pad = event\.pointerType === "touch" \? 42 : 18/);
+  assert.match(source, /const pad = event\.pointerType === "touch" \? 76 : 18/);
   assert.match(source, /needsTouchFallback/);
 });
 
@@ -33,7 +33,7 @@ test("audio path avoids hard gain discontinuities and per-frame FFT allocation",
   assert.match(source, /rampMasterGain/);
   assert.match(source, /linearRampToValueAtTime/);
   assert.match(source, /audioFrequencyData/);
-  assert.match(source, /mobileAudioProfile \? 256 : 512/);
+  assert.match(source, /mobileAudioProfile \? 128 : 512/);
 });
 
 test("legacy ORKIO icon paths resolve to PatroAI artwork for stale installed clients", () => {

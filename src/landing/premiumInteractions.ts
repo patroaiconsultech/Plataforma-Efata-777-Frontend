@@ -792,7 +792,7 @@ export function mountPremiumLanding({
       const target = event.target as Element | null;
       if (target?.closest("a,button,input,select,textarea")) return;
       const rect = neuralLobbyBrand.getBoundingClientRect();
-      const pad = event.pointerType === "touch" ? 42 : 18;
+      const pad = event.pointerType === "touch" ? 76 : 18;
       const insideExpandedBrand =
         event.clientX >= rect.left - pad &&
         event.clientX <= rect.right + pad &&
@@ -876,13 +876,11 @@ export function mountPremiumLanding({
     window.addEventListener("pointermove", onPointerMove, { passive: false });
     window.addEventListener("pointerup", onPointerUp, { passive: false });
     window.addEventListener("pointercancel", onPointerUp, { passive: false });
-    const needsTouchFallback = !("PointerEvent" in window);
-    if (needsTouchFallback) {
-      neuralLobbyBrand.addEventListener("touchstart", onTouchStart, { passive: false });
-      window.addEventListener("touchmove", onTouchMove, { passive: false });
-      window.addEventListener("touchend", onTouchEnd, { passive: false });
-      window.addEventListener("touchcancel", onTouchEnd, { passive: false });
-    }
+    const needsTouchFallback = true;
+    neuralLobbyBrand.addEventListener("touchstart", onTouchStart, { passive: false });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onTouchEnd, { passive: false });
+    window.addEventListener("touchcancel", onTouchEnd, { passive: false });
     neuralLobbyBrand.addEventListener("keydown", onKeyDown);
     neuralLobbyBrand.addEventListener("dblclick", recenter);
     applyPosition(0, 0);
@@ -1249,6 +1247,7 @@ export function mountPremiumLanding({
     let audioAnalyser: AnalyserNode | null = null;
     let audioFrequencyData: Uint8Array | null = null;
     let audioReactiveFrame = 0;
+    let audioReactiveLastSample = 0;
     let audioReactiveLevel = 0;
     let audioBassLevel = 0;
     let audioMidLevel = 0;
@@ -1359,7 +1358,6 @@ export function mountPremiumLanding({
         Math.max(index, 0),
         audioPlaylist.length - 1,
       );
-      rampMasterGain(0.0001, 0.035);
       immersiveAudio.src = audioPlaylist[audioTrackIndex];
       immersiveAudio.volume = 0.58;
       immersiveAudio.preload = "auto";
@@ -1374,6 +1372,7 @@ export function mountPremiumLanding({
         window.cancelAnimationFrame(audioReactiveFrame);
         audioReactiveFrame = 0;
       }
+      audioReactiveLastSample = 0;
       audioReactiveLevel = 0;
       audioBassLevel = 0;
       audioMidLevel = 0;
@@ -1400,7 +1399,15 @@ export function mountPremiumLanding({
       root.style.removeProperty("--music-motion-duration");
     };
 
-    const renderAudioReactiveLogo = () => {
+    const renderAudioReactiveLogo = (timestamp = performance.now()) => {
+      const mobileReactiveProfile =
+        window.innerWidth <= 820 ||
+        window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+      if (mobileReactiveProfile && timestamp - audioReactiveLastSample < 33) {
+        audioReactiveFrame = window.requestAnimationFrame(renderAudioReactiveLogo);
+        return;
+      }
+      audioReactiveLastSample = timestamp;
       if (
         !immersiveAudio ||
         !audioAnalyser ||
@@ -1548,7 +1555,7 @@ export function mountPremiumLanding({
         const mobileAudioProfile =
           window.innerWidth <= 820 ||
           window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-        audioAnalyser.fftSize = mobileAudioProfile ? 256 : 512;
+        audioAnalyser.fftSize = mobileAudioProfile ? 128 : 512;
         audioAnalyser.smoothingTimeConstant = mobileAudioProfile ? 0.66 : 0.58;
         audioFrequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
         source.connect(audioMasterGain);
@@ -1576,6 +1583,8 @@ export function mountPremiumLanding({
         resetAudioReactiveLogo();
         return;
       }
+      rampMasterGain(0.0001, 0.065);
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 72));
       selectAudioTrack(audioTrackIndex + 1);
       try {
         await immersiveAudio.play();

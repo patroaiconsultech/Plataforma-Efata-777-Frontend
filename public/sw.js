@@ -1,5 +1,5 @@
 /* EFATA777 / PatroAI PWA — explicit public allowlist only */
-const VERSION = "efata777-v11-20260824-mobile-immersive-polish";
+const VERSION = "efata777-v12-20260824-canonical-immersive";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 const CACHE_PREFIXES = ["efata777-", "orkio-v2-"];
@@ -135,7 +135,7 @@ async function networkFirstNavigation(request) {
     requestUrl.pathname === "/app" &&
     (requestUrl.searchParams.get("source") || "").startsWith("pwa")
   ) {
-    return Response.redirect(`${self.location.origin}/?source=pwa&experience=immersive&v=10`, 302);
+    return Response.redirect(`${self.location.origin}/?source=pwa&experience=immersive&v=12`, 302);
   }
 
   const runtime = await caches.open(RUNTIME);
