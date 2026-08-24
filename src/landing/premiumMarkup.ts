@@ -13,9 +13,11 @@ export const premiumMarkup = String.raw`
     <svg viewBox="0 0 1000 700" preserveAspectRatio="none" role="presentation">
       <defs>
         <linearGradient id="immersiveGateNetworkGradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#36e7c1" stop-opacity=".08"></stop>
-          <stop offset=".5" stop-color="#ffe29a" stop-opacity=".74"></stop>
-          <stop offset="1" stop-color="#36e7c1" stop-opacity=".08"></stop>
+          <stop offset="0" stop-color="#37C5FF" stop-opacity=".10"></stop>
+          <stop offset=".28" stop-color="#7D6BFF" stop-opacity=".46"></stop>
+          <stop offset=".52" stop-color="#F6C453" stop-opacity=".78"></stop>
+          <stop offset=".76" stop-color="#28F0B5" stop-opacity=".44"></stop>
+          <stop offset="1" stop-color="#37C5FF" stop-opacity=".10"></stop>
         </linearGradient>
       </defs>
       <g class="immersive-gate__network-lines">

@@ -80,6 +80,8 @@ void main() {
   vec2 uv = gl_FragCoord.xy / u_resolution.xy;
   vec2 p = toAspect(uv - 0.5);
   vec2 pointer = toAspect(u_pointer - 0.5);
+  vec2 cameraOffset = pointer * vec2(0.038, 0.030);
+  p -= cameraOffset;
   float t = u_time * (0.28 + u_energy * 0.32);
   float pointerDistance = length(p - pointer);
   float pointerInfluence = exp(-pointerDistance * 3.0) * (0.10 + u_energy * 0.12);
@@ -100,12 +102,28 @@ void main() {
       cos(t * 0.52 + fi * 1.91)
     ) * (0.018 + u_energy * 0.018);
 
+    // Subtle seed-driven parallax: near nodes respond more strongly while
+    // deeper nodes drift slightly against the pointer direction.
+    float depth = mix(-0.10, 0.34, seed);
+    node += pointer * depth * (0.055 + u_energy * 0.018);
+
     float distanceToNode = length(p - node);
     float nodeGlow = exp(-distanceToNode * (52.0 - u_energy * 14.0));
     float nodeCore = exp(-distanceToNode * 230.0);
     glow += nodeGlow;
-    color += mix(vec3(0.12, 0.95, 0.66), vec3(1.0, 0.78, 0.32), step(0.78, seed)) * nodeGlow;
-    color += vec3(1.0, 0.93, 0.66) * nodeCore * (0.7 + u_energy * 1.5);
+
+    vec3 electricBlue = vec3(0.216, 0.773, 1.0);
+    vec3 violet = vec3(0.490, 0.420, 1.0);
+    vec3 livingGreen = vec3(0.157, 0.941, 0.710);
+    vec3 auroraGold = vec3(0.965, 0.769, 0.325);
+    vec3 nodeColor =
+      seed < 0.40 ? electricBlue :
+      seed < 0.65 ? violet :
+      seed < 0.85 ? livingGreen :
+                    auroraGold;
+
+    color += nodeColor * nodeGlow;
+    color += mix(vec3(1.0, 0.95, 0.78), auroraGold, 0.44) * nodeCore * (0.7 + u_energy * 1.5);
 
     for (int j = 0; j < 4; j++) {
       float fj = float(j);
@@ -117,6 +135,8 @@ void main() {
         sin(t * 0.7 + (fi + fj + 1.0) * 1.37),
         cos(t * 0.52 + (fi + fj + 1.0) * 1.91)
       ) * (0.018 + u_energy * 0.018);
+      float otherDepth = mix(-0.10, 0.34, otherSeed);
+      other += pointer * otherDepth * (0.055 + u_energy * 0.018);
       float edge = lineSegment(p, node, other);
       network += exp(-edge * (110.0 - u_energy * 38.0)) * 0.17;
     }
@@ -125,13 +145,20 @@ void main() {
   float wave = sin(t * 1.2 - length(p) * 13.0) * 0.5 + 0.5;
   float core = exp(-length(p) * (4.2 - u_energy * 0.8));
   float noiseField = field(p * 1.6, t) * 0.12;
-  vec3 cyan = vec3(0.06, 0.72, 0.48);
-  vec3 gold = vec3(0.92, 0.68, 0.25);
+  vec3 electricBlue = vec3(0.216, 0.773, 1.0);
+  vec3 violet = vec3(0.490, 0.420, 1.0);
+  vec3 livingGreen = vec3(0.157, 0.941, 0.710);
+  vec3 auroraGold = vec3(0.965, 0.769, 0.325);
 
-  color += cyan * network * (0.62 + wave * 0.48);
-  color += mix(cyan, gold, 0.42) * glow * 0.05;
-  color += mix(gold, cyan, 0.55) * core * (0.16 + u_energy * 0.12);
-  color += cyan * noiseField;
+  float spectralPhase = sin(t * 0.34 + length(p) * 5.2) * 0.5 + 0.5;
+  vec3 spectralNetwork = mix(electricBlue, violet, spectralPhase * 0.58);
+  spectralNetwork = mix(spectralNetwork, livingGreen, 0.18 + wave * 0.08);
+
+  color += spectralNetwork * network * (0.62 + wave * 0.48);
+  color += mix(violet, electricBlue, 0.46) * glow * 0.028;
+  color += auroraGold * glow * 0.022;
+  color += mix(auroraGold, electricBlue, 0.24) * core * (0.18 + u_energy * 0.13);
+  color += mix(electricBlue, violet, 0.38) * noiseField;
 
   float vignette = smoothstep(1.18, 0.18, length(p));
   float alpha = (0.16 + network * 0.52 + glow * 0.16 + core * 0.18) * vignette * u_visibility;
@@ -216,7 +243,10 @@ export function initNeuralWebgl(
     visibility: gl.getUniformLocation(program, "u_visibility"),
   };
 
-  const pointer = { x: 0.5, y: 0.5, active: false };
+  // Keep input and rendered pointer separate so camera/parallax motion eases
+  // toward the user's intent instead of snapping on every pointer event.
+  const pointer = { x: 0.5, y: 0.5 };
+  const pointerTarget = { x: 0.5, y: 0.5, active: false };
   let width = 1;
   let height = 1;
   let pixelRatio = 1;
@@ -241,12 +271,12 @@ export function initNeuralWebgl(
 
   const pointerMove = (event: PointerEvent) => {
     const rect = stage.getBoundingClientRect();
-    pointer.x = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
-    pointer.y = 1 - Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
-    pointer.active = true;
+    pointerTarget.x = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    pointerTarget.y = 1 - Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+    pointerTarget.active = true;
   };
   const pointerLeave = () => {
-    pointer.active = false;
+    pointerTarget.active = false;
   };
   const schedule = () => {
     if (!disposed && raf === 0) {
@@ -261,9 +291,9 @@ export function initNeuralWebgl(
     if (!isVisible) return;
     const externalPointer = options.getPointer?.();
     if (externalPointer?.active) {
-      pointer.active = true;
-      pointer.x = Math.min(1, Math.max(0, externalPointer.x));
-      pointer.y = Math.min(1, Math.max(0, externalPointer.y));
+      pointerTarget.active = true;
+      pointerTarget.x = Math.min(1, Math.max(0, externalPointer.x));
+      pointerTarget.y = Math.min(1, Math.max(0, externalPointer.y));
     }
 
     const reactive = options.getReactive?.() ? 1 : 0;
@@ -272,9 +302,11 @@ export function initNeuralWebgl(
     const delta = lastTime ? Math.min(40, now - lastTime) : 16;
     lastTime = now;
     if (isVisible) {
-      const smoothing = Math.min(1, delta / 220);
-      const targetX = pointer.active ? pointer.x : 0.5;
-      const targetY = pointer.active ? pointer.y : 0.5;
+      // ~260 ms inertial follow keeps the scene responsive without feeling
+      // attached to the cursor. Leaving the stage recenters it organically.
+      const smoothing = Math.min(1, delta / 260);
+      const targetX = pointerTarget.active ? pointerTarget.x : 0.5;
+      const targetY = pointerTarget.active ? pointerTarget.y : 0.5;
       pointer.x += (targetX - pointer.x) * smoothing;
       pointer.y += (targetY - pointer.y) * smoothing;
       gl.useProgram(program);

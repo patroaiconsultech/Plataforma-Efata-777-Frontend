@@ -6,8 +6,10 @@
         --muted: #b7c7bf;
         --dim: #7f928a;
         --green: #28f0b5;
-        --gold: #d9b45f;
-        --cyan: #30d8ff;
+        --gold: #f6c453;
+        --cyan: #37c5ff;
+        --electric-blue: #37c5ff;
+        --violet: #7d6bff;
         --shadow: 0 24px 90px rgba(0, 0, 0, 0.48);
         --radius: 8px;
         --max: 1180px;
@@ -22,9 +24,11 @@
         min-width: 320px;
         overflow-x: hidden;
         background:
-          radial-gradient(circle at 16% 10%, rgba(40, 240, 181, 0.14), transparent 30%),
-          radial-gradient(circle at 86% 12%, rgba(217, 180, 95, 0.15), transparent 28%),
-          linear-gradient(180deg, #010302 0%, #06110e 48%, #020605 100%);
+          radial-gradient(circle at 82% 12%, rgba(55, 197, 255, 0.16), transparent 31%),
+          radial-gradient(circle at 18% 24%, rgba(125, 107, 255, 0.13), transparent 34%),
+          radial-gradient(circle at 22% 86%, rgba(40, 240, 181, 0.10), transparent 32%),
+          radial-gradient(circle at 52% 38%, rgba(246, 196, 83, 0.09), transparent 24%),
+          linear-gradient(180deg, #010305 0%, #050913 48%, #020605 100%);
         color: var(--text);
         font-family: var(--sans);
       }
@@ -1725,9 +1729,11 @@
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(circle at 50% 38%, rgba(36, 126, 105, .19), transparent 36%),
-    radial-gradient(circle at 50% 50%, rgba(217, 180, 95, .08), transparent 58%),
-    rgba(1, 6, 5, .96);
+    radial-gradient(circle at 72% 24%, rgba(55, 197, 255, .18), transparent 34%),
+    radial-gradient(circle at 24% 30%, rgba(125, 107, 255, .14), transparent 38%),
+    radial-gradient(circle at 28% 78%, rgba(40, 240, 181, .12), transparent 36%),
+    radial-gradient(circle at 50% 44%, rgba(246, 196, 83, .12), transparent 30%),
+    rgba(1, 4, 8, .97);
   backdrop-filter: blur(18px);
 }
 .patroai-premium .immersive-gate__backdrop::before {
@@ -1775,7 +1781,7 @@
   filter:
     drop-shadow(0 0 12px rgba(217, 180, 95, .42))
     drop-shadow(0 0 28px rgba(58, 236, 208, .18));
-  animation: immersiveLogoFloat 5.8s ease-in-out infinite;
+  animation: immersiveLogoFloat 7.2s ease-in-out infinite;
 }
 .patroai-premium .immersive-gate__halo {
   position: absolute;
@@ -1785,15 +1791,17 @@
     conic-gradient(
       from 0deg,
       transparent,
-      rgba(217,180,95,.72),
-      rgba(58,236,208,.26),
-      transparent 48%,
-      rgba(217,180,95,.42),
+      rgba(55,197,255,.56),
+      rgba(125,107,255,.46),
+      rgba(246,196,83,.72),
+      rgba(40,240,181,.30),
+      transparent 58%,
+      rgba(246,196,83,.44),
       transparent
     );
   filter: blur(8px);
   opacity: .78;
-  animation: immersiveHaloSpin 14s linear infinite;
+  animation: immersiveHaloSpin 18.5s linear infinite;
 }
 .patroai-premium .immersive-gate__eyebrow {
   margin: 0 0 14px;
@@ -1957,8 +1965,9 @@ body.immersive-gate-open {
   to { transform: rotate(360deg) scale(.98); }
 }
 @keyframes immersiveLogoFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+  0%, 100% { transform: translate3d(0, 1px, 0) scale(.995); }
+  42% { transform: translate3d(0, -3px, 0) scale(1.012); }
+  68% { transform: translate3d(1px, -1px, 0) scale(1.004); }
 }
 @media (max-width: 620px) {
   .patroai-premium .immersive-gate {
@@ -3264,7 +3273,7 @@ body.neural-lobby-open {
   stroke-width: 1.25;
   stroke-dasharray: 8 18 2 22;
   opacity: .78;
-  animation: immersiveGateNetworkFlow calc(6.4s + (var(--i) * .34s)) linear infinite;
+  animation: immersiveGateNetworkFlow calc(7.2s + (var(--i) * .41s)) linear infinite;
   animation-delay: calc(var(--i) * -.42s);
 }
 
@@ -3274,8 +3283,26 @@ body.neural-lobby-open {
   filter: drop-shadow(0 0 8px rgba(255, 226, 143, .95));
   transform-box: fill-box;
   transform-origin: center;
-  animation: immersiveGateNetworkNode calc(2.4s + (var(--i) * .08s)) ease-in-out infinite;
+  animation: immersiveGateNetworkNode calc(3.1s + (var(--i) * .11s)) ease-in-out infinite;
   animation-delay: calc(var(--i) * -.15s);
+}
+
+/* Stable spectral identity per node: color never flickers frame-to-frame. */
+.patroai-premium .immersive-gate__network-nodes circle:nth-child(4n + 1) {
+  fill: #37c5ff;
+  filter: drop-shadow(0 0 9px rgba(55, 197, 255, .86));
+}
+.patroai-premium .immersive-gate__network-nodes circle:nth-child(4n + 2) {
+  fill: #7d6bff;
+  filter: drop-shadow(0 0 9px rgba(125, 107, 255, .82));
+}
+.patroai-premium .immersive-gate__network-nodes circle:nth-child(4n + 3) {
+  fill: #28f0b5;
+  filter: drop-shadow(0 0 9px rgba(40, 240, 181, .78));
+}
+.patroai-premium .immersive-gate__network-nodes circle:nth-child(4n) {
+  fill: #f6c453;
+  filter: drop-shadow(0 0 10px rgba(246, 196, 83, .90));
 }
 
 @keyframes immersiveGateNetworkFlow {
@@ -3315,27 +3342,27 @@ body.neural-lobby-open {
   .patroai-premium .immersive-gate__network svg,
   .patroai-premium .neural-lobby__network svg {
     transform-origin: 50% 50%;
-    animation: desktopNeuralFieldDrift 8.5s ease-in-out infinite;
+    animation: desktopNeuralFieldDrift 14.5s cubic-bezier(.45, .05, .55, .95) infinite;
   }
 
   .patroai-premium .immersive-gate__network-lines path,
   .patroai-premium .neural-lobby__network-lines path {
     stroke-width: 2.15;
     stroke-dasharray: 22 16 5 18;
-    animation-duration: calc(2.8s + (var(--i) * .22s));
+    animation-duration: calc(5.8s + (var(--i) * .31s));
   }
 
   .patroai-premium .immersive-gate__network-nodes circle,
   .patroai-premium .neural-lobby__network-nodes circle {
-    filter: drop-shadow(0 0 11px rgba(255, 226, 143, 1));
-    animation-duration: calc(1.75s + (var(--i) * .06s));
+    animation-duration: calc(2.9s + (var(--i) * .09s));
   }
 }
 
 @keyframes desktopNeuralFieldDrift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  32% { transform: translate3d(1.15%, -.8%, 0) scale(1.035); }
-  67% { transform: translate3d(-.9%, .65%, 0) scale(1.018); }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.012); }
+  28% { transform: translate3d(.68%, -.48%, 0) scale(1.026); }
+  61% { transform: translate3d(-.52%, .38%, 0) scale(1.018); }
+  82% { transform: translate3d(.24%, .18%, 0) scale(1.022); }
 }
 
 
@@ -3349,14 +3376,16 @@ body.neural-lobby-open {
     z-index: 4;
     pointer-events: none;
     background: linear-gradient(108deg,
-      transparent 0 39%,
-      rgba(52, 231, 193, .02) 43%,
-      rgba(255, 226, 143, .34) 49%,
-      rgba(52, 231, 193, .16) 53%,
-      transparent 59% 100%);
+      transparent 0 38%,
+      rgba(55, 197, 255, .03) 42%,
+      rgba(125, 107, 255, .22) 46%,
+      rgba(246, 196, 83, .36) 49%,
+      rgba(40, 240, 181, .18) 53%,
+      rgba(55, 197, 255, .08) 56%,
+      transparent 61% 100%);
     filter: blur(9px);
     mix-blend-mode: screen;
-    animation: desktopNeuralBeam 3.8s cubic-bezier(.35, .05, .65, .95) infinite;
+    animation: desktopNeuralBeam 8.2s cubic-bezier(.42, .05, .58, .95) infinite;
   }
 
   .patroai-premium .immersive-gate__network::after,
@@ -3371,24 +3400,31 @@ body.neural-lobby-open {
     pointer-events: none;
     border-radius: 50%;
     transform: translate(-50%, -50%) scale(.72);
-    background: radial-gradient(circle, rgba(255, 226, 143, .2), rgba(52, 231, 193, .08) 32%, transparent 72%);
+    background:
+      radial-gradient(circle,
+        rgba(255, 244, 210, .24) 0 8%,
+        rgba(246, 196, 83, .22) 16%,
+        rgba(55, 197, 255, .12) 34%,
+        rgba(125, 107, 255, .09) 52%,
+        rgba(40, 240, 181, .05) 64%,
+        transparent 76%);
     filter: blur(12px);
     mix-blend-mode: screen;
-    animation: desktopNeuralCorePulse 2.6s ease-in-out infinite;
+    animation: desktopNeuralCorePulse 4.8s ease-in-out infinite;
   }
 }
 
 @keyframes desktopNeuralBeam {
-  0% { transform: translate3d(-58%, 0, 0) rotate(-7deg); opacity: .12; }
-  18% { opacity: .86; }
-  50% { transform: translate3d(0, 0, 0) rotate(-7deg); opacity: .92; }
-  82% { opacity: .64; }
-  100% { transform: translate3d(58%, 0, 0) rotate(-7deg); opacity: .12; }
+  0% { transform: translate3d(-46%, -2%, 0) rotate(-6deg); opacity: .10; }
+  24% { opacity: .52; }
+  52% { transform: translate3d(2%, 1%, 0) rotate(-6deg); opacity: .72; }
+  78% { opacity: .46; }
+  100% { transform: translate3d(46%, -1%, 0) rotate(-6deg); opacity: .10; }
 }
 
 @keyframes desktopNeuralCorePulse {
-  0%, 100% { opacity: .2; transform: translate(-50%, -50%) scale(.72); }
-  50% { opacity: .9; transform: translate(-50%, -50%) scale(1.18); }
+  0%, 100% { opacity: .28; transform: translate(-50%, -50%) scale(.84); }
+  50% { opacity: .82; transform: translate(-50%, -50%) scale(1.08); }
 }
 
 @media (prefers-reduced-motion: reduce) {
