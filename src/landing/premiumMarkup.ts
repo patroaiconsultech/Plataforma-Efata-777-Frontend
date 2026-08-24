@@ -216,7 +216,7 @@ export const premiumMarkup = String.raw`
   </a>
 
   <div class="neural-lobby__source-reveal" aria-label="Fontes PatroAI" data-source-reveal>
-    <a href="#top" data-neural-lobby-link data-reveal-index="0"><span data-i18n="lobby.node.about">Conheça a PatroAI</span></a>
+    <a href="#patroai" data-neural-lobby-link data-reveal-index="0"><span data-i18n="lobby.node.about">Conheça a PatroAI</span></a>
     <a href="#ecossistema" data-neural-lobby-link data-reveal-index="1"><span data-i18n="lobby.node.ecosystem">Ecossistema</span></a>
     <a href="#governanca" data-neural-lobby-link data-reveal-index="2"><span data-i18n="lobby.node.governance">Governança</span></a>
     <a href="#metodo" data-neural-lobby-link data-reveal-index="3"><span data-i18n="lobby.node.method">Método</span></a>
@@ -257,7 +257,7 @@ export const premiumMarkup = String.raw`
   </div>
 
   <nav class="neural-lobby__nodes" aria-label="Navegação imersiva">
-    <a class="neural-lobby__node neural-lobby__node--a" href="#top" data-neural-lobby-link>
+    <a class="neural-lobby__node neural-lobby__node--a" href="#patroai" data-neural-lobby-link>
       <span data-i18n="lobby.node.about">Conheça a PatroAI</span>
     </a>
     <a class="neural-lobby__node neural-lobby__node--b" href="#ecossistema" data-neural-lobby-link>
@@ -463,6 +463,47 @@ export const premiumMarkup = String.raw`
               <span data-i18n="level6.layer.governance">Governança</span>
               <span data-i18n="level6.layer.impact">Impacto</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+
+      <section class="section patroai-about" id="patroai" aria-labelledby="patroaiAboutTitle">
+        <div class="section-inner patroai-about__shell">
+          <div class="section-head patroai-about__intro reveal">
+            <div>
+              <p class="eyebrow">CONHEÇA A PATROAI</p>
+              <h2 id="patroaiAboutTitle">Tecnologia, estratégia e propósito para perpetuar negócios.</h2>
+              <p class="patroai-about__lead">
+                A Patroai nasce para unir inteligência estratégica, tecnologia aplicada e responsabilidade empresarial em projetos capazes de gerar valor sustentável.
+              </p>
+            </div>
+          </div>
+
+          <div class="patroai-about__cards">
+            <article class="patroai-about__card reveal">
+              <span class="patroai-about__index" aria-hidden="true">01</span>
+              <h3>Missão</h3>
+              <p>
+                Apoiar empresas, investidores, consultores e parceiros na estruturação de negócios mais inteligentes, governados e sustentáveis, transformando informação complexa em clareza, decisão e execução.
+              </p>
+            </article>
+
+            <article class="patroai-about__card reveal">
+              <span class="patroai-about__index" aria-hidden="true">02</span>
+              <h3>Visão</h3>
+              <p>
+                Ser uma referência brasileira em consultech, AI Factory e desenvolvimento de novos negócios, construindo uma categoria própria de sistemas governados de IA para gestão, crescimento e perpetuação empresarial.
+              </p>
+            </article>
+
+            <article class="patroai-about__card reveal">
+              <span class="patroai-about__index" aria-hidden="true">03</span>
+              <h3>Valores</h3>
+              <p>
+                Verdade operacional, governança, sustentabilidade, responsabilidade, excelência, discrição, parceria, inovação aplicada, visão de longo prazo e fé traduzida em serviço.
+              </p>
+            </article>
           </div>
         </div>
       </section>

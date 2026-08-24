@@ -7423,3 +7423,115 @@ body.neural-lobby-open .patroai-premium .immersive-return-button {
     -webkit-user-drag: none !important;
   }
 }
+
+
+/* === EFATA777 V17 TRUE MOBILE DRAG + PATROAI STORY === */
+.patroai-premium.music-reactive-active .neural-lobby__brand,
+.patroai-premium .neural-lobby__brand.is-dragging {
+  transform:
+    translate3d(var(--logo-drag-x, 0px), var(--logo-drag-y, 0px), 0)
+    translate3d(0, calc(var(--music-beat, 0) * -2px), 0)
+    scale(calc(1 + var(--music-bass, 0) * .025 + var(--music-beat, 0) * .07)) !important;
+}
+
+@media (max-width: 820px), (hover: none) and (pointer: coarse) {
+  .patroai-premium .neural-lobby__brand,
+  .patroai-premium .neural-lobby__brand.is-dragging,
+  .patroai-premium.music-reactive-active .neural-lobby__brand {
+    transform:
+      translate3d(var(--logo-drag-x, 0px), var(--logo-drag-y, 0px), 0)
+      translate3d(0, calc(var(--music-beat, 0) * -1.5px), 0)
+      scale(calc(1 + var(--music-bass, 0) * .016 + var(--music-beat, 0) * .04)) !important;
+    transform-origin: center !important;
+    will-change: transform;
+  }
+}
+
+.patroai-about {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(55,197,255,.08), transparent 30%),
+    radial-gradient(circle at 82% 72%, rgba(125,107,255,.08), transparent 32%),
+    linear-gradient(180deg, #02080b 0%, #03100f 52%, #02080b 100%);
+  border-top: 1px solid rgba(246,196,83,.12);
+  border-bottom: 1px solid rgba(55,197,255,.10);
+}
+
+.patroai-about__shell { position: relative; z-index: 1; }
+
+.patroai-about__intro {
+  max-width: 880px;
+  margin: 0 auto clamp(40px, 6vw, 70px);
+  text-align: center;
+}
+
+.patroai-about__intro h2 {
+  max-width: 13ch;
+  margin: 14px auto 18px;
+  font-size: clamp(38px, 5.4vw, 76px);
+  line-height: .98;
+  letter-spacing: -.045em;
+}
+
+.patroai-about__lead {
+  max-width: 760px;
+  margin-inline: auto;
+  color: rgba(235,242,242,.72);
+  font-size: clamp(16px, 1.65vw, 21px);
+  line-height: 1.7;
+}
+
+.patroai-about__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 28px);
+}
+
+.patroai-about__card {
+  min-height: 300px;
+  padding: clamp(28px, 3vw, 42px);
+  border: 1px solid rgba(246,196,83,.18);
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(5,20,21,.88), rgba(3,11,15,.78));
+  box-shadow: 0 18px 65px rgba(0,0,0,.25), inset 0 0 34px rgba(55,197,255,.025);
+}
+
+.patroai-about__card:nth-child(2) { border-color: rgba(55,197,255,.22); }
+.patroai-about__card:nth-child(3) { border-color: rgba(125,107,255,.24); }
+
+.patroai-about__index {
+  display: inline-flex;
+  margin-bottom: 48px;
+  color: #F6C453;
+  font-size: 11px;
+  letter-spacing: .24em;
+}
+
+.patroai-about__card h3 {
+  margin: 0 0 18px;
+  color: #F5F7FA;
+  font-size: clamp(25px, 2.2vw, 34px);
+}
+
+.patroai-about__card p {
+  margin: 0;
+  color: rgba(235,242,242,.69);
+  line-height: 1.72;
+}
+
+@media (max-width: 820px) {
+  .patroai-about__intro { text-align: left; }
+  .patroai-about__intro h2 {
+    max-width: 11ch;
+    margin-inline: 0;
+    font-size: clamp(38px, 11vw, 56px);
+  }
+  .patroai-about__cards { grid-template-columns: 1fr; }
+  .patroai-about__card {
+    min-height: 0;
+    padding: 28px;
+    border-radius: 22px;
+  }
+  .patroai-about__index { margin-bottom: 28px; }
+}
