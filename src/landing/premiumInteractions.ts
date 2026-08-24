@@ -1,4 +1,5 @@
 import { initNeuralWebgl } from "./neuralWebgl";
+import { apiForm } from "../api";
 
 type PremiumLandingOptions = {
   root: HTMLElement;
@@ -2080,6 +2081,104 @@ export function mountPremiumLanding({
       leadForm.removeEventListener("submit", onSubmit),
     );
   }
+
+
+  const applicationForm = query<HTMLFormElement>("[data-application-form]");
+  const applicationStatus = query<HTMLElement>("[data-application-status]");
+  const applicationSubmit = query<HTMLButtonElement>("[data-application-submit]");
+  const applicationTypeInput = query<HTMLInputElement>("[data-application-type-input]");
+  const applicationInterestInput = query<HTMLSelectElement>("[data-application-interest-input]");
+  const consultantFields = query<HTMLElement>("[data-consultant-fields]");
+  const applicationResume = query<HTMLInputElement>("[data-application-resume]");
+  const resumeName = query<HTMLElement>("[data-resume-name]");
+  const applicationTypeButtons = queryAll<HTMLButtonElement>("[data-application-type]");
+  const applicationOpenButtons = queryAll<HTMLButtonElement>("[data-application-open]");
+
+  const setApplicationType = (type: "career" | "consultant") => {
+    if (applicationTypeInput) applicationTypeInput.value = type;
+    applicationTypeButtons.forEach((button) => {
+      const active = button.dataset.applicationType === type;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    if (consultantFields) consultantFields.hidden = type !== "consultant";
+    const specialty = applicationForm?.elements.namedItem("consulting_specialty") as HTMLInputElement | null;
+    if (specialty) specialty.required = type === "consultant";
+  };
+
+  applicationTypeButtons.forEach((button) => {
+    const onTypeClick = () => setApplicationType(button.dataset.applicationType === "consultant" ? "consultant" : "career");
+    button.addEventListener("click", onTypeClick);
+    cleanups.push(() => button.removeEventListener("click", onTypeClick));
+  });
+
+  applicationOpenButtons.forEach((button) => {
+    const onOpen = () => {
+      const type = button.dataset.applicationOpen === "consultant" ? "consultant" : "career";
+      setApplicationType(type);
+      if (applicationInterestInput) applicationInterestInput.value = button.dataset.applicationInterest || "";
+      document.getElementById("talentos-formulario")?.scrollIntoView({
+        behavior: reducedMotion.matches ? "auto" : "smooth",
+        block: "start",
+      });
+      window.setTimeout(() => {
+        (applicationForm?.elements.namedItem("full_name") as HTMLInputElement | null)?.focus();
+      }, reducedMotion.matches ? 0 : 420);
+    };
+    button.addEventListener("click", onOpen);
+    cleanups.push(() => button.removeEventListener("click", onOpen));
+  });
+
+  const onResumeChange = () => {
+    const file = applicationResume?.files?.[0];
+    if (resumeName) resumeName.textContent = file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB` : "Nenhum arquivo selecionado.";
+  };
+  applicationResume?.addEventListener("change", onResumeChange);
+  cleanups.push(() => applicationResume?.removeEventListener("change", onResumeChange));
+
+  const onApplicationSubmit = async (event: SubmitEvent) => {
+    event.preventDefault();
+    if (!applicationForm || !applicationStatus || !applicationSubmit) return;
+    applicationStatus.className = "application-form__status";
+
+    if (!applicationForm.reportValidity()) {
+      applicationStatus.textContent = "Revise os campos obrigatórios antes de enviar.";
+      applicationStatus.classList.add("is-error");
+      return;
+    }
+
+    const file = applicationResume?.files?.[0];
+    if (!file || !/\.(pdf|doc|docx)$/i.test(file.name) || file.size > 10 * 1024 * 1024) {
+      applicationStatus.textContent = "Envie um currículo em PDF, DOC ou DOCX com até 10 MB.";
+      applicationStatus.classList.add("is-error");
+      return;
+    }
+
+    applicationSubmit.disabled = true;
+    applicationSubmit.setAttribute("aria-busy", "true");
+    applicationSubmit.textContent = "Enviando…";
+    applicationStatus.textContent = "Enviando sua candidatura com segurança…";
+
+    try {
+      const payload = new FormData(applicationForm);
+      await apiForm<{ ok: boolean; application_id: string }>("/api/public/applications", payload);
+      applicationStatus.textContent = "Candidatura enviada. Obrigado por compartilhar sua trajetória com a PatroAI.";
+      applicationStatus.classList.add("is-success");
+      applicationForm.reset();
+      setApplicationType("career");
+      onResumeChange();
+    } catch {
+      applicationStatus.textContent = "Não foi possível enviar agora. Seus dados permanecem no formulário; tente novamente em instantes.";
+      applicationStatus.classList.add("is-error");
+    } finally {
+      applicationSubmit.disabled = false;
+      applicationSubmit.removeAttribute("aria-busy");
+      applicationSubmit.textContent = "Enviar candidatura";
+    }
+  };
+
+  applicationForm?.addEventListener("submit", onApplicationSubmit);
+  cleanups.push(() => applicationForm?.removeEventListener("submit", onApplicationSubmit));
 
   const onScroll = () => updateProgress();
   window.addEventListener("scroll", onScroll, { passive: true });

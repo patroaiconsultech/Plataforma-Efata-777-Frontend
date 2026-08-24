@@ -1,0 +1,3 @@
+import test from "node:test";import assert from "node:assert/strict";import fs from "node:fs";const read=p=>fs.readFileSync(p,"utf8");
+test("career and consultant forms exist",()=>{const m=read("src/landing/premiumMarkup.ts");assert.match(m,/data-application-open="consultant"/);assert.match(m,/data-application-open="career"/);assert.match(m,/data-application-form/);assert.match(m,/name="resume"/);assert.match(m,/name="consent"/)});
+test("multipart submit uses apiForm and preserves form on failure",()=>{const s=read("src/landing/premiumInteractions.ts");assert.match(s,/apiForm/);assert.match(s,/\/api\/public\/applications/);assert.match(s,/10 \* 1024 \* 1024/);assert.match(s,/Seus dados permanecem no formulário/)});
