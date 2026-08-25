@@ -2199,7 +2199,7 @@ export function mountPremiumLanding({
       setApplicationType(type);
       if (applicationInterestInput) applicationInterestInput.value = button.dataset.applicationInterest || "";
       persistApplicationDraft();
-      document.getElementById("talentos-formulario")?.scrollIntoView({
+      document.querySelector<HTMLElement>("[data-application-section]")?.scrollIntoView({
         behavior: reducedMotion.matches ? "auto" : "smooth",
         block: "start",
       });

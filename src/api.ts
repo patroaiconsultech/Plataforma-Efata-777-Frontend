@@ -6,6 +6,8 @@ export const TOKEN_STORAGE_KEY = "orkio_access_token";
 export const TOKEN_EXPIRY_STORAGE_KEY = "orkio_access_token_expires_at";
 export const AUTH_REQUIRED_EVENT = "orkio:auth-required";
 
+let csrfToken: string | null = null;
+
 /** Erro de API com status e código legível, em vez de string concatenada. */
 export class ApiError extends Error {
   readonly status: number;
@@ -50,9 +52,14 @@ function authHeaders(extra?: HeadersInit): Headers {
 
 function applyCsrfHeader(headers: Headers, method: string): void {
   const normalized = method.toUpperCase();
-  if (!["GET", "HEAD", "OPTIONS"].includes(normalized)) {
-    headers.set("X-ORKIO-CSRF", "1");
+  if (!["GET", "HEAD", "OPTIONS"].includes(normalized) && csrfToken) {
+    headers.set("X-ORKIO-CSRF", csrfToken);
   }
+}
+
+function captureCsrfToken(response: Response): void {
+  const candidate = response.headers.get("X-ORKIO-CSRF");
+  if (candidate) csrfToken = candidate;
 }
 
 /** Extrai o código de erro do corpo, aceitando JSON ou texto. */
@@ -80,6 +87,15 @@ function ensureConfigured(): void {
     );
 }
 
+async function ensureCsrfToken(): Promise<void> {
+  if (csrfToken) return;
+  const response = await fetch(`${BASE}/api/v2/auth/bootstrap-status`, {
+    method: "GET",
+    credentials: "include",
+  });
+  captureCsrfToken(response);
+}
+
 /** Requisição JSON. Só define Content-Type quando há corpo. */
 export async function apiJson<T = unknown>(
   path: string,
@@ -88,6 +104,7 @@ export async function apiJson<T = unknown>(
   ensureConfigured();
   const headers = authHeaders(init.headers);
   const method = (init.method || "GET").toUpperCase();
+  if (!["GET", "HEAD", "OPTIONS"].includes(method)) await ensureCsrfToken();
   applyCsrfHeader(headers, method);
   if (init.body !== undefined && init.body !== null)
     headers.set("Content-Type", "application/json");
@@ -96,6 +113,7 @@ export async function apiJson<T = unknown>(
     headers,
     credentials: "include",
   });
+  captureCsrfToken(response);
   if (!response.ok) {
     const error = await readError(response);
     if (response.status === 401) clearToken();
@@ -117,6 +135,7 @@ export async function apiForm<T = unknown>(
   ensureConfigured();
   const headers = authHeaders(init.headers);
   const method = (init.method || "POST").toUpperCase();
+  if (!["GET", "HEAD", "OPTIONS"].includes(method)) await ensureCsrfToken();
   applyCsrfHeader(headers, method);
   headers.delete("Content-Type");
   const response = await fetch(`${BASE}${path}`, {
@@ -126,6 +145,7 @@ export async function apiForm<T = unknown>(
     headers,
     credentials: "include",
   });
+  captureCsrfToken(response);
   if (!response.ok) {
     const error = await readError(response);
     if (response.status === 401) clearToken();
@@ -453,6 +473,7 @@ export async function messageVoice(
   signal?: AbortSignal,
 ): Promise<MessageVoiceResult> {
   ensureConfigured();
+  await ensureCsrfToken();
   const headers = authHeaders();
   applyCsrfHeader(headers, "POST");
   headers.set("Content-Type", "application/json");
@@ -597,6 +618,7 @@ export async function streamRealtimeTurn(
 ): Promise<RealtimeStreamResult> {
   try {
     ensureConfigured();
+    await ensureCsrfToken();
     const headers = authHeaders();
     applyCsrfHeader(headers, "POST");
     headers.set("Content-Type", "application/json");
@@ -611,6 +633,7 @@ export async function streamRealtimeTurn(
         credentials: "include",
       },
     );
+    captureCsrfToken(response);
     if (!response.ok) throw await readError(response);
     if (!response.body) throw new ApiError(0, "STREAM_BODY_UNAVAILABLE");
 
@@ -880,6 +903,7 @@ export async function streamMessage(
 
   try {
     ensureConfigured();
+    await ensureCsrfToken();
     const headers = authHeaders();
     applyCsrfHeader(headers, "POST");
     headers.set("Content-Type", "application/json");
@@ -894,6 +918,7 @@ export async function streamMessage(
         credentials: "include",
       },
     );
+    captureCsrfToken(response);
     if (!response.ok) {
       const error = await readError(response);
       handlers.onError?.(error.code);
@@ -980,6 +1005,7 @@ export async function streamTeamMessage(
 
   try {
     ensureConfigured();
+    await ensureCsrfToken();
     const headers = authHeaders();
     applyCsrfHeader(headers, "POST");
     headers.set("Content-Type", "application/json");
@@ -994,6 +1020,7 @@ export async function streamTeamMessage(
         credentials: "include",
       },
     );
+    captureCsrfToken(response);
     if (!response.ok) {
       const error = await readError(response);
       handlers.onError?.(error.code);

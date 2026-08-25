@@ -265,16 +265,28 @@ export default function AccessPortal() {
         onboarding_goal: goal,
       });
       sessionStorage.removeItem(ONBOARDING_DRAFT_KEY);
+      if (result.authenticated) {
+        navigate(returnPath, { replace: true });
+        return;
+      }
       const token = result.verification_token || result.claim_token || "";
       setActionToken(token);
-      if (result.status === "ACCOUNT_CLAIM_VERIFICATION_REQUIRED" && token) {
+      if (result.status === "ACCOUNT_RECOVERY_REQUIRED" && token) {
+        setMode("activate");
+      } else if (result.status === "ACCOUNT_CLAIM_VERIFICATION_REQUIRED" && token) {
         setMode("claim");
       } else if (token) {
         setMode("verify");
       } else {
         setMode("login");
       }
-      setError("Se o cadastro for elegível, enviaremos a próxima etapa para o e-mail informado.");
+      setError(
+        result.status === "ACCOUNT_RECOVERY_REQUIRED"
+          ? "Se a conta for elegível, enviaremos a etapa segura de ativação para o e-mail informado."
+          : result.authenticated
+            ? "Conta criada. Entrando na plataforma..."
+            : "Se o cadastro for elegível, enviaremos a próxima etapa para o e-mail informado.",
+      );
     } catch (err) {
       setError(friendlyAuthError(err));
     } finally {
