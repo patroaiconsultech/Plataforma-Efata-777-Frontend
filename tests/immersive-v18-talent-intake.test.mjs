@@ -1,28 +1,34 @@
-import test from "node:test";import assert from "node:assert/strict";import fs from "node:fs";const read=p=>fs.readFileSync(p,"utf8");
-test("career and consultant forms exist",()=>{const m=read("src/landing/premiumMarkup.ts");assert.match(m,/data-application-open="consultant"/);assert.match(m,/data-application-open="career"/);assert.match(m,/data-application-form/);assert.match(m,/name="resume"/);assert.match(m,/name="consent"/)});
-test("multipart submit uses apiForm and preserves form on failure",()=>{const s=read("src/landing/premiumInteractions.ts");assert.match(s,/apiForm/);assert.match(s,/\/api\/public\/applications/);assert.match(s,/10 \* 1024 \* 1024/);assert.match(s,/Seus dados permanecem no formulário/)});
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const read=(p)=>fs.readFileSync(p,"utf8");
 
-
-test("city state avoids mobile address autofill takeover and draft is session-persisted",()=>{
+test("career and consultant CTAs open the dedicated application route",()=>{
   const m=read("src/landing/premiumMarkup.ts");
-  const s=read("src/landing/premiumInteractions.ts");
-  assert.match(m,/name="location" autocomplete="off" inputmode="text"/);
-  assert.match(s,/APPLICATION_DRAFT_KEY/);
-  assert.match(s,/sessionStorage\.setItem/);
-  assert.match(s,/restoreApplicationDraft/);
-  assert.match(s,/sessionStorage\.removeItem/);
+  assert.match(m,/\/talentos\/candidatura\?type=consultant/);
+  assert.match(m,/\/talentos\/candidatura\?type=career/);
+  assert.doesNotMatch(m,/id="talentos-formulario"/);
 });
-
-test("form interactions are isolated from global landing navigation handlers",()=>{
-  const s=read("src/landing/premiumInteractions.ts");
-  assert.match(s,/isolateApplicationEvent/);
-  assert.match(s,/applicationForm\?\.addEventListener\("click", isolateApplicationEvent\)/);
-  assert.match(s,/applicationForm\?\.addEventListener\("pointerdown", isolateApplicationEvent\)/);
+test("dedicated application page contains resume consent and multipart submit",()=>{
+  const r=read("src/routes/TalentApplication.tsx");
+  assert.match(r,/name="resume"/);
+  assert.match(r,/name="consent"/);
+  assert.match(r,/apiForm/);
+  assert.match(r,/\/api\/public\/applications/);
+  assert.match(r,/10 \* 1024 \* 1024/);
 });
-
-test("consultant type switching keeps a valid interest and draft",()=>{
-  const s=read("src/landing/premiumInteractions.ts");
-  assert.match(s,/nextType === "consultant"/);
-  assert.match(s,/Consultoria de implantação de IA/);
-  assert.match(s,/persistApplicationDraft\(\)/);
+test("city state and draft persistence are isolated on the dedicated page",()=>{
+  const r=read("src/routes/TalentApplication.tsx");
+  assert.match(r,/name="location"/);
+  assert.match(r,/autoComplete="off"/);
+  assert.match(r,/sessionStorage\.setItem/);
+  assert.match(r,/sessionStorage\.removeItem/);
+});
+test("consultant flow exposes specialty and international WhatsApp normalization",()=>{
+  const r=read("src/routes/TalentApplication.tsx");
+  assert.match(r,/consulting_specialty/);
+  assert.match(r,/COUNTRIES/);
+  assert.match(r,/normalizeE164/);
+  assert.match(r,/phone_country_code/);
+  assert.match(r,/phone_national/);
 });
