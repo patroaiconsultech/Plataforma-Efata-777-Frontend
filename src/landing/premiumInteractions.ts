@@ -2093,6 +2093,8 @@ export function mountPremiumLanding({
   const resumeName = query<HTMLElement>("[data-resume-name]");
   const applicationTypeButtons = queryAll<HTMLButtonElement>("[data-application-type]");
   const applicationOpenButtons = queryAll<HTMLButtonElement>("[data-application-open]");
+  const applicationDraftNote = query<HTMLElement>("[data-application-draft-note]");
+  const APPLICATION_DRAFT_KEY = "patroai:application-draft:v18.1";
 
   const setApplicationType = (type: "career" | "consultant") => {
     if (applicationTypeInput) applicationTypeInput.value = type;
@@ -2106,8 +2108,87 @@ export function mountPremiumLanding({
     if (specialty) specialty.required = type === "consultant";
   };
 
+  const serializeApplicationDraft = () => {
+    if (!applicationForm) return null;
+    const draft: Record<string, string | boolean> = {};
+    Array.from(applicationForm.elements).forEach((element) => {
+      if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement)) return;
+      if (!element.name || element.type === "file" || element.name === "website") return;
+      if (element instanceof HTMLInputElement && element.type === "checkbox") {
+        draft[element.name] = element.checked;
+      } else {
+        draft[element.name] = element.value;
+      }
+    });
+    return draft;
+  };
+
+  const persistApplicationDraft = () => {
+    try {
+      const draft = serializeApplicationDraft();
+      if (draft) window.sessionStorage.setItem(APPLICATION_DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+      // Draft persistence is best-effort and must never block the form.
+    }
+  };
+
+  const restoreApplicationDraft = () => {
+    if (!applicationForm) return;
+    try {
+      const raw = window.sessionStorage.getItem(APPLICATION_DRAFT_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as Record<string, string | boolean>;
+      Object.entries(draft).forEach(([name, value]) => {
+        const element = applicationForm.elements.namedItem(name);
+        if (element instanceof HTMLInputElement && element.type === "checkbox") {
+          element.checked = Boolean(value);
+        } else if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) {
+          element.value = typeof value === "string" ? value : "";
+        }
+      });
+      const restoredType = applicationTypeInput?.value === "consultant" ? "consultant" : "career";
+      setApplicationType(restoredType);
+      if (applicationDraftNote) applicationDraftNote.textContent = "Rascunho recuperado nesta aba. Reanexe o currículo antes de enviar.";
+    } catch {
+      // Ignore corrupted browser session state.
+    }
+  };
+
+  const clearApplicationDraft = () => {
+    try {
+      window.sessionStorage.removeItem(APPLICATION_DRAFT_KEY);
+    } catch {
+      /* no-op */
+    }
+  };
+
+  const onApplicationDraftInput = () => persistApplicationDraft();
+  applicationForm?.addEventListener("input", onApplicationDraftInput);
+  applicationForm?.addEventListener("change", onApplicationDraftInput);
+  cleanups.push(() => {
+    applicationForm?.removeEventListener("input", onApplicationDraftInput);
+    applicationForm?.removeEventListener("change", onApplicationDraftInput);
+  });
+
+  const isolateApplicationEvent = (event: Event) => event.stopPropagation();
+  applicationForm?.addEventListener("click", isolateApplicationEvent);
+  applicationForm?.addEventListener("pointerdown", isolateApplicationEvent);
+  cleanups.push(() => {
+    applicationForm?.removeEventListener("click", isolateApplicationEvent);
+    applicationForm?.removeEventListener("pointerdown", isolateApplicationEvent);
+  });
+
+  restoreApplicationDraft();
+
   applicationTypeButtons.forEach((button) => {
-    const onTypeClick = () => setApplicationType(button.dataset.applicationType === "consultant" ? "consultant" : "career");
+    const onTypeClick = () => {
+      const nextType = button.dataset.applicationType === "consultant" ? "consultant" : "career";
+      setApplicationType(nextType);
+      if (applicationInterestInput && nextType === "consultant" && !applicationInterestInput.value) {
+        applicationInterestInput.value = "Consultoria de implantação de IA";
+      }
+      persistApplicationDraft();
+    };
     button.addEventListener("click", onTypeClick);
     cleanups.push(() => button.removeEventListener("click", onTypeClick));
   });
@@ -2117,6 +2198,7 @@ export function mountPremiumLanding({
       const type = button.dataset.applicationOpen === "consultant" ? "consultant" : "career";
       setApplicationType(type);
       if (applicationInterestInput) applicationInterestInput.value = button.dataset.applicationInterest || "";
+      persistApplicationDraft();
       document.getElementById("talentos-formulario")?.scrollIntoView({
         behavior: reducedMotion.matches ? "auto" : "smooth",
         block: "start",
@@ -2164,10 +2246,12 @@ export function mountPremiumLanding({
       await apiForm<{ ok: boolean; application_id: string }>("/api/public/applications", payload);
       applicationStatus.textContent = "Candidatura enviada. Obrigado por compartilhar sua trajetória com a PatroAI.";
       applicationStatus.classList.add("is-success");
+      clearApplicationDraft();
       applicationForm.reset();
       setApplicationType("career");
       onResumeChange();
     } catch {
+      persistApplicationDraft();
       applicationStatus.textContent = "Não foi possível enviar agora. Seus dados permanecem no formulário; tente novamente em instantes.";
       applicationStatus.classList.add("is-error");
     } finally {

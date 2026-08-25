@@ -7545,3 +7545,23 @@ body.neural-lobby-open .patroai-premium .immersive-return-button {
 .application-upload{padding:18px;border:1px dashed rgba(246,196,83,.28);border-radius:16px;background:rgba(246,196,83,.025)}.application-upload em{color:rgba(55,197,255,.72);font-size:13px;font-style:normal}.application-consent{flex-direction:row!important;align-items:flex-start;gap:12px!important}.application-consent input{width:18px;height:18px;margin-top:2px;flex:0 0 auto}.application-consent span{text-transform:none!important;letter-spacing:0!important;line-height:1.55}
 .application-form__footer{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:26px}.application-form__status{margin:0;color:rgba(235,242,242,.62);line-height:1.5}.application-form__status.is-success{color:#71e8bd}.application-form__status.is-error{color:#ff9b9b}.application-form__footer button:disabled{opacity:.58;cursor:wait}.application-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}.application-open{border:0;padding:0;background:transparent;font:inherit;text-align:left;cursor:pointer}
 @media(max-width:820px){.application-intake{padding:22px 18px;border-radius:22px}.application-intake__head{grid-template-columns:1fr;align-items:stretch}.application-intake__switch{display:grid;grid-template-columns:1fr;border-radius:18px}.application-form__grid{grid-template-columns:1fr}.application-form__wide{grid-column:1}.application-form__consultant{grid-template-columns:1fr}.application-form__footer{align-items:stretch;flex-direction:column}.application-form__footer .button{width:100%}}
+
+
+/* === EFATA777 V18.1 FORM STATE SAFETY === */
+.application-form__feedback {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  min-width:0;
+}
+.application-form__feedback small {
+  color:rgba(235,242,242,.42);
+  line-height:1.4;
+}
+@media(max-width:820px){
+  .application-form input,
+  .application-form select,
+  .application-form textarea {
+    font-size:16px; /* avoids mobile browser zoom/focus jumps */
+  }
+}

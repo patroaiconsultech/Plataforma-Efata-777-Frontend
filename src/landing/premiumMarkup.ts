@@ -680,7 +680,7 @@ export const premiumMarkup = String.raw`
                 <label><span>Nome completo *</span><input name="full_name" autocomplete="name" required maxlength="120" /></label>
                 <label><span>E-mail *</span><input name="email" type="email" autocomplete="email" required maxlength="160" /></label>
                 <label><span>Telefone / WhatsApp *</span><input name="phone" autocomplete="tel" required maxlength="40" /></label>
-                <label><span>Cidade / Estado *</span><input name="location" autocomplete="address-level2" required maxlength="120" /></label>
+                <label><span>Cidade / Estado *</span><input name="location" autocomplete="off" inputmode="text" enterkeyhint="next" required maxlength="120" /></label>
                 <label><span>LinkedIn</span><input name="linkedin_url" type="url" inputmode="url" placeholder="https://linkedin.com/in/..." maxlength="300" /></label>
                 <label><span>Portfólio / GitHub / Site</span><input name="portfolio_url" type="url" inputmode="url" placeholder="https://..." maxlength="300" /></label>
 
@@ -721,7 +721,7 @@ export const premiumMarkup = String.raw`
               </div>
 
               <div class="application-form__footer">
-                <p class="application-form__status" data-application-status role="status" aria-live="polite"></p>
+                <div class="application-form__feedback"><p class="application-form__status" data-application-status role="status" aria-live="polite"></p><small data-application-draft-note>Seu rascunho é preservado nesta aba até o envio.</small></div>
                 <button type="submit" class="button primary" data-application-submit>Enviar candidatura</button>
               </div>
             </form>
