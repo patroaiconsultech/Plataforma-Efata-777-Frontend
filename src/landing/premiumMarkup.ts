@@ -634,98 +634,30 @@ export const premiumMarkup = String.raw`
               <span class="career-index">01</span>
               <h3 data-i18n="careers.consulting.title">Consultores de implantação de IA</h3>
               <p data-i18n="careers.consulting.copy">Executivos, especialistas de setor e profissionais experientes para diagnóstico, desenho de processos, implantação e adoção de IA.</p>
-              <button type="button" class="text-link application-open" data-application-open="consultant" data-application-interest="Consultoria de implantação de IA">Quero atuar como consultor →</button>
+              <a class="text-link" href="/talentos/candidatura?type=consultant&area=Consultoria%20de%20implantação%20de%20IA">Quero atuar como consultor →</a>
             </article>
             <article class="career-card reveal">
               <span class="career-index">02</span>
               <h3 data-i18n="careers.engineering.title">Engenharia &amp; IA</h3>
               <p data-i18n="careers.engineering.copy">Software, agentes, dados, infraestrutura, segurança e produto para construir a próxima camada do ecossistema PatroAI.</p>
-              <button type="button" class="text-link application-open" data-application-open="career" data-application-interest="Engenharia & IA">Quero construir com a PatroAI →</button>
+              <a class="text-link" href="/talentos/candidatura?type=career&area=Engenharia%20%26%20IA">Quero construir com a PatroAI →</a>
             </article>
             <article class="career-card reveal">
               <span class="career-index">03</span>
               <h3 data-i18n="careers.partnerships.title">Comercial &amp; Parcerias</h3>
               <p data-i18n="careers.partnerships.copy">Venda consultiva B2B, desenvolvimento de negócios e relacionamento estratégico.</p>
-              <button type="button" class="text-link application-open" data-application-open="career" data-application-interest="Comercial & Parcerias">Quero desenvolver negócios →</button>
+              <a class="text-link" href="/talentos/candidatura?type=career&area=Comercial%20%26%20Parcerias">Quero desenvolver negócios →</a>
             </article>
             <article class="career-card reveal">
               <span class="career-index">04</span>
               <h3 data-i18n="careers.talent.title">Banco de talentos</h3>
               <p data-i18n="careers.talent.copy">Perfis multidisciplinares para projetos, programas de formação e futuras oportunidades.</p>
-              <button type="button" class="text-link application-open" data-application-open="career" data-application-interest="Banco de Talentos">Entrar no banco de talentos →</button>
+              <a class="text-link" href="/talentos/candidatura?type=career&area=Banco%20de%20Talentos">Entrar no banco de talentos →</a>
             </article>
           </div>
           <div class="preview-note reveal">
             <strong data-i18n="careers.note">As candidaturas passam por triagem qualificada, consentimento e análise de aderência ao ecossistema PatroAI.</strong>
           </div>
-
-          <section class="application-intake reveal" id="talentos-formulario" aria-labelledby="application-title">
-            <div class="application-intake__head">
-              <div>
-                <p class="eyebrow">CANDIDATURA PATROAI</p>
-                <h3 id="application-title">Vamos conhecer sua trajetória.</h3>
-                <p>Escolha o tipo de interesse, conte brevemente sobre sua experiência e envie seu currículo. A candidatura será encaminhada para triagem da PatroAI.</p>
-              </div>
-              <div class="application-intake__switch" role="group" aria-label="Tipo de candidatura">
-                <button type="button" class="is-active" data-application-type="career" aria-pressed="true">Carreiras &amp; Talentos</button>
-                <button type="button" data-application-type="consultant" aria-pressed="false">Quero ser Consultor</button>
-              </div>
-            </div>
-
-            <form class="application-form" data-application-form novalidate>
-              <input type="hidden" name="application_type" value="career" data-application-type-input />
-              <input type="text" name="website" class="application-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
-
-              <div class="application-form__grid">
-                <label><span>Nome completo *</span><input name="full_name" autocomplete="name" required maxlength="120" /></label>
-                <label><span>E-mail *</span><input name="email" type="email" autocomplete="email" required maxlength="160" /></label>
-                <label><span>Telefone / WhatsApp *</span><input name="phone" autocomplete="tel" required maxlength="40" /></label>
-                <label><span>Cidade / Estado *</span><input name="location" autocomplete="off" inputmode="text" enterkeyhint="next" required maxlength="120" /></label>
-                <label><span>LinkedIn</span><input name="linkedin_url" type="url" inputmode="url" placeholder="https://linkedin.com/in/..." maxlength="300" /></label>
-                <label><span>Portfólio / GitHub / Site</span><input name="portfolio_url" type="url" inputmode="url" placeholder="https://..." maxlength="300" /></label>
-
-                <label class="application-form__wide">
-                  <span>Área de interesse *</span>
-                  <select name="interest_area" required data-application-interest-input>
-                    <option value="">Selecione</option>
-                    <option>Consultoria de implantação de IA</option>
-                    <option>Engenharia &amp; IA</option>
-                    <option>Comercial &amp; Parcerias</option>
-                    <option>Banco de Talentos</option>
-                    <option>Produto &amp; Design</option>
-                    <option>Operações &amp; Projetos</option>
-                    <option>Outro</option>
-                  </select>
-                </label>
-
-                <label><span>Anos de experiência</span><select name="experience_years"><option value="">Selecione</option><option value="0-2">0–2 anos</option><option value="3-5">3–5 anos</option><option value="6-10">6–10 anos</option><option value="11-15">11–15 anos</option><option value="16+">16+ anos</option></select></label>
-                <label><span>Disponibilidade</span><select name="availability"><option value="">Selecione</option><option>Imediata</option><option>Até 30 dias</option><option>Até 60 dias</option><option>Projetos pontuais</option><option>A combinar</option></select></label>
-
-                <div class="application-form__consultant application-form__wide" data-consultant-fields hidden>
-                  <label><span>Especialidade / setor de atuação *</span><input name="consulting_specialty" maxlength="180" /></label>
-                  <label><span>Experiência com IA / transformação / implantação</span><textarea name="consulting_experience" rows="4" maxlength="1200" placeholder="Conte os principais contextos em que você já atuou."></textarea></label>
-                </div>
-
-                <label class="application-form__wide"><span>Apresentação profissional *</span><textarea name="introduction" rows="5" required maxlength="1800" placeholder="Conte quem você é, sua experiência e como gostaria de contribuir com a PatroAI."></textarea></label>
-
-                <label class="application-form__wide application-upload">
-                  <span>Currículo / perfil profissional * <small>PDF, DOC ou DOCX · até 10 MB</small></span>
-                  <input name="resume" type="file" required accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-application-resume />
-                  <em data-resume-name>Nenhum arquivo selecionado.</em>
-                </label>
-
-                <label class="application-consent application-form__wide">
-                  <input name="consent" type="checkbox" value="true" required />
-                  <span>Autorizo a PatroAI a utilizar os dados enviados exclusivamente para análise desta candidatura e contato relacionado a oportunidades profissionais.</span>
-                </label>
-              </div>
-
-              <div class="application-form__footer">
-                <div class="application-form__feedback"><p class="application-form__status" data-application-status role="status" aria-live="polite"></p><small data-application-draft-note>Seu rascunho é preservado nesta aba até o envio.</small></div>
-                <button type="submit" class="button primary" data-application-submit>Enviar candidatura</button>
-              </div>
-            </form>
-          </section>
 
         </div>
       </section>
