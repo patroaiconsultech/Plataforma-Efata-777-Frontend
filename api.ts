@@ -1133,21 +1133,6 @@ export type NativeBootstrapStatus = {
   completed: boolean;
 };
 
-export type LegacyClaimStatus = {
-  enabled: boolean;
-  available: boolean;
-  status: string;
-};
-
-export type LegacyClaimImportResult = {
-  status: string;
-  run_id: string;
-  threads: number;
-  messages: number;
-  attachments: number;
-  exceptions: number;
-};
-
 export async function nativeLogin(input: {
   email: string;
   password: string;
@@ -1203,19 +1188,6 @@ export async function nativeClaimAccount(token: string): Promise<NativeRegistrat
   return apiJson<NativeRegistration>("/api/v2/auth/account/claim", {
     method: "POST",
     body: JSON.stringify({ token }),
-  });
-}
-
-export async function getLegacyClaimStatus(): Promise<LegacyClaimStatus> {
-  return apiJson<LegacyClaimStatus>("/api/v2/legacy-claim/status");
-}
-
-export async function importLegacyContext(
-  consentVersion: string,
-): Promise<LegacyClaimImportResult> {
-  return apiJson<LegacyClaimImportResult>("/api/v2/legacy-claim/import", {
-    method: "POST",
-    body: JSON.stringify({ consent_version: consentVersion }),
   });
 }
 
@@ -1355,6 +1327,27 @@ export type AdminOverview = {
   release_sha: string;
 };
 
+export type AdminUser = {
+  user_id: string;
+  email: string;
+  display_name: string;
+  role: string;
+  active: boolean;
+  email_verified: boolean;
+  created_at?: string | null;
+};
+
+export type AdminGovernanceStatus = {
+  tenant_id: string;
+  environment: string;
+  release_sha: string;
+  access_gate_enabled: boolean;
+  artifacts_enabled: boolean;
+  realtime_streaming_enabled: boolean;
+  voice_enabled: boolean;
+  llm_primary_provider: string;
+};
+
 export async function validateAccessCode(
   code: string,
 ): Promise<AccessGrantResponse> {
@@ -1387,6 +1380,22 @@ export async function getMe(): Promise<HyperCocreatorMe> {
 
 export async function getAdminOverview(): Promise<AdminOverview> {
   return apiJson<AdminOverview>("/api/v2/admin/overview");
+}
+
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  return apiJson<AdminUser[]>("/api/v2/admin/users");
+}
+
+export async function getAdminAgents(): Promise<AgentDefinition[]> {
+  return apiJson<AgentDefinition[]>("/api/v2/admin/agents");
+}
+
+export async function getAdminTeams(): Promise<TeamDefinition[]> {
+  return apiJson<TeamDefinition[]>("/api/v2/admin/teams");
+}
+
+export async function getAdminGovernance(): Promise<AdminGovernanceStatus> {
+  return apiJson<AdminGovernanceStatus>("/api/v2/admin/governance");
 }
 
 
